@@ -1,0 +1,1030 @@
+openapi: "3.0.3"
+info:
+  version: 1.0.0
+  title: Toe Beans
+  description: API reference of Toe Beans
+  license:
+    name: MIT
+servers:
+  - url: http://localhost:80
+    description: local
+  - url: will be written
+    description: production
+paths:
+  /login:
+    post:
+      description: login
+      operationId: login
+      tags:
+        - user
+      requestBody:
+        $ref: '#/components/requestBodies/login'
+      responses:
+        "200":
+          description: return token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/token'
+        "400":
+          $ref: '#/components/responses/badRequest'
+        "401":
+          $ref: '#/components/responses/unauthorized'
+        "500":
+          $ref: '#/components/responses/internalServerError'
+  /logout:
+    post:
+      description: logout
+      operationId: logout
+      tags:
+        - user
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          $ref: '#/components/responses/simpleSuccess'
+        "401":
+          $ref: '#/components/responses/unauthorized'
+        "500":
+          $ref: '#/components/responses/internalServerError'
+  /user:
+    post:
+      description: register user info
+      operationId: registerUser
+      tags:
+        - user
+      requestBody:
+        $ref: '#/components/requestBodies/registerUser'
+      responses:
+        "200":
+          description: return token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/token'
+        "400":
+          $ref: '#/components/responses/badRequest'
+        "500":
+          $ref: '#/components/responses/internalServerError'
+    get:
+      description: get a user info
+      operationId: getUser
+      tags:
+        - user
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: user_name
+          in: query
+          description: user name
+          required: true
+          schema:
+            type: string
+            example: sample-user
+      responses:
+        "200":
+          $ref: '#/components/responses/getUser'
+        "400":
+          $ref: '#/components/responses/badRequest'
+        "401":
+          $ref: '#/components/responses/unauthorized'
+        "500":
+          $ref: '#/components/responses/internalServerError'
+    delete:
+      description: delete user info
+      operationId: deleteUser
+      tags:
+        - user
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          $ref: '#/components/responses/simpleSuccess'
+        "401":
+          $ref: '#/components/responses/unauthorized'
+        "500":
+          $ref: '#/components/responses/internalServerError'
+  /user/{user_name}:
+    put:
+      description: update user info
+      operationId: updateUser
+      tags:
+        - user
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: user_name
+          schema:
+            type: string
+          in: path
+          required: true
+          example: sample-user
+      requestBody:
+        $ref: '#/components/requestBodies/updateUser'
+      responses:
+        "200":
+          $ref: '#/components/responses/simpleSuccess'
+        "400":
+          $ref: '#/components/responses/badRequest'
+        "401":
+          $ref: '#/components/responses/unauthorized'
+        "500":
+          $ref: '#/components/responses/internalServerError'
+  /user-activation/{user_name}/{activation_key}:
+    put:
+      description: activate user by email
+      operationId: activateUser
+      tags:
+        - user
+      parameters:
+        - name: user_name
+          schema:
+            type: string
+          in: path
+          required: true
+          example: sample-user
+        - name: activation_key
+          description: hashed key to activate the user
+          schema:
+            type: string
+          in: path
+          required: true
+          example: '5e8ff9bf55ba3508199d22e984129be6'
+      responses:
+        "200":
+          $ref: '#/components/responses/simpleSuccess'
+        "400":
+          $ref: '#/components/responses/badRequest'
+        "500":
+          $ref: '#/components/responses/internalServerError'
+  /password-reset-email:
+    post:
+      description: send an email to reset password
+      operationId: sendPasswordResetEmail
+      tags:
+        - user
+      requestBody:
+        $ref: '#/components/requestBodies/sendPasswordResetEmail'
+      responses:
+        "200":
+          $ref: '#/components/responses/simpleSuccess'
+        "400":
+          $ref: '#/components/responses/badRequest'
+        "500":
+          $ref: '#/components/responses/internalServerError'
+  /password-reset:
+    post:
+      description: reset password
+      operationId: resetPassword
+      tags:
+        - user
+      requestBody:
+        $ref: '#/components/requestBodies/resetPassword'
+      responses:
+        "200":
+          $ref: '#/components/responses/simpleSuccess'
+        "400":
+          $ref: '#/components/responses/badRequest'
+        "500":
+          $ref: '#/components/responses/internalServerError'
+  /posting:
+    post:
+      description: register posting
+      operationId: registerPosting
+      tags:
+        - posting
+      security:
+        - bearerAuth: []  
+      requestBody:
+        $ref: '#/components/requestBodies/registerPosting'
+      responses:
+        "200":
+          $ref: '#/components/responses/simpleSuccess'
+        "400":
+          $ref: '#/components/responses/badRequest'
+        "401":
+          $ref: '#/components/responses/unauthorized'
+        "500":
+          $ref: '#/components/responses/internalServerError'
+  /postings:
+    get:
+      description: get posting list
+      operationId: getPostingList
+      tags:
+        - posting
+      security:
+        - bearerAuth: []  
+      parameters:
+        - name: since_at
+          description: get older data than since_at. If it's first request, the current time is used. If not, the oldest uploaded_at from previous data is used.
+          in: query
+          required: true
+          schema:
+            type: string
+            example: '2020-01-01T18:00:00+00:00'
+          style: form
+          explode: true
+        - name: limit
+          description: the limit number of return items per request
+          in: query
+          required: true
+          schema:
+            type: integer
+            format: int8
+            minimum: 1
+            example: 50
+          style: form
+          explode: true
+        - name: user_name
+          description: this will be used only when to get the user related postings
+          in: query
+          required: false
+          schema:
+            type: string
+          explode: true  
+      responses:
+        "200":
+          description: success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  page:
+                    description: page
+                    type: integer
+                    format: int64
+                    minimum: 1
+                    example: 1
+                  postings:
+                    description: list of posting
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        posting_id:
+                          type: integer
+                          format: int64
+                          description: id
+                          example: 1
+                        user_name:
+                          type: string
+                          description: user_name
+                          example: sample_user
+                        uploaded_at:
+                          description: uploaded datetime with TZ. This means created_at in postings table.
+                          type: string
+                          example: '2020-01-01T18:00:00+00:00'
+                        title:
+                          type: string
+                          description: the title of posting
+                          example: This is a sample posting.
+                        image_url:
+                          type: string
+                          description: image url
+                          example: 'https://s3-ap-northeast-1.amazonaws.com/sample_bucket/sample1.jpg'
+                        liked:
+                          type: integer
+                          format: int64
+                          description: the number of liked
+                          example: 20
+                      required:
+                        - posting_id
+                        - user_name
+                        - uploaded_at
+                        - title
+                        - liked
+        "400":
+          $ref: '#/components/responses/badRequest'
+        "401":
+          $ref: '#/components/responses/unauthorized'
+        "500":
+          $ref: '#/components/responses/internalServerError'
+  /posting/{posting_id}:
+    delete:
+      description: delete posting
+      operationId: deletePosting
+      tags:
+        - posting
+      security:
+        - bearerAuth: []  
+      parameters:
+        - name: posting_id
+          schema:
+            type: integer
+            format: int64
+          in: path
+          required: true
+      responses:
+        "200":
+          $ref: '#/components/responses/simpleSuccess'
+        "400":
+          $ref: '#/components/responses/badRequest'
+        "401":
+          $ref: '#/components/responses/unauthorized'
+        "500":
+          $ref: '#/components/responses/internalServerError'
+  /like:
+    post:
+      description: register like
+      operationId: registerLike
+      tags:
+        - like
+      security:
+        - bearerAuth: []  
+      requestBody:
+        $ref: '#/components/requestBodies/registerLike'
+      responses:
+        "200":
+          $ref: '#/components/responses/simpleSuccess'
+        "400":
+          $ref: '#/components/responses/badRequest'
+        "401":
+          $ref: '#/components/responses/unauthorized'
+        "500":
+          $ref: '#/components/responses/internalServerError'
+  /like/{like_id}:
+    delete:
+      description: delete like
+      operationId: deleteLike
+      tags:
+        - like
+      security:
+        - bearerAuth: []  
+      parameters:
+        - name: like_id
+          schema:
+            type: integer
+            format: int64
+          in: path
+          required: true
+      responses:
+        "200":
+          $ref: '#/components/responses/simpleSuccess'
+        "400":
+          $ref: '#/components/responses/badRequest'
+        "401":
+          $ref: '#/components/responses/unauthorized'
+        "500":
+          $ref: '#/components/responses/internalServerError'
+  /comment:
+    post:
+      description: register comment
+      operationId: registerComment
+      tags:
+        - comment
+      security:
+        - bearerAuth: []  
+      requestBody:
+        $ref: '#/components/requestBodies/registerComment'
+      responses:
+        "200":
+          $ref: '#/components/responses/simpleSuccess'
+        "400":
+          $ref: '#/components/responses/badRequest'
+        "401":
+          $ref: '#/components/responses/unauthorized'
+        "500":
+          $ref: '#/components/responses/internalServerError' 
+  /comments:
+    get:
+      description: get comments
+      operationId: getComments
+      tags:
+        - comment
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: posting_id
+          in: query
+          required: true
+          schema:
+            type: integer
+            format: int64
+            example: 1
+      responses:
+        "200":
+          description: success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  posting_id:
+                    description: posting id
+                    type: integer
+                    format: int64
+                    example: 1
+                  comments:
+                    description: list of comment
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        user_name:
+                          type: string
+                          description: user_name
+                          example: sample_user
+                        commented_at:
+                          description: commented datetime with TZ. This means created_at in postings table.
+                          type: string
+                          example: '2020-01-01T18:00:00+00:00'
+                        comment:
+                          type: string
+                          description: the content of comment
+                          example: This is a sample comment.
+                      required:
+                        - user_name
+                        - commented_at
+                        - comment
+        "400":
+          $ref: '#/components/responses/badRequest'
+        "401":
+          $ref: '#/components/responses/unauthorized'
+        "500":
+          $ref: '#/components/responses/internalServerError'
+  /comment/{comment_id}:
+    delete:
+      description: delete comment
+      operationId: deleteComment
+      tags:
+        - comment
+      security:
+        - bearerAuth: []  
+      parameters:
+        - name: comment_id
+          schema:
+            type: integer
+            format: int64
+          in: path
+          required: true
+      responses:
+        "200":
+          $ref: '#/components/responses/simpleSuccess'
+        "400":
+          $ref: '#/components/responses/badRequest'
+        "401":
+          $ref: '#/components/responses/unauthorized'
+        "500":
+          $ref: '#/components/responses/internalServerError'
+  /follow:
+    post:
+      description: register follow
+      operationId: registerFollow
+      tags:
+        - follow
+      security:
+        - bearerAuth: []  
+      requestBody:
+        $ref: '#/components/requestBodies/registerFollow'
+      responses:
+        "200":
+          $ref: '#/components/responses/simpleSuccess'
+        "400":
+          $ref: '#/components/responses/badRequest'
+        "401":
+          $ref: '#/components/responses/unauthorized'
+        "500":
+          $ref: '#/components/responses/internalServerError'
+  /follow/{user_name}:
+    delete:
+      description: delete follow
+      operationId: deleteFollow
+      tags:
+        - follow
+      security:
+        - bearerAuth: []  
+      parameters:
+        - name: user_name
+          schema:
+            type: string
+          in: path
+          required: true
+          example: sample-user
+      responses:
+        "200":
+          $ref: '#/components/responses/simpleSuccess'
+        "400":
+          $ref: '#/components/responses/badRequest'
+        "401":
+          $ref: '#/components/responses/unauthorized'
+        "500":
+          $ref: '#/components/responses/internalServerError'
+  /notifications:
+    get:
+      description: get notifications
+      operationId: getNotifications
+      tags:
+        - notification
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: user_name
+          description: user name
+          in: query
+          required: true
+          schema:
+            type: string
+          explode: true
+      responses:
+        "200":
+          description: success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    visitor_name:
+                      description: acting user name
+                      type: string
+                      example: sample_user
+                    visited_name:
+                      description: acted user name
+                      type: string
+                      example: sample_user2
+                    posting_id:
+                      description: only when action is like or comment
+                      type: integer
+                      format: int64
+                      example: 1
+                    comment_id:
+                      description: only when action is comment
+                      type: integer
+                      format: int64
+                      example: 1
+                    action:
+                      description: action type
+                      type: string
+                      enum:
+                        - 'like'
+                        - 'comment'
+                        - 'follow'
+                    created_at:
+                      description: datetime with TZ
+                      type: string
+                      example: '2020-01-01T18:00:00+00:00'
+                  required:
+                    - visitor_name
+                    - visited_name
+                    - action
+                    - created_at
+        "400":
+          $ref: '#/components/responses/badRequest'
+        "401":
+          $ref: '#/components/responses/unauthorized'
+        "500":
+          $ref: '#/components/responses/internalServerError'
+  /notification/{user_name}:
+    put:
+      description: update notification as read
+      operationId: updateNotification
+      tags:
+        - notification
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: user_name
+          schema:
+            type: string
+          in: path
+          required: true
+          example: sample-user
+      responses:
+        "200":
+          $ref: '#/components/responses/simpleSuccess'
+        "400":
+          $ref: '#/components/responses/badRequest'
+        "401":
+          $ref: '#/components/responses/unauthorized'
+        "500":
+          $ref: '#/components/responses/internalServerError'      
+  /health:
+    get:
+      description: health check
+      operationId: getHealth
+      tags:
+        - system
+      responses:
+        '200':
+          $ref: '#/components/responses/simpleSuccess'
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  # parameters:
+  #   access-token:
+  #     name: access-token
+  #     in: header
+  #     required: true
+  #     schema:
+  #       type: string
+  #       format: byte
+  requestBodies:
+    login:
+      description: login
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/requestLogin'
+    registerUser:
+      description: register user
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/requestRegisterUser'
+    updateUser:
+      description: update user
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/requestUpdateUser'
+    sendPasswordResetEmail:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/email'
+    registerPosting:
+      description: register posting
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/requestRegisterPosting'
+    deletePosting:
+      description: delete posting
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/postingID'
+    resetPassword:
+      description: reset password
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/requestResetPassword'
+    registerComment:
+      description: register comment
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/comment'
+    registerLike:
+      description: register like
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/like'        
+    registerFollow:
+      description: register follow
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/follow'         
+  responses:
+    getUser:
+      description: get user
+      content:
+        'application/json':
+          schema:
+            $ref: '#/components/schemas/responseGetUser'
+    registerPosting:
+      description: register posting
+      content:
+        'application/json':
+          schema:
+            $ref: '#/components/schemas/postingID'
+    simpleSuccess:
+      description: '200'
+      content:
+        'application/json':
+          schema:
+            $ref: '#/components/schemas/responseSimpleSuccess'
+    badRequest:
+      description: '400'
+      content:
+        'application/json':
+          schema:
+            $ref: '#/components/schemas/responseBadRequest'
+    unauthorized:
+      description: '401'
+      content:
+        'application/json':
+          schema:
+            $ref: '#/components/schemas/responseUnauthorized'
+    notFound:
+      description: '404'
+      content:
+        'application/json':
+          schema:
+            $ref: '#/components/schemas/responseNotFound'
+    internalServerError:
+      description: '500'
+      content:
+        'application/json':
+          schema:
+            $ref: '#/components/schemas/responseInternalServerError'
+  schemas:
+    token:
+      type: object
+      properties:
+        access_token:
+          type: string
+          description: token to request APIs
+          example: rerlkjewlrewi.dsafodniq34noisdf.e68kljsf
+      required:
+        - access_token
+    email:
+      type: object
+      properties:
+        email:
+          type: string
+          description: email
+          example: sample-user@gmail.com
+      required:
+        - email    
+    postingID:
+      type: object
+      properties:
+        id:
+          description: posting id
+          type: integer
+          format: int64
+          example: 1
+      required:
+        - id    
+    comment:
+      description: posting comment
+      type: object
+      properties:
+        user_name:
+          description: user name
+          type: string
+          example: sample_user
+        posting_id:
+          description: posting id
+          type: integer
+          format: int64
+          example: 1
+        comment:
+          description: comment
+          type: string
+          example: 'this is a sample comment.'
+      required:
+        - user_name
+        - posting_id
+        - comment
+    like:
+      description: like
+      type: object
+      properties:
+        user_name:
+          description: user name
+          type: string
+          example: sample_user
+        posting_id:
+          description: posting id
+          type: integer
+          format: int64
+          example: 1
+      required:
+        - user_name
+        - posting_id
+    follow:   
+      description: follow
+      type: object
+      properties:
+        following_user_name:
+          description: following user name
+          type: string
+          example: sample_user
+        followed_user_name:
+          description: followed user name
+          type: string
+          example: sample_user2
+      required:
+        - following_user_name
+        - followed_user_name
+    requestLogin:
+      type: object
+      properties:
+        email:
+          type: string
+          description: email
+          example: sample_user@gmail.com
+        password:
+          type: string
+          description: password
+          example: password1234
+      required:
+        - email
+        - password
+    requestRegisterUser:
+      type: object
+      properties:
+        email:
+          type: string
+          description: email
+          example: sample_user@gmail.com
+        user_name:
+          type: string
+          description: user_name
+          example: sample_user
+        password:
+          type: string
+          description: password
+          example: password1234
+      required:
+        - email
+        - user_name
+        - password
+    requestUpdateUser:
+      type: object
+      properties:
+        password:
+          type: string
+          description: password
+          example: password1234
+        icon:
+          description: icon image file of base64 encoded and zipped
+          type: string
+          format: byte
+          example: 'GEsDBBQACAAIAJhjzE4AAAAAAAAAAAAAAAASABAAaU9TIOOBrueUu+WDjzIucG5nVVgMAKTALl1wcQBd9gEUAIy8B'
+        self-introduction:
+          type: string
+          description: self-introduction
+          example: 'Hello'
+    requestResetPassword:
+      type: object
+      properties:
+        user_name:
+          description: user name
+          type: string
+          example: sample_user
+        password:
+          type: string
+          description: password
+          example: password1234
+        password_reset_key:  
+          type: string
+          description: hashed key for password reset
+          example: '5e8ff9bf55ba3508199d22e984129be6'
+      required:
+        - user_name
+        - password
+        - password_reset_key
+    requestRegisterPosting:
+      type: object
+      properties:
+        title:
+          type: string
+          description: the title of posting
+          example: This is a sample posting.
+        image:
+          type: string
+          format: byte
+          description: posting image file of base64 encoded and zipped
+          example: 'GEsDBBQACAAIAJhjzE4AAAAAAAAAAAAAAAASABAAaU9TIOOBrueUu+WDjzIucG5nVVgMAKTALl1wcQBd9gEUAIy8B'
+      required:
+        - title
+        - image
+    responseGetUser:
+      description: get user
+      type: object
+      properties:
+        user_name:
+          description: user name
+          type: string
+          example: sample_user
+        email:
+          description: email
+          type: string
+          example: sample-user@gmail.com
+        icon:
+          description: icon
+          type: string
+          example: icon url
+        posting_count:
+          description: the total count of posting
+          type: integer
+          format: int64
+          example: 1 
+        like_count:
+          description: the total count of like
+          type: integer
+          format: int64
+          example: 10
+        liked_count:
+          description: the total count of liked
+          type: integer
+          format: int64
+          example: 20
+        created_at:
+          description: the datetime when the account is created
+          type: string
+          example: '2020-01-01T18:00:00+00:00'
+      required:
+        - user_name
+        - email
+        - icon
+        - posting_count
+        - like_count
+        - liked_count
+        - created_at
+    responseSimpleSuccess:
+      description: Success
+      type: object
+      properties:
+        status:
+          description: status
+          type: integer
+          format: int16
+          example: 200
+        message:
+          description: message
+          type: string
+          example: 'success'
+      required:
+        - status
+        - message
+    responseBadRequest:
+      description: Bad Reqeust
+      type: object
+      properties:
+        status:
+          description: status
+          type: integer
+          format: int16
+          example: 400
+        message:
+          description: message
+          type: string
+          example: 'Bad Request'
+      required:
+        - status
+        - message
+    responseUnauthorized:
+      description: Unauthorized
+      type: object
+      properties:
+        status:
+          description: status
+          type: integer
+          format: int16
+          example: 401
+        message:
+          description: message
+          type: string
+          example: 'Unauthorized'
+      required:
+        - status
+        - message
+    responseNotFound:
+      description: Not Found
+      type: object
+      properties:
+        status:
+          description: status
+          type: integer
+          format: int16
+          example: 404
+        message:
+          description: message
+          type: string
+          example: 'Not Found'
+      required:
+        - status
+        - message
+    responseInternalServerError:
+      description: Internal Server Error
+      type: object
+      properties:
+        status:
+          description: status
+          type: integer
+          format: int16
+          example: 500
+        message:
+          description: message
+          type: string
+          example: 'Internal Server Error'
+      required:
+        - status
+        - message
+tags:
+  - name: user
+    description: user
+  - name: posting
+    description: posting
+  - name: like
+    description: like    
+  - name: comment
+    description: comment
+  - name: follow
+    description: follow 
+  - name: notification
+    description: notification     
+  - name: system
+    description: system operation
