@@ -10,6 +10,17 @@
 
 # Output of the go coverage tool, specifically when used with LiteIDE
 *.out
+coverage.html
 
-# Dependency directories (remove the comment below to include it)
-# vendor/
+# OpenAPI-generate
+openapi/openapi-generated/api
+
+# Go
+go-modules/
+Gododir/godobin*
+
+# Docker
+.docker-compose-data/
+
+# IDE
+.idea/
