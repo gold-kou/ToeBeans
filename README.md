@@ -5,7 +5,7 @@ ToeBeans is a social media for cat-lovers!
 
 # Tech stacks
 ## Frontend
-HTML/CSS/JavaScript/React
+HTML/CSS/JavaScript/React/SPA
 
 ## Backend
 Go/OpenAPI/MySQL
@@ -20,11 +20,9 @@ GitHub/GitHub Actions
 
 # Features
 ## Feature list
-- 
-
-## API
-## Batch
-- Reset the count of sending email for password reset
+- User management
+- Posting management
+- (Batch) Reset the count of sending email for password reset
 
 ## Not allowed features for guest user
 - Like
@@ -40,17 +38,18 @@ GitHub/GitHub Actions
 Basically, guest user only can do read actions.
 
 ## Coming features
-- Notification
+- Like
 - Comment
 - Follow
+- Notification
+- Password reset
+- Other social media services sharing
+- Refresh token
 - Ranking
 - Incident report
-- Mute user
 - Block user
 - Direct message
 - Movie posting
-- Other SNS sharing
-- Refresh token
 
 # Documents
 ## API
@@ -70,3 +69,39 @@ This is written in Japanese.
 ## CloudFront
 ## Auto Scaling
 ## Pagenation
+
+# Development tips
+## Launch application in local
+```
+$ ./serverrun.sh
+# go run main.go
+```
+
+If the error of `listen tcp :8080: bind: address already in use exit status 1` happens, try below.
+
+Kill process.
+
+```
+On app
+
+# apt-get update -y
+# apt-get install -y lsof
+# lsof -i | grep 8080
+# kill -9 <process>
+```
+
+Or another container might be block in local.
+Remove unused container.
+
+```
+On Host
+
+$ docker system prune -f
+```
+
+## UT
+```
+$ make test
+```
+
+Not enough test cases now.

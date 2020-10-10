@@ -3,8 +3,6 @@ info:
   version: 1.0.0
   title: Toe Beans
   description: API reference of Toe Beans
-  license:
-    name: MIT
 servers:
   - url: http://localhost:80
     description: local
@@ -194,7 +192,7 @@ paths:
       tags:
         - posting
       security:
-        - bearerAuth: []  
+        - bearerAuth: []
       requestBody:
         $ref: '#/components/requestBodies/registerPosting'
       responses:
@@ -213,7 +211,7 @@ paths:
       tags:
         - posting
       security:
-        - bearerAuth: []  
+        - bearerAuth: []
       parameters:
         - name: since_at
           description: get older data than since_at. If it's first request, the current time is used. If not, the oldest uploaded_at from previous data is used.
@@ -241,59 +239,10 @@ paths:
           required: false
           schema:
             type: string
-          explode: true  
+          explode: true
       responses:
         "200":
-          description: success
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  page:
-                    description: page
-                    type: integer
-                    format: int64
-                    minimum: 1
-                    example: 1
-                  postings:
-                    description: list of posting
-                    type: array
-                    items:
-                      type: object
-                      properties:
-                        posting_id:
-                          type: integer
-                          format: int64
-                          description: id
-                          example: 1
-                        user_name:
-                          type: string
-                          description: user_name
-                          example: sample_user
-                        uploaded_at:
-                          description: uploaded datetime with TZ. This means created_at in postings table.
-                          type: string
-                          example: '2020-01-01T18:00:00+00:00'
-                        title:
-                          type: string
-                          description: the title of posting
-                          example: This is a sample posting.
-                        image_url:
-                          type: string
-                          description: image url
-                          example: 'https://s3-ap-northeast-1.amazonaws.com/sample_bucket/sample1.jpg'
-                        liked:
-                          type: integer
-                          format: int64
-                          description: the number of liked
-                          example: 20
-                      required:
-                        - posting_id
-                        - user_name
-                        - uploaded_at
-                        - title
-                        - liked
+          $ref: '#/components/responses/getPostings'
         "400":
           $ref: '#/components/responses/badRequest'
         "401":
@@ -307,7 +256,7 @@ paths:
       tags:
         - posting
       security:
-        - bearerAuth: []  
+        - bearerAuth: []
       parameters:
         - name: posting_id
           schema:
@@ -331,7 +280,7 @@ paths:
       tags:
         - like
       security:
-        - bearerAuth: []  
+        - bearerAuth: []
       requestBody:
         $ref: '#/components/requestBodies/registerLike'
       responses:
@@ -350,7 +299,7 @@ paths:
       tags:
         - like
       security:
-        - bearerAuth: []  
+        - bearerAuth: []
       parameters:
         - name: like_id
           schema:
@@ -374,7 +323,7 @@ paths:
       tags:
         - comment
       security:
-        - bearerAuth: []  
+        - bearerAuth: []
       requestBody:
         $ref: '#/components/requestBodies/registerComment'
       responses:
@@ -385,7 +334,7 @@ paths:
         "401":
           $ref: '#/components/responses/unauthorized'
         "500":
-          $ref: '#/components/responses/internalServerError' 
+          $ref: '#/components/responses/internalServerError'
   /comments:
     get:
       description: get comments
@@ -404,39 +353,7 @@ paths:
             example: 1
       responses:
         "200":
-          description: success
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  posting_id:
-                    description: posting id
-                    type: integer
-                    format: int64
-                    example: 1
-                  comments:
-                    description: list of comment
-                    type: array
-                    items:
-                      type: object
-                      properties:
-                        user_name:
-                          type: string
-                          description: user_name
-                          example: sample_user
-                        commented_at:
-                          description: commented datetime with TZ. This means created_at in postings table.
-                          type: string
-                          example: '2020-01-01T18:00:00+00:00'
-                        comment:
-                          type: string
-                          description: the content of comment
-                          example: This is a sample comment.
-                      required:
-                        - user_name
-                        - commented_at
-                        - comment
+          $ref: '#/components/responses/getComments'
         "400":
           $ref: '#/components/responses/badRequest'
         "401":
@@ -450,7 +367,7 @@ paths:
       tags:
         - comment
       security:
-        - bearerAuth: []  
+        - bearerAuth: []
       parameters:
         - name: comment_id
           schema:
@@ -474,7 +391,7 @@ paths:
       tags:
         - follow
       security:
-        - bearerAuth: []  
+        - bearerAuth: []
       requestBody:
         $ref: '#/components/requestBodies/registerFollow'
       responses:
@@ -493,7 +410,7 @@ paths:
       tags:
         - follow
       security:
-        - bearerAuth: []  
+        - bearerAuth: []
       parameters:
         - name: user_name
           schema:
@@ -528,48 +445,7 @@ paths:
           explode: true
       responses:
         "200":
-          description: success
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  type: object
-                  properties:
-                    visitor_name:
-                      description: acting user name
-                      type: string
-                      example: sample_user
-                    visited_name:
-                      description: acted user name
-                      type: string
-                      example: sample_user2
-                    posting_id:
-                      description: only when action is like or comment
-                      type: integer
-                      format: int64
-                      example: 1
-                    comment_id:
-                      description: only when action is comment
-                      type: integer
-                      format: int64
-                      example: 1
-                    action:
-                      description: action type
-                      type: string
-                      enum:
-                        - 'like'
-                        - 'comment'
-                        - 'follow'
-                    created_at:
-                      description: datetime with TZ
-                      type: string
-                      example: '2020-01-01T18:00:00+00:00'
-                  required:
-                    - visitor_name
-                    - visited_name
-                    - action
-                    - created_at
+          $ref: '#/components/responses/getNotifications'
         "400":
           $ref: '#/components/responses/badRequest'
         "401":
@@ -599,7 +475,7 @@ paths:
         "401":
           $ref: '#/components/responses/unauthorized'
         "500":
-          $ref: '#/components/responses/internalServerError'      
+          $ref: '#/components/responses/internalServerError'
   /health:
     get:
       description: health check
@@ -615,14 +491,6 @@ components:
       type: http
       scheme: bearer
       bearerFormat: JWT
-  # parameters:
-  #   access-token:
-  #     name: access-token
-  #     in: header
-  #     required: true
-  #     schema:
-  #       type: string
-  #       format: byte
   requestBodies:
     login:
       description: login
@@ -676,13 +544,13 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/like'        
+            $ref: '#/components/schemas/like'
     registerFollow:
       description: register follow
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/follow'         
+            $ref: '#/components/schemas/follow'
   responses:
     getUser:
       description: get user
@@ -696,6 +564,24 @@ components:
         'application/json':
           schema:
             $ref: '#/components/schemas/postingID'
+    getPostings:
+      description: get postings
+      content:
+        'application/json':
+          schema:
+            $ref: '#/components/schemas/responseGetPostings'
+    getComments:
+      description: get comments
+      content:
+        'application/json':
+          schema:
+            $ref: '#/components/schemas/responseGetComments'
+    getNotifications:
+      description: get notifications
+      content:
+        'application/json':
+          schema:
+            $ref: '#/components/schemas/responseGetNotifications'
     simpleSuccess:
       description: '200'
       content:
@@ -744,17 +630,17 @@ components:
           description: email
           example: sample-user@gmail.com
       required:
-        - email    
+        - email
     postingID:
       type: object
       properties:
-        id:
+        posting_id:
           description: posting id
           type: integer
           format: int64
           example: 1
       required:
-        - id    
+        - id
     comment:
       description: posting comment
       type: object
@@ -792,7 +678,7 @@ components:
       required:
         - user_name
         - posting_id
-    follow:   
+    follow:
       description: follow
       type: object
       properties:
@@ -867,7 +753,7 @@ components:
           type: string
           description: password
           example: password1234
-        password_reset_key:  
+        password_reset_key:
           type: string
           description: hashed key for password reset
           example: '5e8ff9bf55ba3508199d22e984129be6'
@@ -910,7 +796,7 @@ components:
           description: the total count of posting
           type: integer
           format: int64
-          example: 1 
+          example: 1
         like_count:
           description: the total count of like
           type: integer
@@ -932,6 +818,135 @@ components:
         - posting_count
         - like_count
         - liked_count
+        - created_at
+    responseGetPostings:
+      description: get postings
+      type: object
+      properties:
+        page:
+          description: page
+          type: integer
+          format: int64
+          minimum: 1
+          example: 1
+        postings:
+          description: list of posting
+          type: array
+          items:
+            $ref: '#/components/schemas/responseGetPosting'
+    responseGetPosting:
+      type: object
+      properties:
+        posting_id:
+          type: integer
+          format: int64
+          description: id
+          example: 1
+        user_name:
+          type: string
+          description: user_name
+          example: sample_user
+        uploaded_at:
+          description: uploaded datetime with TZ. This means created_at in postings table.
+          type: string
+          example: '2020-01-01T18:00:00+00:00'
+        title:
+          type: string
+          description: the title of posting
+          example: This is a sample posting.
+        image_url:
+          type: string
+          description: image url
+          example: 'https://s3-ap-northeast-1.amazonaws.c/sample_bucket/sample1.jpg'
+        liked:
+          type: integer
+          format: int64
+          description: the number of liked
+          example: 20
+      required:
+        - posting_id
+        - user_name
+        - uploaded_at
+        - title
+        - liked
+    responseGetComments:
+      description: get comments
+      type: object
+      properties:
+        posting_id:
+          description: posting id
+          type: integer
+          format: int64
+          example: 1
+        comments:
+          description: list of comment
+          type: array
+          items:
+            $ref: '#/components/schemas/responseGetComment'
+    responseGetComment:
+      type: object
+      properties:
+        user_name:
+          type: string
+          description: user_name
+          example: sample_user
+        commented_at:
+          description: commented datetime with TZ. This means created_at in postings table.
+          type: string
+          example: '2020-01-01T18:00:00+00:00'
+        comment:
+          type: string
+          description: the content of comment
+          example: This is a sample comment.
+      required:
+        - user_name
+        - commented_at
+        - comment
+    responseGetNotifications:
+      description: get notifications
+      type: object
+      properties:
+        visited_name:
+          description: acted user name
+          type: string
+          example: sample_user
+        actions:
+          description: actions
+          type: array
+          items:
+            $ref: '#/components/schemas/responseGetNotification'
+    responseGetNotification:
+      type: object
+      properties:
+        visitor_name:
+          description: acting user name
+          type: string
+          example: sample_user
+        posting_id:
+          description: only when action is like or comment
+          type: integer
+          format: int64
+          example: 1
+        comment_id:
+          description: only when action is comment
+          type: integer
+          format: int64
+          example: 1
+        action_type:
+          description: action type
+          type: string
+          enum:
+            - 'like'
+            - 'comment'
+            - 'follow'
+        created_at:
+          description: datetime with TZ
+          type: string
+          example: '2020-01-01T18:00:00+00:00'
+      required:
+        - visited_name
+        - visitor_name
+        - action
         - created_at
     responseSimpleSuccess:
       description: Success
@@ -1019,12 +1034,12 @@ tags:
   - name: posting
     description: posting
   - name: like
-    description: like    
+    description: like
   - name: comment
     description: comment
   - name: follow
-    description: follow 
+    description: follow
   - name: notification
-    description: notification     
+    description: notification
   - name: system
     description: system operation

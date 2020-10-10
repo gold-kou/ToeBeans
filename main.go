@@ -1,7 +1,7 @@
 package main
 
-import "fmt"
+import "github.com/gold-kou/ToeBeans/app/adapter/http"
 
 func main() {
-	fmt.Println("Hello world.")
+	http.Serve()
 }

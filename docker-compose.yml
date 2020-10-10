@@ -9,17 +9,21 @@ services:
       - DB_NAME=toebeans
       - DB_USER=toebeans
       - DB_PASS=secret
-      - DB_HOST=db
+      - DB_HOST=mysql
       - DB_PORT=3306
       - TZ=America/Vancouver
       - LOG_LEVEL=debug
+      - MINIO_ACCESS_KEY=minio_access_key
+      - MINIO_SECRET_KEY=minio_secret_key
+      - MINIO_REGION=us-east-1
+      - JWT_SECRET_KEY=samplekey
     volumes:
       - ./:/go/src/github.com/gold-kou/ToeBeans:cached
       - /go/src/github.com/gold-kou/ToeBeans/.git
     networks:
       - backend
     ports:
-      - 80:8080
+      - 8080:8080
     depends_on:
       - db
       - minio
