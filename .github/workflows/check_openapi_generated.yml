@@ -1,4 +1,4 @@
-name: Unit Test
+name: openapi generated test
 on:
   push:
     branches:
@@ -8,11 +8,11 @@ on:
       - master
 
 jobs:
-  tests:
-    name: Tests
+  openapi:
+    name: openapi generated test
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v2
-      - name: Run tests
-        run: make test
+      - name: Run shell
+        run: ./hack/openapi/check_openapi_generated.sh
