@@ -15,9 +15,6 @@ type ResponseGetUser struct {
 	// user name
 	UserName string `json:"user_name"`
 
-	// email
-	Email string `json:"email"`
-
 	// icon
 	Icon string `json:"icon"`
 

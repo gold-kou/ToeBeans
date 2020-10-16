@@ -13,7 +13,7 @@ services:
       - DB_NAME=toebeans
       - DB_USER=toebeans
       - DB_PASS=secret
-      - DB_HOST=db
+      - DB_HOST=db-test
       - DB_PORT=3306
       - AWS_ACCESS_KEY=test_access_key
       - AWS_SECRET_KEY=test_secret_key
@@ -26,18 +26,16 @@ services:
       - /go/src/github.com/gold-kou/ToeBeans/.git
     networks:
       - backend
-    ports:
-      - 8080:8080
     depends_on:
-      - db
-      - minio
+      - db-test
+    command: dockerize -wait tcp://db-test:3306 -timeout 60s realize start --run --no-config
 
-  db:
+  db-test:
     image: mysql:5.7
     volumes:
       - ./toebeans-sql/mysql/my.cnf:/etc/mysql/conf.d/my.cnf
       - ./toebeans-sql/mysql/sql:/docker-entrypoint-initdb.d
-      - db:/var/lib/mysql
+      - db-test:/var/lib/mysql
     tmpfs:
       - /var/lib/mysql,mode=755
       - /var/log/mysql,mode=755
@@ -65,11 +63,9 @@ services:
     command: -c 'mkdir -p /images/icons && mkdir -p /images/postings && /usr/bin/minio server /images'
     networks:
       - backend
-    ports:
-      - 9000:9000
 
 networks:
   backend:
 
 volumes:
-  db:
+  db-test:

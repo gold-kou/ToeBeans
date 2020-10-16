@@ -40,7 +40,7 @@ linters-settings:
     min-confidence: 0
     exclude-dir: app/domain/model/http
   govet:
-    check-shadowing: true
+    check-shadowing: false
     settings:
       printf:
         funcs:
@@ -69,13 +69,10 @@ linters:
     - deadcode
     - depguard
     - dogsled
-    - dupl
     - errcheck
     - exhaustive
-    - funlen
-    - goconst
+    - exportloopref
     - gocritic
-    - gocyclo
     - gofmt
     - goimports
     - golint
@@ -86,7 +83,6 @@ linters:
     - ineffassign
     - interfacer
     - misspell
-    - nakedret
     - noctx
     - nolintlint
     - rowserrcheck
@@ -109,10 +105,24 @@ issues:
         - golint
         - stylecheck
 
+    - path: _test\.go
+      linters:
+        - noctx
+        - gosec
+
+    - path: testing/data
+      linters:
+        - gosec
+
     # https://github.com/go-critic/go-critic/issues/926
     - linters:
         - gocritic
       text: "unnecessaryDefer:"
+
+    - linters:
+        - golint
+        - stylecheck
+      text: "comment on exported var"
 
 # golangci.com configuration
 # https://github.com/golangci/golangci/wiki/Configuration

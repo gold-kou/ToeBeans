@@ -17,9 +17,10 @@ func HealthController(w http.ResponseWriter, r *http.Request) {
 	l.LogHTTPAccess(r)
 
 	switch r.Method {
-	case "GET":
+	case http.MethodGet:
 		helper.ResponseSimpleSuccess(w)
 	default:
-		helper.ResponseBadRequest(w, "not allowed method")
+		methods := []string{http.MethodGet}
+		helper.ResponseNotAllowedMethod(w, "not allowed method", methods)
 	}
 }

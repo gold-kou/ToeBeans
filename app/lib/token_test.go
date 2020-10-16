@@ -1,10 +1,12 @@
-package middleware
+package lib
 
 import (
+	"os"
 	"strings"
 	"testing"
 
-	"github.com/gold-kou/go-housework/app/common"
+	"github.com/gold-kou/ToeBeans/testing/dummy"
+
 	"github.com/stretchr/testify/assert"
 )
 
@@ -23,8 +25,8 @@ func TestGenerateToken(t *testing.T) {
 	}{
 		{
 			name:        "success",
-			args:        args{userName: common.TestUserName},
-			environment: common.TestSecretKey,
+			args:        args{userName: dummy.User1.Name},
+			environment: dummy.SecretKey,
 			want:        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9",
 			wantErr:     false,
 		},
@@ -34,7 +36,7 @@ func TestGenerateToken(t *testing.T) {
 			a := assert.New(t)
 
 			// set env
-			tmp := common.SetTestEnv("JWT_SECRET_KEY", tt.environment)
+			tmp := setTestEnv("JWT_SECRET_KEY", tt.environment)
 			defer tmp()
 
 			// test target
@@ -60,22 +62,22 @@ func TestVerifyToken(t *testing.T) {
 		name        string
 		args        args
 		environment string
-		want        *Auth
+		want        string
 		wantErr     bool
 		watnErrMsg  string
 	}{
 		{
 			name:        "success",
 			args:        args{tokenString: sharedTestToken},
-			environment: common.TestSecretKey,
-			want:        &Auth{UserName: common.TestUserName},
+			environment: dummy.SecretKey,
+			want:        dummy.User1.Name,
 			wantErr:     false,
 		},
 		{
 			name:        "fail(expired)",
 			args:        args{tokenString: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE1ODM3MjIzNjIsImlhdCI6IjIwMjAtMDMtMDhUMTE6NTI6NDIuMjIxMjY2NCswOTowMCIsIm5hbWUiOiJ0ZXN0In0.FYMJmXo17aUhTpdaLifMovDQ0BiKSq8LnssLwxFvshI"},
-			environment: common.TestSecretKey,
-			want:        &Auth{UserName: common.TestUserName},
+			environment: dummy.SecretKey,
+			want:        dummy.User1.Name,
 			wantErr:     true,
 			watnErrMsg:  "token is expired",
 		},
@@ -83,13 +85,13 @@ func TestVerifyToken(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			// set env
-			tmp := common.SetTestEnv("JWT_SECRET_KEY", tt.environment)
+			tmp := setTestEnv("JWT_SECRET_KEY", tt.environment)
 			defer tmp()
 
 			a := assert.New(t)
 
 			// test target
-			got, err := VerifyToken(tt.args.tokenString)
+			got, err := verifyToken(tt.args.tokenString)
 
 			// assert
 			if tt.wantErr {
@@ -100,5 +102,13 @@ func TestVerifyToken(t *testing.T) {
 				a.Equal(tt.want, got)
 			}
 		})
+	}
+}
+
+func setTestEnv(key, val string) func() {
+	preVal := os.Getenv(key)
+	os.Setenv(key, val)
+	return func() {
+		os.Setenv(key, preVal)
 	}
 }

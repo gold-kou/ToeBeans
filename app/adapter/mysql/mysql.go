@@ -59,7 +59,7 @@ func NewDB() (*sql.DB, error) {
 		return nil, e
 	}
 
-	db.SetMaxIdleConns(1) // 1リクエスト中のクエリ間でセッションを維持するために1接続だけ保持する
+	db.SetMaxIdleConns(1) // retain a connection to maintain the session between queries in a request
 	db.SetMaxOpenConns(1)
 	return db, nil
 }

@@ -12,5 +12,5 @@ package http
 type Token struct {
 
 	// token to request APIs
-	AccessToken string `json:"access_token"`
+	IdToken string `json:"id_token"`
 }
