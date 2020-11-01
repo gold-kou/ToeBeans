@@ -53,7 +53,7 @@ Basically, guest user only can do read actions.
 
 # Documents
 ## API
-See openapi.yml
+See openapi/openapi.yml
 
 ## RDB
 https://docs.google.com/spreadsheets/d/1xIYH9PO4Hry3wTN6KYULvxmKMUQ6kwIWJNJJTyijZ_g/edit?usp=sharing
@@ -63,7 +63,7 @@ https://docs.google.com/presentation/d/1iqj8Hsm_CTQPWf_kTsZQMqlHoHxr-md7kc2Zsn8o
 
 This is written in Japanese.
 
-# Well designed points for improving response time
+# Well designed points for performance
 ## Go
 ## RDB Indexing
 ## CloudFront
@@ -71,22 +71,21 @@ This is written in Japanese.
 ## Pagenation
 
 # Development tips
-## Launch application in local
+## Launch servers in local
 ```
 $ ./serverrun.sh
 # go run main.go
 ```
 
-If the error of `listen tcp :8080: bind: address already in use exit status 1` happens, try below.
+If the error of `listen tcp :8080: bind: address already in use exit status 1` happens, you might have failed to stop previous launching. 
+Try below.
 
 Kill process.
 
 ```
 On app
 
-# apt-get update -y
-# apt-get install -y lsof
-# lsof -i | grep 8080
+# ps ax |grep main.go
 # kill -9 <process>
 ```
 
@@ -98,6 +97,20 @@ On Host
 
 $ docker system prune -f
 ```
+
+## Stop servers in local
+
+```
+# (control + Z)
+^X^Z[1] + Stopped                    go run main.go
+
+# ps ax |grep main.go
+
+# kill -9 <process>
+
+# exit
+```
+
 
 ## UT
 ```

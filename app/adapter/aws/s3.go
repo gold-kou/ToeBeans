@@ -1,4 +1,4 @@
-package common
+package aws
 
 import (
 	"bytes"
@@ -8,32 +8,26 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/s3"
+	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 )
 
-func PutToS3(bucket, key string, target []byte) error {
-	sess, err := session.NewSession(generateConfig())
-	if err != nil {
-		return err
-	}
-
-	svc := s3.New(sess)
-	_, err = svc.PutObject(&s3.PutObjectInput{
+func PutToS3(bucket, filename string, file []byte) (*s3manager.UploadOutput, error) {
+	sess := session.Must(session.NewSession(generateS3Config()))
+	uploader := s3manager.NewUploader(sess)
+	return uploader.Upload(&s3manager.UploadInput{
 		Bucket: aws.String(bucket),
-		Key:    aws.String(key),
-		Body:   bytes.NewReader(target),
+		Key:    aws.String(filename),
+		Body:   bytes.NewReader(file),
 	})
-
-	return err
 }
 
-func generateConfig() *aws.Config {
-	if os.Getenv("RUNSERVER") == "LOCAL" || flag.Lookup("test.v") != nil {
-		// use minio in local
-		creds := credentials.NewStaticCredentials(os.Getenv("MINIO_ACCESS_KEY"), os.Getenv("MINIO_SECRET_KEY"), "")
+func generateS3Config() *aws.Config {
+	if os.Getenv("APP_ENV") == "development" || flag.Lookup("test.v") != nil {
+		// use minio in local or test
+		creds := credentials.NewStaticCredentials(os.Getenv("AWS_ACCESS_KEY"), os.Getenv("AWS_SECRET_KEY"), "")
 		return &aws.Config{
 			Credentials:      creds,
-			Region:           aws.String(os.Getenv("MINIO_REGION")),
+			Region:           aws.String(os.Getenv("AWS_REGION")),
 			Endpoint:         aws.String("http://minio:9000"),
 			S3ForcePathStyle: aws.Bool(true),
 		}

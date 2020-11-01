@@ -5,7 +5,6 @@ import (
 	"net/http"
 
 	model "github.com/gold-kou/ToeBeans/app/domain/model/http"
-	"github.com/opentracing/opentracing-go/log"
 )
 
 func ResponseSimpleSuccess(w http.ResponseWriter) {
@@ -13,15 +12,14 @@ func ResponseSimpleSuccess(w http.ResponseWriter) {
 		Status:  http.StatusOK,
 		Message: "success",
 	}
-	w.Header().Set(HeaderKeyContentType, "application/json; charset=UTF-8")
+	w.Header().Set(HeaderKeyContentType, HeaderValueApplicationJSON)
 	w.WriteHeader(http.StatusOK)
 	if err := json.NewEncoder(w).Encode(resp); err != nil {
-		log.Error(err)
 		panic(err.Error())
 	}
 }
 
-func ResponseBadRequest(w http.ResponseWriter, message string, errors ...map[string]string) {
+func ResponseBadRequest(w http.ResponseWriter, message string) {
 	resp := model.ResponseBadRequest{
 		Status:  http.StatusBadRequest,
 		Message: message,
@@ -30,7 +28,6 @@ func ResponseBadRequest(w http.ResponseWriter, message string, errors ...map[str
 	w.Header().Set(HeaderKeyCacheControl, HeaderValueNoStore)
 	w.WriteHeader(http.StatusBadRequest)
 	if err := json.NewEncoder(w).Encode(resp); err != nil {
-		log.Error(err)
 		panic(err.Error())
 	}
 }
@@ -44,7 +41,22 @@ func ResponseUnauthorized(w http.ResponseWriter, message string) {
 	w.Header().Set(HeaderKeyCacheControl, HeaderValueNoStore)
 	w.WriteHeader(http.StatusUnauthorized)
 	if err := json.NewEncoder(w).Encode(resp); err != nil {
-		log.Error(err)
+		panic(err.Error())
+	}
+}
+
+func ResponseNotAllowedMethod(w http.ResponseWriter, message string, methods []string) {
+	resp := model.ResponseNotAllowedMethod{
+		Status:  http.StatusMethodNotAllowed,
+		Message: message,
+	}
+	w.Header().Set(HeaderKeyContentType, HeaderValueApplicationJSON)
+	w.Header().Set(HeaderKeyCacheControl, HeaderValueNoStore)
+	for _, m := range methods {
+		w.Header().Set(HeaderKeyAllow, m)
+	}
+	w.WriteHeader(http.StatusMethodNotAllowed)
+	if err := json.NewEncoder(w).Encode(resp); err != nil {
 		panic(err.Error())
 	}
 }
@@ -58,7 +70,6 @@ func ResponseInternalServerError(w http.ResponseWriter, message string) {
 	w.Header().Set(HeaderKeyCacheControl, HeaderValueNoStore)
 	w.WriteHeader(http.StatusInternalServerError)
 	if err := json.NewEncoder(w).Encode(resp); err != nil {
-		log.Error(err)
 		panic(err.Error())
 	}
 }

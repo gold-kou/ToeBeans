@@ -17,8 +17,8 @@ openapi:
 
 .PHONY: test
 test:
-	@go test -p=1 -covermode=count -coverprofile=cover.out github.com/gold-kou/ToeBeans/app/...
-	@go tool cover -html=cover.out -o coverage.html
+	@docker-compose -f docker-compose.test.yml build app
+	@docker-compose -f docker-compose.test.yml run --rm app dockerize -wait tcp://db-test:3306 -timeout 60s gotest -p 1 -v github.com/gold-kou/ToeBeans/app/...
 
 .PHONY: lint
 lint:
