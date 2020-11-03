@@ -3,7 +3,7 @@ package model
 import "time"
 
 type Posting struct {
-	ID         uint64
+	ID         int64
 	UserName   string
 	Title      string
 	ImageURL   string
