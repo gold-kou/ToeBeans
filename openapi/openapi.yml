@@ -834,7 +834,8 @@ components:
         created_at:
           description: the datetime when the account is created
           type: string
-          example: '2020-01-01T18:00:00+00:00'
+          format: date-time
+          example: '2020-01-01T00:00:00Z'
       required:
         - user_name
         - icon
@@ -872,7 +873,8 @@ components:
         uploaded_at:
           description: uploaded datetime with TZ. This means created_at in postings table.
           type: string
-          example: '2020-01-01T18:00:00+00:00'
+          format: date-time
+          example: '2020-01-01T00:00:00Z'
         title:
           type: string
           description: the title of posting
@@ -916,7 +918,8 @@ components:
         commented_at:
           description: commented datetime with TZ. This means created_at in postings table.
           type: string
-          example: '2020-01-01T18:00:00+00:00'
+          format: date-time
+          example: '2020-01-01T00:00:00Z'
         comment:
           type: string
           description: the content of comment
@@ -965,7 +968,8 @@ components:
         created_at:
           description: datetime with TZ
           type: string
-          example: '2020-01-01T18:00:00+00:00'
+          format: date-time
+          example: '2020-01-01T00:00:00Z'
       required:
         - visited_name
         - visitor_name

@@ -17,6 +17,9 @@ func Serve() {
 	r.HandleFunc("/password-reset-email", controller.PasswordResetEmailController)
 	r.HandleFunc("/password-reset", controller.PasswordReset)
 	r.HandleFunc("/login", controller.LoginController)
+	r.HandleFunc("/posting", controller.PostingController)
+	r.HandleFunc("/postings", controller.PostingsController)
+	r.HandleFunc("/posting/{posting_id}", controller.PostingPostingIDController)
 	log.Println("Server started!")
 	log.Fatal(http.ListenAndServe(":8080", r))
 }

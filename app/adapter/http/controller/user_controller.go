@@ -49,7 +49,7 @@ func UserController(w http.ResponseWriter, r *http.Request) {
 				PostingCount: user.PostingCount,
 				LikeCount:    user.LikeCount,
 				LikedCount:   user.LikedCount,
-				CreatedAt:    user.CreatedAt.Format(lib.DateTimeFormat),
+				CreatedAt:    user.CreatedAt,
 			}
 			w.Header().Set(helper.HeaderKeyContentType, helper.HeaderValueApplicationJSON)
 			w.WriteHeader(http.StatusOK)

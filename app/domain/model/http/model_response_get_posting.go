@@ -9,6 +9,10 @@
 
 package http
 
+import (
+	"time"
+)
+
 type ResponseGetPosting struct {
 
 	// id
@@ -18,7 +22,7 @@ type ResponseGetPosting struct {
 	UserName string `json:"user_name"`
 
 	// uploaded datetime with TZ. This means created_at in postings table.
-	UploadedAt string `json:"uploaded_at"`
+	UploadedAt time.Time `json:"uploaded_at"`
 
 	// the title of posting
 	Title string `json:"title"`

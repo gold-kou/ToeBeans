@@ -9,6 +9,10 @@
 
 package http
 
+import (
+	"time"
+)
+
 type ResponseGetNotification struct {
 
 	// acting user name
@@ -24,5 +28,5 @@ type ResponseGetNotification struct {
 	ActionType string `json:"action_type,omitempty"`
 
 	// datetime with TZ
-	CreatedAt string `json:"created_at"`
+	CreatedAt time.Time `json:"created_at"`
 }
