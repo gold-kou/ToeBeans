@@ -63,7 +63,7 @@ func (user *UpdateUser) UpdateUserUseCase() error {
 	if err != nil {
 		return ErrDecodeImage
 	}
-	o, err := aws.PutToS3(os.Getenv("S3_BUCKET_ICONS"), user.userName, decodedImg)
+	o, err := aws.UploadObject(os.Getenv("S3_BUCKET_ICONS"), user.userName, decodedImg)
 	if err != nil {
 		return err
 	}

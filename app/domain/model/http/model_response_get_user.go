@@ -9,6 +9,10 @@
 
 package http
 
+import (
+	"time"
+)
+
 // ResponseGetUser - get user
 type ResponseGetUser struct {
 
@@ -28,5 +32,5 @@ type ResponseGetUser struct {
 	LikedCount int64 `json:"liked_count"`
 
 	// the datetime when the account is created
-	CreatedAt string `json:"created_at"`
+	CreatedAt time.Time `json:"created_at"`
 }

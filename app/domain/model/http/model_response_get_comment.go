@@ -9,13 +9,17 @@
 
 package http
 
+import (
+	"time"
+)
+
 type ResponseGetComment struct {
 
 	// user_name
 	UserName string `json:"user_name"`
 
 	// commented datetime with TZ. This means created_at in postings table.
-	CommentedAt string `json:"commented_at"`
+	CommentedAt time.Time `json:"commented_at"`
 
 	// the content of comment
 	Comment string `json:"comment"`
