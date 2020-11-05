@@ -12,9 +12,6 @@ package http
 // Like - like
 type Like struct {
 
-	// user name
-	UserName string `json:"user_name"`
-
 	// posting id
 	PostingId int64 `json:"posting_id"`
 }

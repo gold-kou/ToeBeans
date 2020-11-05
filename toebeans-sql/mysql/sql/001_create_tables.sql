@@ -38,7 +38,8 @@ CREATE TABLE `likes` (
     `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     `updated_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP on UPDATE CURRENT_TIMESTAMP,
     CONSTRAINT `likes_user_name` FOREIGN KEY (`user_name`) REFERENCES `users` (`name`),
-    CONSTRAINT `likes_posting_id` FOREIGN KEY (`posting_id`) REFERENCES `postings` (`id`)
+    CONSTRAINT `likes_posting_id` FOREIGN KEY (`posting_id`) REFERENCES `postings` (`id`),
+    UNIQUE `uk_user_name_posting_id` (`user_name`, `posting_id`)
 );
 
 CREATE TABLE `comments` (

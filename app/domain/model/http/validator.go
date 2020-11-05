@@ -40,12 +40,6 @@ func (req *RequestLogin) ValidateParam() error {
 	return validation.ValidateStruct(req, fieldRules...)
 }
 
-func (e *Email) ValidateParam() error {
-	var fieldRules []*validation.FieldRules
-	fieldRules = append(fieldRules, validation.Field(&e.Email, validation.Required, is.Email, validation.Length(MinVarcharLength, MaxVarcharLength)))
-	return validation.ValidateStruct(e, fieldRules...)
-}
-
 func (req *RequestResetPassword) ValidateParam() error {
 	var fieldRules []*validation.FieldRules
 	fieldRules = append(fieldRules, validation.Field(&req.UserName, validation.Required, validation.Length(MinVarcharLength, MaxVarcharLength), is.Alphanumeric),
@@ -59,6 +53,18 @@ func (req *RequestRegisterPosting) ValidateParam() error {
 	fieldRules = append(fieldRules, validation.Field(&req.Title, validation.Required, validation.Length(MinVarcharLength, MaxVarcharLength)),
 		validation.Field(&req.Image, validation.Required))
 	return validation.ValidateStruct(req, fieldRules...)
+}
+
+func (e *Email) ValidateParam() error {
+	var fieldRules []*validation.FieldRules
+	fieldRules = append(fieldRules, validation.Field(&e.Email, validation.Required, is.Email, validation.Length(MinVarcharLength, MaxVarcharLength)))
+	return validation.ValidateStruct(e, fieldRules...)
+}
+
+func (l *Like) ValidateParam() error {
+	var fieldRules []*validation.FieldRules
+	fieldRules = append(fieldRules, validation.Field(&l.PostingId, validation.Required))
+	return validation.ValidateStruct(l, fieldRules...)
 }
 
 // custom password validation

@@ -3,9 +3,9 @@ package model
 import "time"
 
 type Like struct {
-	ID        uint64
+	ID        int64
 	UserName  string
-	PostingID uint64
+	PostingID int64
 	CreatedAt time.Time
 	UpdatedAt time.Time
 }

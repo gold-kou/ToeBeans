@@ -23,6 +23,8 @@ type UserRepositoryInterface interface {
 	UpdateEmailVerifiedWhereNameActivationKey(ctx context.Context, emailVerified bool, userName string, activationKey string) (err error)
 	UpdatePasswordResetWhereEmail(ctx context.Context, count uint16, resetKey string, expiresAt time.Time, email string) (err error)
 	ResetPassword(ctx context.Context, password string, userName string, resetKey string, requestedAt time.Time) (err error)
+	UpdateLikeCount(ctx context.Context, userName string, increment bool) (err error)
+	UpdateLikedCount(ctx context.Context, userName string) (err error)
 	DeleteWhereName(ctx context.Context, userName string) (err error)
 }
 
@@ -154,6 +156,38 @@ func (r *UserRepository) ResetPassword(ctx context.Context, password, userName, 
 		_, err = tx.ExecContext(ctx, q, password, userName, resetKey, requestedAt)
 	} else {
 		_, err = r.db.ExecContext(ctx, q, password, userName, resetKey, requestedAt)
+	}
+	return
+}
+
+func (r *UserRepository) UpdateLikeCount(ctx context.Context, userName string, increment bool) (err error) {
+	var q string
+	if increment {
+		q = "UPDATE `users` SET `like_count` = `like_count` + 1 WHERE `name` = ?"
+	} else {
+		q = "UPDATE `users` SET `like_count` = `like_count` - 1 WHERE `name` = ?"
+	}
+	tx := m.GetTransaction(ctx)
+	if tx != nil {
+		_, err = tx.ExecContext(ctx, q, userName)
+	} else {
+		_, err = r.db.ExecContext(ctx, q, userName)
+	}
+	return
+}
+
+func (r *UserRepository) UpdateLikedCount(ctx context.Context, postingID int64, increment bool) (err error) {
+	var q string
+	if increment {
+		q = "UPDATE `users` SET `liked_count` = `liked_count` + 1 WHERE `name` = (SELECT `user_name` FROM `postings` WHERE `id` = ?)"
+	} else {
+		q = "UPDATE `users` SET `liked_count` = `liked_count` - 1 WHERE `name` = (SELECT `user_name` FROM `postings` WHERE `id` = ?)"
+	}
+	tx := m.GetTransaction(ctx)
+	if tx != nil {
+		_, err = tx.ExecContext(ctx, q, postingID)
+	} else {
+		_, err = r.db.ExecContext(ctx, q, postingID)
 	}
 	return
 }

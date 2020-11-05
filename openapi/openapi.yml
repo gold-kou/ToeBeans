@@ -673,10 +673,6 @@ components:
       description: posting comment
       type: object
       properties:
-        user_name:
-          description: user name
-          type: string
-          example: sample_user
         posting_id:
           description: posting id
           type: integer
@@ -687,39 +683,28 @@ components:
           type: string
           example: 'this is a sample comment.'
       required:
-        - user_name
         - posting_id
         - comment
     like:
       description: like
       type: object
       properties:
-        user_name:
-          description: user name
-          type: string
-          example: sample_user
         posting_id:
           description: posting id
           type: integer
           format: int64
           example: 1
       required:
-        - user_name
         - posting_id
     follow:
       description: follow
       type: object
       properties:
-        following_user_name:
-          description: following user name
-          type: string
-          example: sample_user
         followed_user_name:
           description: followed user name
           type: string
-          example: sample_user2
+          example: sample_user
       required:
-        - following_user_name
         - followed_user_name
     requestLogin:
       type: object
