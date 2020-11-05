@@ -31,6 +31,7 @@ func NewDeleteUser(ctx context.Context, tx mysql.DBTransaction, userName string,
 
 func (user *DeleteUser) DeleteUserUseCase() error {
 	err := user.tx.Do(user.ctx, func(ctx context.Context) error {
+		// TODO notification→likes/comments/follows→postings→usersで削除
 		err := user.userRepo.DeleteWhereName(ctx, user.userName)
 		if err != nil {
 			return err

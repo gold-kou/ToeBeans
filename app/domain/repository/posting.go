@@ -15,6 +15,7 @@ type PostingRepositoryInterface interface {
 	Create(ctx context.Context, posting *model.Posting) (err error)
 	GetPostings(ctx context.Context, sinceAt time.Time, limit int8) (postings []model.Posting, err error)
 	GetWhereIDUserName(ctx context.Context, id uint64, userName string) (posting model.Posting, err error)
+	UpdateLikedCount(ctx context.Context, id int64, increment bool) (err error)
 	DeleteWhereID(ctx context.Context, id uint64) (err error)
 	DeleteWhereUserName(ctx context.Context, userName string) (err error)
 }
@@ -84,6 +85,22 @@ func (r *PostingRepository) GetWhereIDUserName(ctx context.Context, id uint64, u
 	if err == sql.ErrNoRows {
 		err = ErrNotExistsData
 		return
+	}
+	return
+}
+
+func (r *PostingRepository) UpdateLikedCount(ctx context.Context, id int64, increment bool) (err error) {
+	var q string
+	if increment {
+		q = "UPDATE `postings` SET `liked_count` = `liked_count` + 1 WHERE `id` = ?"
+	} else {
+		q = "UPDATE `postings` SET `liked_count` = `liked_count` - 1 WHERE `id` = ?"
+	}
+	tx := m.GetTransaction(ctx)
+	if tx != nil {
+		_, err = tx.ExecContext(ctx, q, id)
+	} else {
+		_, err = r.db.ExecContext(ctx, q, id)
 	}
 	return
 }

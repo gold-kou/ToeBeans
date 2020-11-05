@@ -12,9 +12,6 @@ package http
 // Follow - follow
 type Follow struct {
 
-	// following user name
-	FollowingUserName string `json:"following_user_name"`
-
 	// followed user name
 	FollowedUserName string `json:"followed_user_name"`
 }
