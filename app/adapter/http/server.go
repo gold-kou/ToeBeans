@@ -22,6 +22,9 @@ func Serve() {
 	r.HandleFunc("/posting/{posting_id}", controller.PostingPostingIDController)
 	r.HandleFunc("/like", controller.LikeController)
 	r.HandleFunc("/like/{like_id}", controller.LikeLikeIDController)
+	r.HandleFunc("/comment", controller.CommentController)
+	r.HandleFunc("/comments", controller.CommentsController)
+	r.HandleFunc("/comment/{comment_id}", controller.CommentCommentIDController)
 	log.Println("Server started!")
 	log.Fatal(http.ListenAndServe(":8080", r))
 }

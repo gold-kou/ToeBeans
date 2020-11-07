@@ -896,6 +896,11 @@ components:
     responseGetComment:
       type: object
       properties:
+        comment_id:
+          description: comment id
+          type: integer
+          format: int64
+          example: 1
         user_name:
           type: string
           description: user_name
@@ -910,6 +915,7 @@ components:
           description: the content of comment
           example: This is a sample comment.
       required:
+        - comment_id
         - user_name
         - commented_at
         - comment

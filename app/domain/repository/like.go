@@ -12,7 +12,7 @@ import (
 
 type LikeRepositoryInterface interface {
 	Create(ctx context.Context, like *model.Like) (err error)
-	GetWhereID(ctx context.Context, id uint64) (like model.Like, err error)
+	GetWhereID(ctx context.Context, id int64) (like model.Like, err error)
 	DeleteWhereID(ctx context.Context, id int64) (err error)
 	DeleteWhereUserName(ctx context.Context, userName string) (err error)
 }
