@@ -67,6 +67,13 @@ func (l *Like) ValidateParam() error {
 	return validation.ValidateStruct(l, fieldRules...)
 }
 
+func (c *Comment) ValidateParam() error {
+	var fieldRules []*validation.FieldRules
+	fieldRules = append(fieldRules, validation.Field(&c.PostingId, validation.Required),
+		validation.Field(&c.Comment, validation.Required, validation.Length(MinVarcharLength, MaxVarcharLength)))
+	return validation.ValidateStruct(c, fieldRules...)
+}
+
 // custom password validation
 //
 // upp: at least one upper case letter.

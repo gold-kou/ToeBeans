@@ -49,10 +49,10 @@ func (r *PostingRepository) GetPostings(ctx context.Context, sinceAt time.Time, 
 	var q string
 	var rows *sql.Rows
 	if userName == "" {
-		q = "SELECT `id`, `user_name`, `title`, `image_url`, `liked_count`, `created_at` FROM `postings` WHERE `created_at` < ? ORDER BY `created_at` DESC LIMIT ?"
+		q = "SELECT `id`, `user_name`, `title`, `image_url`, `liked_count`, `created_at`, `updated_at` FROM `postings` WHERE `created_at` < ? ORDER BY `created_at` DESC LIMIT ?"
 		rows, err = r.db.QueryContext(ctx, q, sinceAt, limit)
 	} else {
-		q = "SELECT `id`, `user_name`, `title`, `image_url`, `liked_count`, `created_at` FROM `postings` WHERE `created_at` < ? AND `user_name` = ? ORDER BY `created_at` DESC LIMIT ?"
+		q = "SELECT `id`, `user_name`, `title`, `image_url`, `liked_count`, `created_at`, `updated_at` FROM `postings` WHERE `created_at` < ? AND `user_name` = ? ORDER BY `created_at` DESC LIMIT ?"
 		rows, err = r.db.QueryContext(ctx, q, sinceAt, userName, limit)
 	}
 	if err == sql.ErrNoRows {
@@ -66,7 +66,7 @@ func (r *PostingRepository) GetPostings(ctx context.Context, sinceAt time.Time, 
 
 	var p model.Posting
 	for rows.Next() {
-		if err = rows.Scan(&p.ID, &p.UserName, &p.Title, &p.ImageURL, &p.LikedCount, &p.CreatedAt); err != nil {
+		if err = rows.Scan(&p.ID, &p.UserName, &p.Title, &p.ImageURL, &p.LikedCount, &p.CreatedAt, &p.UpdatedAt); err != nil {
 			return
 		}
 		postings = append(postings, p)

@@ -15,6 +15,9 @@ import (
 
 type ResponseGetComment struct {
 
+	// comment id
+	CommentId int64 `json:"comment_id"`
+
 	// user_name
 	UserName string `json:"user_name"`
 
