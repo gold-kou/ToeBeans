@@ -192,6 +192,38 @@ func (r *UserRepository) UpdateLikedCount(ctx context.Context, postingID int64, 
 	return
 }
 
+func (r *UserRepository) UpdateFollowCount(ctx context.Context, userName string, increment bool) (err error) {
+	var q string
+	if increment {
+		q = "UPDATE `users` SET `follow_count` = `follow_count` + 1 WHERE `name` = ?"
+	} else {
+		q = "UPDATE `users` SET `follow_count` = `follow_count` - 1 WHERE `name` = ?"
+	}
+	tx := m.GetTransaction(ctx)
+	if tx != nil {
+		_, err = tx.ExecContext(ctx, q, userName)
+	} else {
+		_, err = r.db.ExecContext(ctx, q, userName)
+	}
+	return
+}
+
+func (r *UserRepository) UpdateFollowedCount(ctx context.Context, userName string, increment bool) (err error) {
+	var q string
+	if increment {
+		q = "UPDATE `users` SET `followed_count` = `followed_count` + 1 WHERE `name` = ?"
+	} else {
+		q = "UPDATE `users` SET `followed_count` = `followed_count` - 1 WHERE `name` = ?"
+	}
+	tx := m.GetTransaction(ctx)
+	if tx != nil {
+		_, err = tx.ExecContext(ctx, q, userName)
+	} else {
+		_, err = r.db.ExecContext(ctx, q, userName)
+	}
+	return
+}
+
 func (r *UserRepository) DeleteWhereName(ctx context.Context, userName string) (err error) {
 	q := "DELETE FROM `users` WHERE `name` = ?"
 	tx := m.GetTransaction(ctx)
