@@ -256,9 +256,13 @@ func deleteUser(r *http.Request) (err error) {
 
 	// repository
 	userRepo := repository.NewUserRepository(db)
+	postingRepo := repository.NewPostingRepository(db)
+	likeRepo := repository.NewLikeRepository(db)
+	commentRepo := repository.NewCommentRepository(db)
+	followRepo := repository.NewFollowRepository(db)
 
 	// UseCase
-	u := usecase.NewDeleteUser(r.Context(), tx, userName, userRepo)
+	u := usecase.NewDeleteUser(r.Context(), tx, userName, userRepo, postingRepo, likeRepo, commentRepo, followRepo)
 	if err = u.DeleteUserUseCase(); err != nil {
 		log.Println(err)
 		return helper.NewInternalServerError(err.Error())

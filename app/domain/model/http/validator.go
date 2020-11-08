@@ -74,6 +74,12 @@ func (c *Comment) ValidateParam() error {
 	return validation.ValidateStruct(c, fieldRules...)
 }
 
+func (f *Follow) ValidateParam() error {
+	var fieldRules []*validation.FieldRules
+	fieldRules = append(fieldRules, validation.Field(&f.FollowedUserName, validation.Required, validation.Length(MinVarcharLength, MaxVarcharLength), is.Alphanumeric))
+	return validation.ValidateStruct(f, fieldRules...)
+}
+
 // custom password validation
 //
 // upp: at least one upper case letter.

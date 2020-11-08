@@ -63,7 +63,7 @@ paths:
           required: true
           schema:
             type: string
-            example: sample_user
+            example: user1
       responses:
         "200":
           $ref: '#/components/responses/getUser'
@@ -105,7 +105,7 @@ paths:
             type: string
           in: path
           required: true
-          example: sample_user
+          example: user1
       requestBody:
         $ref: '#/components/requestBodies/updateUser'
       responses:
@@ -131,7 +131,7 @@ paths:
             type: string
           in: path
           required: true
-          example: sample_user
+          example: user1
         - name: activation_key
           description: hashed key to activate the user
           schema:
@@ -236,7 +236,7 @@ paths:
           description: this will be used only when user profile
           in: query
           required: false
-          example: sample_user
+          example: user1
           schema:
             type: string
           explode: true
@@ -419,7 +419,7 @@ paths:
           $ref: '#/components/responses/notAllowedMethod'
         "500":
           $ref: '#/components/responses/internalServerError'
-  /follow/{user_name}:
+  /follow/{followed_user_name}:
     delete:
       description: delete follow
       operationId: deleteFollow
@@ -428,12 +428,12 @@ paths:
       security:
         - bearerAuth: []
       parameters:
-        - name: user_name
+        - name: followed_user_name
           schema:
             type: string
           in: path
           required: true
-          example: sample_user
+          example: user1
       responses:
         "200":
           $ref: '#/components/responses/simpleSuccess'
@@ -486,7 +486,7 @@ paths:
             type: string
           in: path
           required: true
-          example: sample_user
+          example: user1
       responses:
         "200":
           $ref: '#/components/responses/simpleSuccess'
@@ -656,7 +656,7 @@ components:
         email:
           type: string
           description: email
-          example: sample_user@gmail.com
+          example: user1@gmail.com
       required:
         - email
     postingID:
@@ -703,7 +703,7 @@ components:
         followed_user_name:
           description: followed user name
           type: string
-          example: sample_user
+          example: user1
       required:
         - followed_user_name
     requestLogin:
@@ -712,7 +712,7 @@ components:
         email:
           type: string
           description: email
-          example: sample_user@gmail.com
+          example: user1@gmail.com
         password:
           type: string
           description: password
@@ -726,11 +726,11 @@ components:
         email:
           type: string
           description: email
-          example: sample_user@gmail.com
+          example: user1@gmail.com
         user_name:
           type: string
           description: user_name
-          example: sample_user
+          example: user1
         password:
           type: string
           description: password
@@ -761,7 +761,7 @@ components:
         user_name:
           description: user name
           type: string
-          example: sample_user
+          example: user1
         password:
           type: string
           description: password
@@ -796,7 +796,7 @@ components:
         user_name:
           description: user name
           type: string
-          example: sample_user
+          example: user1
         icon:
           description: icon
           type: string
@@ -854,7 +854,7 @@ components:
         user_name:
           type: string
           description: user_name
-          example: sample_user
+          example: user1
         uploaded_at:
           description: uploaded datetime with TZ. This means created_at in postings table.
           type: string
@@ -904,7 +904,7 @@ components:
         user_name:
           type: string
           description: user_name
-          example: sample_user
+          example: user1
         commented_at:
           description: commented datetime with TZ. This means created_at in postings table.
           type: string
@@ -926,7 +926,7 @@ components:
         visited_name:
           description: acted user name
           type: string
-          example: sample_user
+          example: user1
         actions:
           description: actions
           type: array
@@ -938,7 +938,7 @@ components:
         visitor_name:
           description: acting user name
           type: string
-          example: sample_user
+          example: user1
         posting_id:
           description: only when action is like or comment
           type: integer
