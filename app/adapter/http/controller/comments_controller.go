@@ -60,7 +60,8 @@ func CommentsController(w http.ResponseWriter, r *http.Request) {
 			helper.ResponseInternalServerError(w, err.Error())
 		}
 	default:
-		helper.ResponseBadRequest(w, "not allowed method")
+		methods := []string{http.MethodGet}
+		helper.ResponseNotAllowedMethod(w, "not allowed method", methods)
 	}
 }
 
