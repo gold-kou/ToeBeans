@@ -21,7 +21,11 @@ GitHub/GitHub Actions
 # Features
 ## Feature list
 - User management
-- Posting management
+- Password reset
+- Posting
+- Like
+- Comment
+- Follow
 - (Batch) Reset the count of sending email for password reset
 
 ## Not allowed features for guest user
@@ -38,17 +42,12 @@ GitHub/GitHub Actions
 Basically, guest user only can do read actions.
 
 ## Coming features
-- Like
-- Comment
-- Follow
 - Notification
-- Password reset
 - Other social media services sharing
 - Refresh token
 - Ranking
 - Incident report
 - Block user
-- Direct message
 - Movie posting
 
 # Documents

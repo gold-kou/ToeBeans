@@ -14,29 +14,40 @@ type RegisterLikeUseCaseInterface interface {
 }
 
 type RegisterLike struct {
-	ctx             context.Context
-	tx              mysql.DBTransaction
-	userName        string
-	reqRegisterLike *modelHTTP.Like
-	userRepo        *repository.UserRepository
-	postingRepo     *repository.PostingRepository
-	likeRepo        *repository.LikeRepository
+	ctx              context.Context
+	tx               mysql.DBTransaction
+	userName         string
+	reqRegisterLike  *modelHTTP.Like
+	userRepo         *repository.UserRepository
+	postingRepo      *repository.PostingRepository
+	likeRepo         *repository.LikeRepository
+	notificationRepo *repository.NotificationRepository
 }
 
-func NewRegisterLike(ctx context.Context, tx mysql.DBTransaction, userName string, reqRegisterLike *modelHTTP.Like, userRepo *repository.UserRepository, postingRepo *repository.PostingRepository, likeRepo *repository.LikeRepository) *RegisterLike {
+func NewRegisterLike(ctx context.Context, tx mysql.DBTransaction, userName string, reqRegisterLike *modelHTTP.Like, userRepo *repository.UserRepository, postingRepo *repository.PostingRepository, likeRepo *repository.LikeRepository, notificationRepo *repository.NotificationRepository) *RegisterLike {
 	return &RegisterLike{
-		ctx:             ctx,
-		tx:              tx,
-		userName:        userName,
-		reqRegisterLike: reqRegisterLike,
-		userRepo:        userRepo,
-		postingRepo:     postingRepo,
-		likeRepo:        likeRepo,
+		ctx:              ctx,
+		tx:               tx,
+		userName:         userName,
+		reqRegisterLike:  reqRegisterLike,
+		userRepo:         userRepo,
+		postingRepo:      postingRepo,
+		likeRepo:         likeRepo,
+		notificationRepo: notificationRepo,
 	}
 }
 
 func (like *RegisterLike) RegisterLikeUseCase() error {
-	err := like.tx.Do(like.ctx, func(ctx context.Context) error {
+	p, err := like.postingRepo.GetWhereID(like.ctx, like.reqRegisterLike.PostingId)
+	if err != nil {
+		return err
+	}
+
+	if like.userName == p.UserName {
+		return ErrLikeYourSelf
+	}
+
+	err = like.tx.Do(like.ctx, func(ctx context.Context) error {
 		l := model.Like{
 			UserName:  like.userName,
 			PostingID: like.reqRegisterLike.PostingId,
@@ -55,6 +66,18 @@ func (like *RegisterLike) RegisterLikeUseCase() error {
 		if err := like.postingRepo.UpdateLikedCount(ctx, like.reqRegisterLike.PostingId, true); err != nil {
 			return err
 		}
+
+		// TODO notification
+		// if like.userName != p.UserName {
+		// 	n := model.Notification{
+		// 		VisitorName: like.userName,
+		// 		VisitedName: p.UserName,
+		// 		Action:      model.LikeAction,
+		// 	}
+		// 	if err = like.notificationRepo.Create(ctx, &n); err != nil {
+		// 		return err
+		// 	}
+		// }
 
 		return nil
 	})

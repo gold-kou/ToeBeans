@@ -2,14 +2,17 @@ package model
 
 import "time"
 
+const (
+	LikeAction    = "like"
+	CommentAction = "comment"
+	FollowAction  = "follow"
+)
+
 type Notification struct {
-	ID          uint64
+	ID          int64
 	VisitorName string
 	VisitedName string
-	PostingID   uint64
-	CommentID   uint64
 	Action      string
-	Checked     bool
 	CreatedAt   time.Time
 	UpdatedAt   time.Time
 }

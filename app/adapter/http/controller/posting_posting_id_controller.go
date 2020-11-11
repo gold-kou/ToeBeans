@@ -77,7 +77,7 @@ func deletePosting(r *http.Request) error {
 	postingRepo := repository.NewPostingRepository(db)
 
 	// UseCase
-	u := usecase.NewDeletePosting(r.Context(), tx, uint64(id), userName, postingRepo)
+	u := usecase.NewDeletePosting(r.Context(), tx, int64(id), userName, postingRepo)
 	if err = u.DeletePostingUseCase(); err != nil {
 		log.Println(err)
 		if err == repository.ErrNotExistsData {

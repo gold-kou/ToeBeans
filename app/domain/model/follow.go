@@ -3,7 +3,7 @@ package model
 import "time"
 
 type Follow struct {
-	ID                uint64
+	ID                int64
 	FollowingUserName string
 	FollowedUserName  string
 	CreatedAt         time.Time

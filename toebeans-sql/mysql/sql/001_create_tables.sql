@@ -61,22 +61,18 @@ CREATE TABLE `follows` (
     `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     `updated_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP on UPDATE CURRENT_TIMESTAMP,
     CONSTRAINT `follows_following_user_name` FOREIGN KEY (`following_user_name`) REFERENCES `users` (`name`),
-    CONSTRAINT `follows_followed_user_name` FOREIGN KEY (`followed_user_name`) REFERENCES `users` (`name`)
+    CONSTRAINT `follows_followed_user_name` FOREIGN KEY (`followed_user_name`) REFERENCES `users` (`name`),
+    UNIQUE `uk_following_user_name_followed_user_name` (`following_user_name`, `followed_user_name`)
 );
 
 CREATE TABLE `notifications` (
     `id` INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     `visitor_name` VARCHAR(255) NOT NULL,
     `visited_name` VARCHAR(255) NOT NULL,
-    `posting_id` INT NOT NULL,
-    `comment_id` INT NOT NULL,
     `action` ENUM('like', 'comment', 'follow') NOT NULL,
-    `checked` BOOLEAN NOT NULL DEFAULT FALSE,
     `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     `updated_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP on UPDATE CURRENT_TIMESTAMP,
     CONSTRAINT `notifications_visitor_name` FOREIGN KEY (`visitor_name`) REFERENCES `users` (`name`),
     CONSTRAINT `notifications_visited_name` FOREIGN KEY (`visited_name`) REFERENCES `users` (`name`),
-    CONSTRAINT `notifications_posting_id` FOREIGN KEY (`posting_id`) REFERENCES `postings` (`id`),
-    CONSTRAINT `notifications_comment_id` FOREIGN KEY (`comment_id`) REFERENCES `comments` (`id`),
     INDEX idx_notifications_visited_name(visited_name)
 );

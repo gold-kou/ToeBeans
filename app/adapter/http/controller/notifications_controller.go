@@ -4,24 +4,22 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
-	"strconv"
-	"time"
+
+	"github.com/gold-kou/ToeBeans/app/lib"
 
 	validation "github.com/go-ozzo/ozzo-validation"
 	"github.com/go-ozzo/ozzo-validation/is"
-	"github.com/gold-kou/ToeBeans/app/domain/model"
-
-	"github.com/gold-kou/ToeBeans/app/lib"
 
 	"github.com/gold-kou/ToeBeans/app/adapter/http/helper"
 	applicationLog "github.com/gold-kou/ToeBeans/app/adapter/http/log"
 	"github.com/gold-kou/ToeBeans/app/adapter/mysql"
 	"github.com/gold-kou/ToeBeans/app/application/usecase"
+	"github.com/gold-kou/ToeBeans/app/domain/model"
 	modelHTTP "github.com/gold-kou/ToeBeans/app/domain/model/http"
 	"github.com/gold-kou/ToeBeans/app/domain/repository"
 )
 
-func PostingsController(w http.ResponseWriter, r *http.Request) {
+func NotificationsController(w http.ResponseWriter, r *http.Request) {
 	l, err := applicationLog.NewLogger()
 	if err != nil {
 		log.Panic(err)
@@ -30,25 +28,22 @@ func PostingsController(w http.ResponseWriter, r *http.Request) {
 
 	switch r.Method {
 	case http.MethodGet:
-		postings, err := getPostings(r)
+		notifications, err := getNotifications(r)
 		switch err := err.(type) {
 		case nil:
-			var httpPostings []modelHTTP.ResponseGetPosting
-			for _, p := range postings {
-				httpPosting := modelHTTP.ResponseGetPosting{
-					PostingId:  p.ID,
-					UserName:   p.UserName,
-					UploadedAt: p.CreatedAt,
-					Title:      p.Title,
-					ImageUrl:   p.ImageURL,
-					Liked:      p.LikedCount,
+			var httpNotifications []modelHTTP.ResponseGetNotification
+			for _, n := range notifications {
+				httpNotification := modelHTTP.ResponseGetNotification{
+					VisitorName: n.VisitorName,
+					ActionType:  n.Action,
+					CreatedAt:   n.CreatedAt,
 				}
-				httpPostings = append(httpPostings, httpPosting)
+				httpNotifications = append(httpNotifications, httpNotification)
 			}
-			resp := modelHTTP.ResponseGetPostings{
-				Postings: httpPostings,
+			resp := modelHTTP.ResponseGetNotifications{
+				VisitedName: notifications[0].VisitedName,
+				Actions:     httpNotifications,
 			}
-
 			w.Header().Set(helper.HeaderKeyContentType, helper.HeaderValueApplicationJSON)
 			w.WriteHeader(http.StatusOK)
 			if err := json.NewEncoder(w).Encode(resp); err != nil {
@@ -69,7 +64,7 @@ func PostingsController(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func getPostings(r *http.Request) (postings []model.Posting, err error) {
+func getNotifications(r *http.Request) (notifications []model.Notification, err error) {
 	// authorization
 	_, err = lib.VerifyHeaderToken(r)
 	if err != nil {
@@ -78,26 +73,10 @@ func getPostings(r *http.Request) (postings []model.Posting, err error) {
 	}
 
 	// get request parameter
-	sinceAt := r.URL.Query().Get("since_at")
-	sinceAtFormatted, err := time.Parse(time.RFC3339, sinceAt)
-	if err != nil {
-		log.Println(err)
-		return nil, helper.NewBadRequestError(err.Error())
-	}
+	visitedName := r.URL.Query().Get("user_name")
 
-	limit := r.URL.Query().Get("limit")
-	if limit == "" {
-		log.Println(err)
-		return nil, helper.NewBadRequestError("limit: cannot be blank")
-	}
-	limitInt, err := strconv.Atoi(limit)
-	if err != nil {
-		log.Println(err)
-		return nil, helper.NewBadRequestError(err.Error())
-	}
-
-	userName := r.URL.Query().Get("user_name")
-	if err := validation.Validate(userName, validation.Length(modelHTTP.MinVarcharLength, modelHTTP.MaxVarcharLength), is.Alphanumeric); err != nil {
+	// validation check
+	if err = validation.Validate(visitedName, validation.Required, validation.Length(modelHTTP.MinVarcharLength, modelHTTP.MaxVarcharLength), is.Alphanumeric); err != nil {
 		log.Println(err)
 		return nil, helper.NewBadRequestError(err.Error())
 	}
@@ -112,15 +91,12 @@ func getPostings(r *http.Request) (postings []model.Posting, err error) {
 	tx := mysql.NewDBTransaction(db)
 
 	// repository
-	postingRepo := repository.NewPostingRepository(db)
+	notificationRepo := repository.NewNotificationRepository(db)
 
 	// UseCase
-	u := usecase.NewGetPostings(r.Context(), tx, sinceAtFormatted, int8(limitInt), userName, postingRepo)
-	if postings, err = u.GetPostingsUseCase(); err != nil {
+	u := usecase.NewGetNotifications(r.Context(), tx, visitedName, notificationRepo)
+	if notifications, err = u.GetNotificationsUseCase(); err != nil {
 		log.Println(err)
-		if err == usecase.ErrDecodeImage {
-			return nil, helper.NewBadRequestError(err.Error())
-		}
 		if err == repository.ErrNotExistsData {
 			return nil, helper.NewBadRequestError(err.Error())
 		}

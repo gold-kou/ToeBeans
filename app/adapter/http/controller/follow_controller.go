@@ -84,9 +84,10 @@ func registerFollow(r *http.Request) error {
 	// repository
 	userRepo := repository.NewUserRepository(db)
 	followRepo := repository.NewFollowRepository(db)
+	notificationRepo := repository.NewNotificationRepository(db)
 
 	// UseCase
-	u := usecase.NewRegisterFollow(r.Context(), tx, userName, reqRegisterFollow, userRepo, followRepo)
+	u := usecase.NewRegisterFollow(r.Context(), tx, userName, reqRegisterFollow, userRepo, followRepo, notificationRepo)
 	if err = u.RegisterFollowUseCase(); err != nil {
 		log.Println(err)
 		if err == repository.ErrDuplicateData {
