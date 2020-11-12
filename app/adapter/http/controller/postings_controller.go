@@ -64,7 +64,8 @@ func PostingsController(w http.ResponseWriter, r *http.Request) {
 			helper.ResponseInternalServerError(w, err.Error())
 		}
 	default:
-		helper.ResponseBadRequest(w, "not allowed method")
+		methods := []string{http.MethodGet}
+		helper.ResponseNotAllowedMethod(w, "not allowed method", methods)
 	}
 }
 
@@ -118,6 +119,9 @@ func getPostings(r *http.Request) (postings []model.Posting, err error) {
 	if postings, err = u.GetPostingsUseCase(); err != nil {
 		log.Println(err)
 		if err == usecase.ErrDecodeImage {
+			return nil, helper.NewBadRequestError(err.Error())
+		}
+		if err == repository.ErrNotExistsData {
 			return nil, helper.NewBadRequestError(err.Error())
 		}
 		return nil, helper.NewInternalServerError(err.Error())

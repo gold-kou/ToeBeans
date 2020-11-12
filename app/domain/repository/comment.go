@@ -28,17 +28,17 @@ func NewCommentRepository(db *sql.DB) *CommentRepository {
 	}
 }
 
-func (r *CommentRepository) Create(ctx context.Context, comment *model.Comment) (err error) {
+func (r *CommentRepository) Create(ctx context.Context, comment *model.Comment) (result sql.Result, err error) {
 	q := "INSERT INTO `comments` (`user_name`, `posting_id`, `comment`) VALUES (?, ?, ?)"
 	tx := m.GetTransaction(ctx)
 	if tx != nil {
-		_, err = tx.ExecContext(ctx, q, comment.UserName, comment.PostingID, comment.Comment)
+		result, err = tx.ExecContext(ctx, q, comment.UserName, comment.PostingID, comment.Comment)
 	} else {
-		_, err = r.db.ExecContext(ctx, q, comment.UserName, comment.PostingID, comment.Comment)
+		result, err = r.db.ExecContext(ctx, q, comment.UserName, comment.PostingID, comment.Comment)
 	}
 	mysqlErr, ok := err.(*mysql.MySQLError)
 	if ok && mysqlErr.Number == 1062 {
-		return ErrDuplicateData
+		return nil, ErrDuplicateData
 	}
 	return
 }

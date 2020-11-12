@@ -39,7 +39,8 @@ func CommentController(w http.ResponseWriter, r *http.Request) {
 			helper.ResponseInternalServerError(w, err.Error())
 		}
 	default:
-		helper.ResponseBadRequest(w, "not allowed method")
+		methods := []string{http.MethodPost}
+		helper.ResponseNotAllowedMethod(w, "not allowed method", methods)
 	}
 }
 
@@ -81,12 +82,17 @@ func registerComment(r *http.Request) error {
 	tx := mysql.NewDBTransaction(db)
 
 	// repository
+	postingRepo := repository.NewPostingRepository(db)
 	commentRepo := repository.NewCommentRepository(db)
+	notificationRepo := repository.NewNotificationRepository(db)
 
 	// UseCase
-	u := usecase.NewRegisterComment(r.Context(), tx, userName, reqRegisterComment, commentRepo)
+	u := usecase.NewRegisterComment(r.Context(), tx, userName, reqRegisterComment, postingRepo, commentRepo, notificationRepo)
 	if err = u.RegisterCommentUseCase(); err != nil {
 		log.Println(err)
+		if err == repository.ErrNotExistsData {
+			return helper.NewBadRequestError(err.Error())
+		}
 		if err == repository.ErrDuplicateData {
 			return helper.NewBadRequestError("Whoops, you already commented that")
 		}

@@ -83,6 +83,9 @@ func passwordResetEmail(r *http.Request) error {
 		if err == repository.ErrNotExistsData {
 			return helper.NewBadRequestError(err.Error())
 		}
+		if err == usecase.ErrOverPasswordResetCount {
+			return helper.NewBadRequestError(err.Error())
+		}
 		return helper.NewInternalServerError(err.Error())
 	}
 	return err

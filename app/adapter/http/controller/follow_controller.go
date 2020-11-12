@@ -39,7 +39,8 @@ func FollowController(w http.ResponseWriter, r *http.Request) {
 			helper.ResponseInternalServerError(w, err.Error())
 		}
 	default:
-		helper.ResponseBadRequest(w, "not allowed method")
+		methods := []string{http.MethodPost}
+		helper.ResponseNotAllowedMethod(w, "not allowed method", methods)
 	}
 }
 
@@ -83,9 +84,10 @@ func registerFollow(r *http.Request) error {
 	// repository
 	userRepo := repository.NewUserRepository(db)
 	followRepo := repository.NewFollowRepository(db)
+	notificationRepo := repository.NewNotificationRepository(db)
 
 	// UseCase
-	u := usecase.NewRegisterFollow(r.Context(), tx, userName, reqRegisterFollow, userRepo, followRepo)
+	u := usecase.NewRegisterFollow(r.Context(), tx, userName, reqRegisterFollow, userRepo, followRepo, notificationRepo)
 	if err = u.RegisterFollowUseCase(); err != nil {
 		log.Println(err)
 		if err == repository.ErrDuplicateData {

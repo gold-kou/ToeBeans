@@ -20,9 +20,10 @@ type RegisterFollow struct {
 	reqRegisterFollow *modelHTTP.Follow
 	userRepo          *repository.UserRepository
 	followRepo        *repository.FollowRepository
+	notificationRepo  *repository.NotificationRepository
 }
 
-func NewRegisterFollow(ctx context.Context, tx mysql.DBTransaction, userName string, reqRegisterFollow *modelHTTP.Follow, userRepo *repository.UserRepository, followRepo *repository.FollowRepository) *RegisterFollow {
+func NewRegisterFollow(ctx context.Context, tx mysql.DBTransaction, userName string, reqRegisterFollow *modelHTTP.Follow, userRepo *repository.UserRepository, followRepo *repository.FollowRepository, notificationRepo *repository.NotificationRepository) *RegisterFollow {
 	return &RegisterFollow{
 		ctx:               ctx,
 		tx:                tx,
@@ -30,6 +31,7 @@ func NewRegisterFollow(ctx context.Context, tx mysql.DBTransaction, userName str
 		reqRegisterFollow: reqRegisterFollow,
 		userRepo:          userRepo,
 		followRepo:        followRepo,
+		notificationRepo:  notificationRepo,
 	}
 }
 
@@ -53,6 +55,18 @@ func (follow *RegisterFollow) RegisterFollowUseCase() error {
 		if err != nil {
 			return err
 		}
+
+		// TODO notification
+		// if follow.userName != follow.reqRegisterFollow.FollowedUserName {
+		// 	n := model.Notification{
+		// 		VisitorName: follow.userName,
+		// 		VisitedName: follow.reqRegisterFollow.FollowedUserName,
+		// 		Action:      model.FollowAction,
+		// 	}
+		// 	if err = follow.notificationRepo.Create(ctx, &n); err != nil {
+		// 		return err
+		// 	}
+		// }
 
 		return nil
 	})

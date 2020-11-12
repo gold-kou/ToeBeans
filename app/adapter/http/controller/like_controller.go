@@ -39,7 +39,8 @@ func LikeController(w http.ResponseWriter, r *http.Request) {
 			helper.ResponseInternalServerError(w, err.Error())
 		}
 	default:
-		helper.ResponseBadRequest(w, "not allowed method")
+		methods := []string{http.MethodPost}
+		helper.ResponseNotAllowedMethod(w, "not allowed method", methods)
 	}
 }
 
@@ -84,13 +85,17 @@ func registerLike(r *http.Request) error {
 	userRepo := repository.NewUserRepository(db)
 	postingRepo := repository.NewPostingRepository(db)
 	likeRepo := repository.NewLikeRepository(db)
+	notificationRepo := repository.NewNotificationRepository(db)
 
 	// UseCase
-	u := usecase.NewRegisterLike(r.Context(), tx, userName, reqRegisterLike, userRepo, postingRepo, likeRepo)
+	u := usecase.NewRegisterLike(r.Context(), tx, userName, reqRegisterLike, userRepo, postingRepo, likeRepo, notificationRepo)
 	if err = u.RegisterLikeUseCase(); err != nil {
 		log.Println(err)
 		if err == repository.ErrDuplicateData {
 			return helper.NewBadRequestError("Whoops, you already liked that")
+		}
+		if err == usecase.ErrLikeYourSelf {
+			return helper.NewBadRequestError(err.Error())
 		}
 		return helper.NewInternalServerError(err.Error())
 	}

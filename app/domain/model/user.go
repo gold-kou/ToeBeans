@@ -2,6 +2,8 @@ package model
 
 import "time"
 
+const MaxLimitPasswordResetPerDay = 1
+
 type User struct {
 	Name                      string
 	Email                     string

@@ -14,9 +14,10 @@ import (
 type PostingRepositoryInterface interface {
 	Create(ctx context.Context, posting *model.Posting) (err error)
 	GetPostings(ctx context.Context, sinceAt time.Time, limit int8) (postings []model.Posting, err error)
-	GetWhereIDUserName(ctx context.Context, id uint64, userName string) (posting model.Posting, err error)
+	GetWhereID(ctx context.Context, id int64) (posting model.Posting, err error)
+	GetWhereIDUserName(ctx context.Context, id int64, userName string) (posting model.Posting, err error)
 	UpdateLikedCount(ctx context.Context, id int64, increment bool) (err error)
-	DeleteWhereID(ctx context.Context, id uint64) (err error)
+	DeleteWhereID(ctx context.Context, id int64) (err error)
 	DeleteWhereUserName(ctx context.Context, userName string) (err error)
 }
 
@@ -79,7 +80,17 @@ func (r *PostingRepository) GetPostings(ctx context.Context, sinceAt time.Time, 
 	return
 }
 
-func (r *PostingRepository) GetWhereIDUserName(ctx context.Context, id uint64, userName string) (posting model.Posting, err error) {
+func (r *PostingRepository) GetWhereID(ctx context.Context, id int64) (posting model.Posting, err error) {
+	q := "SELECT `id`, `user_name`, `title`, `image_url`, `liked_count`, `created_at`, `updated_at` FROM `postings` WHERE `id` = ?"
+	err = r.db.QueryRowContext(ctx, q, id).Scan(&posting.ID, &posting.UserName, &posting.Title, &posting.ImageURL, &posting.LikedCount, &posting.CreatedAt, &posting.UpdatedAt)
+	if err == sql.ErrNoRows {
+		err = ErrNotExistsData
+		return
+	}
+	return
+}
+
+func (r *PostingRepository) GetWhereIDUserName(ctx context.Context, id int64, userName string) (posting model.Posting, err error) {
 	q := "SELECT `id`, `user_name`, `title`, `image_url`, `liked_count`, `created_at`, `updated_at` FROM `postings` WHERE `id` = ? AND `user_name` = ?"
 	err = r.db.QueryRowContext(ctx, q, id, userName).Scan(&posting.ID, &posting.UserName, &posting.Title, &posting.ImageURL, &posting.LikedCount, &posting.CreatedAt, &posting.UpdatedAt)
 	if err == sql.ErrNoRows {
@@ -105,13 +116,13 @@ func (r *PostingRepository) UpdateLikedCount(ctx context.Context, id int64, incr
 	return
 }
 
-func (r *PostingRepository) DeleteWhereIDUserName(ctx context.Context, id uint64, userName string) (err error) {
-	q := "DELETE FROM `postings` WHERE `id` = ? AND `user_name` = ?"
+func (r *PostingRepository) DeleteWhereID(ctx context.Context, id int64) (err error) {
+	q := "DELETE FROM `postings` WHERE `id` = ?"
 	tx := m.GetTransaction(ctx)
 	if tx != nil {
-		_, err = tx.ExecContext(ctx, q, id, userName)
+		_, err = tx.ExecContext(ctx, q, id)
 	} else {
-		_, err = r.db.ExecContext(ctx, q, id, userName)
+		_, err = r.db.ExecContext(ctx, q, id)
 	}
 	return
 }

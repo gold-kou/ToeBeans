@@ -16,12 +16,12 @@ type DeletePostingUseCaseInterface interface {
 type DeletePosting struct {
 	ctx         context.Context
 	tx          mysql.DBTransaction
-	postingID   uint64
+	postingID   int64
 	userName    string
 	postingRepo *repository.PostingRepository
 }
 
-func NewDeletePosting(ctx context.Context, tx mysql.DBTransaction, postingID uint64, userName string, postingRepo *repository.PostingRepository) *DeletePosting {
+func NewDeletePosting(ctx context.Context, tx mysql.DBTransaction, postingID int64, userName string, postingRepo *repository.PostingRepository) *DeletePosting {
 	return &DeletePosting{
 		ctx:         ctx,
 		tx:          tx,
@@ -43,7 +43,7 @@ func (posting *DeletePosting) DeletePostingUseCase() error {
 	}
 
 	err = posting.tx.Do(posting.ctx, func(ctx context.Context) error {
-		err := posting.postingRepo.DeleteWhereIDUserName(ctx, posting.postingID, posting.userName)
+		err := posting.postingRepo.DeleteWhereID(ctx, posting.postingID)
 		if err != nil {
 			return err
 		}

@@ -4,6 +4,8 @@ import (
 	"context"
 	"time"
 
+	"github.com/gold-kou/ToeBeans/app/domain/model"
+
 	"github.com/gold-kou/ToeBeans/app/lib"
 	"github.com/google/uuid"
 
@@ -38,6 +40,10 @@ func (re *PasswordResetEmail) PasswordResetEmailUseCase() (err error) {
 	u, err := re.userRepo.GetUserWhereEmail(re.ctx, re.reqPasswordResetEmail.Email)
 	if err != nil {
 		return
+	}
+
+	if u.PasswordResetEmailCount >= model.MaxLimitPasswordResetPerDay {
+		return ErrOverPasswordResetCount
 	}
 
 	// password reset key

@@ -4,21 +4,22 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
-	"strconv"
-
-	"github.com/gold-kou/ToeBeans/app/domain/model"
 
 	"github.com/gold-kou/ToeBeans/app/lib"
+
+	validation "github.com/go-ozzo/ozzo-validation"
+	"github.com/go-ozzo/ozzo-validation/is"
 
 	"github.com/gold-kou/ToeBeans/app/adapter/http/helper"
 	applicationLog "github.com/gold-kou/ToeBeans/app/adapter/http/log"
 	"github.com/gold-kou/ToeBeans/app/adapter/mysql"
 	"github.com/gold-kou/ToeBeans/app/application/usecase"
+	"github.com/gold-kou/ToeBeans/app/domain/model"
 	modelHTTP "github.com/gold-kou/ToeBeans/app/domain/model/http"
 	"github.com/gold-kou/ToeBeans/app/domain/repository"
 )
 
-func CommentsController(w http.ResponseWriter, r *http.Request) {
+func NotificationsController(w http.ResponseWriter, r *http.Request) {
 	l, err := applicationLog.NewLogger()
 	if err != nil {
 		log.Panic(err)
@@ -27,24 +28,22 @@ func CommentsController(w http.ResponseWriter, r *http.Request) {
 
 	switch r.Method {
 	case http.MethodGet:
-		comments, err := getComments(r)
+		notifications, err := getNotifications(r)
 		switch err := err.(type) {
 		case nil:
-			var httpComments []modelHTTP.ResponseGetComment
-			for _, c := range comments {
-				httpComment := modelHTTP.ResponseGetComment{
-					CommentId:   c.ID,
-					UserName:    c.UserName,
-					CommentedAt: c.CreatedAt,
-					Comment:     c.Comment,
+			var httpNotifications []modelHTTP.ResponseGetNotification
+			for _, n := range notifications {
+				httpNotification := modelHTTP.ResponseGetNotification{
+					VisitorName: n.VisitorName,
+					ActionType:  n.Action,
+					CreatedAt:   n.CreatedAt,
 				}
-				httpComments = append(httpComments, httpComment)
+				httpNotifications = append(httpNotifications, httpNotification)
 			}
-			resp := modelHTTP.ResponseGetComments{
-				PostingId: comments[0].PostingID,
-				Comments:  httpComments,
+			resp := modelHTTP.ResponseGetNotifications{
+				VisitedName: notifications[0].VisitedName,
+				Actions:     httpNotifications,
 			}
-
 			w.Header().Set(helper.HeaderKeyContentType, helper.HeaderValueApplicationJSON)
 			w.WriteHeader(http.StatusOK)
 			if err := json.NewEncoder(w).Encode(resp); err != nil {
@@ -65,7 +64,7 @@ func CommentsController(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func getComments(r *http.Request) (comments []model.Comment, err error) {
+func getNotifications(r *http.Request) (notifications []model.Notification, err error) {
 	// authorization
 	_, err = lib.VerifyHeaderToken(r)
 	if err != nil {
@@ -74,13 +73,10 @@ func getComments(r *http.Request) (comments []model.Comment, err error) {
 	}
 
 	// get request parameter
-	postingID := r.URL.Query().Get("posting_id")
-	if postingID == "" {
-		log.Println(err)
-		return nil, helper.NewBadRequestError("posting_id: cannot be blank")
-	}
-	id, err := strconv.Atoi(postingID)
-	if err != nil {
+	visitedName := r.URL.Query().Get("user_name")
+
+	// validation check
+	if err = validation.Validate(visitedName, validation.Required, validation.Length(modelHTTP.MinVarcharLength, modelHTTP.MaxVarcharLength), is.Alphanumeric); err != nil {
 		log.Println(err)
 		return nil, helper.NewBadRequestError(err.Error())
 	}
@@ -95,11 +91,11 @@ func getComments(r *http.Request) (comments []model.Comment, err error) {
 	tx := mysql.NewDBTransaction(db)
 
 	// repository
-	commentRepo := repository.NewCommentRepository(db)
+	notificationRepo := repository.NewNotificationRepository(db)
 
 	// UseCase
-	u := usecase.NewGetComments(r.Context(), tx, int64(id), commentRepo)
-	if comments, err = u.GetCommentsUseCase(); err != nil {
+	u := usecase.NewGetNotifications(r.Context(), tx, visitedName, notificationRepo)
+	if notifications, err = u.GetNotificationsUseCase(); err != nil {
 		log.Println(err)
 		if err == repository.ErrNotExistsData {
 			return nil, helper.NewBadRequestError(err.Error())
