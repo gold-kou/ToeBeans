@@ -3,6 +3,8 @@ package usecase
 import (
 	"context"
 
+	"github.com/gold-kou/ToeBeans/app/lib"
+
 	"github.com/gold-kou/ToeBeans/app/adapter/mysql"
 	"github.com/gold-kou/ToeBeans/app/domain/model"
 	"github.com/gold-kou/ToeBeans/app/domain/repository"
@@ -33,7 +35,22 @@ func NewDeleteFollow(ctx context.Context, tx mysql.DBTransaction, followUserName
 }
 
 func (follow *DeleteFollow) DeleteFollowUseCase() error {
-	err := follow.tx.Do(follow.ctx, func(ctx context.Context) error {
+	// check userName in token exists
+	_, err := follow.userRepo.GetUserWhereName(follow.ctx, follow.followUserName)
+	if err != nil {
+		if err == repository.ErrNotExistsData {
+			return lib.ErrTokenInvalidNotExistingUserName
+		}
+		return err
+	}
+
+	// check userName exists
+	_, err = follow.userRepo.GetUserWhereName(follow.ctx, follow.followedUserName)
+	if err != nil {
+		return err
+	}
+
+	err = follow.tx.Do(follow.ctx, func(ctx context.Context) error {
 		err := follow.followRepo.DeleteWhereFollowingFollowedUserName(ctx, follow.followUserName, follow.followedUserName)
 		if err != nil {
 			return err

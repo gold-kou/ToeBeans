@@ -12,9 +12,6 @@ package http
 // ResponseGetPostings - get postings
 type ResponseGetPostings struct {
 
-	// page
-	Page int64 `json:"page,omitempty"`
-
 	// list of posting
 	Postings []ResponseGetPosting `json:"postings,omitempty"`
 }

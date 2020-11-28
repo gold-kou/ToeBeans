@@ -32,21 +32,20 @@ func NewPasswordReset(ctx context.Context, tx mysql.DBTransaction, reqPasswordRe
 	}
 }
 
-func (re *PasswordReset) PasswordResetUseCase() (err error) {
+func (reset *PasswordReset) PasswordResetUseCase() (err error) {
 	// name and resetKey exists check
-	_, err = re.userRepo.GetUserWhereNameResetKey(re.ctx, re.reqPasswordReset.UserName, re.reqPasswordReset.PasswordResetKey)
-	if err != nil {
-		return
-	}
-
-	// reset password
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(re.reqPasswordReset.Password), bcrypt.DefaultCost)
+	_, err = reset.userRepo.GetUserWhereNameResetKey(reset.ctx, reset.reqPasswordReset.UserName, reset.reqPasswordReset.PasswordResetKey, lib.NowFunc())
 	if err != nil {
 		return err
 	}
-	if err = re.userRepo.ResetPassword(re.ctx, string(hashedPassword), re.reqPasswordReset.UserName, re.reqPasswordReset.PasswordResetKey, lib.NowFunc()); err != nil {
-		return
-	}
 
+	// reset password
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(reset.reqPasswordReset.Password), bcrypt.DefaultCost)
+	if err != nil {
+		return err
+	}
+	if err := reset.userRepo.ResetPassword(reset.ctx, string(hashedPassword), reset.reqPasswordReset.UserName, reset.reqPasswordReset.PasswordResetKey); err != nil {
+		return err
+	}
 	return
 }

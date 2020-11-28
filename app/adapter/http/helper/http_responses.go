@@ -45,6 +45,19 @@ func ResponseUnauthorized(w http.ResponseWriter, message string) {
 	}
 }
 
+func ResponseNotFound(w http.ResponseWriter, message string) {
+	resp := model.ResponseUnauthorized{
+		Status:  http.StatusNotFound,
+		Message: message,
+	}
+	w.Header().Set(HeaderKeyContentType, HeaderValueApplicationJSON)
+	w.Header().Set(HeaderKeyCacheControl, HeaderValueNoStore)
+	w.WriteHeader(http.StatusNotFound)
+	if err := json.NewEncoder(w).Encode(resp); err != nil {
+		panic(err.Error())
+	}
+}
+
 func ResponseNotAllowedMethod(w http.ResponseWriter, message string, methods []string) {
 	resp := model.ResponseNotAllowedMethod{
 		Status:  http.StatusMethodNotAllowed,

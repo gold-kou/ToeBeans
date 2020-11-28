@@ -3,7 +3,6 @@ package repository
 import (
 	"context"
 	"database/sql"
-	"errors"
 	"time"
 
 	"github.com/go-sql-driver/mysql"
@@ -16,13 +15,13 @@ type UserRepositoryInterface interface {
 	Create(ctx context.Context, user *model.User) (err error)
 	GetUserWhereEmail(ctx context.Context, email string) (user model.User, err error)
 	GetUserWhereName(ctx context.Context, userName string) (user model.User, err error)
-	GetUserWhereNameResetKey(ctx context.Context, userName string, resetKey string) (user model.User, err error)
+	GetUserWhereNameResetKey(ctx context.Context, userName string, resetKey string, requestedAt time.Time) (user model.User, err error)
 	UpdatePasswordWhereName(ctx context.Context, password string, userName string) (err error)
 	UpdateIconWhereName(ctx context.Context, iconURL string, userName string) (err error)
 	UpdateSelfIntroductionWhereName(ctx context.Context, selfIntroduction string, userName string) (err error)
 	UpdateEmailVerifiedWhereNameActivationKey(ctx context.Context, emailVerified bool, userName string, activationKey string) (err error)
 	UpdatePasswordResetWhereEmail(ctx context.Context, count uint16, resetKey string, expiresAt time.Time, email string) (err error)
-	ResetPassword(ctx context.Context, password string, userName string, resetKey string, requestedAt time.Time) (err error)
+	ResetPassword(ctx context.Context, password string, userName string, resetKey string) (err error)
 	UpdateLikeCount(ctx context.Context, userName string, increment bool) (err error)
 	UpdateLikedCount(ctx context.Context, userName string) (err error)
 	DeleteWhereName(ctx context.Context, userName string) (err error)
@@ -73,9 +72,9 @@ func (r *UserRepository) GetUserWhereName(ctx context.Context, userName string) 
 	return
 }
 
-func (r *UserRepository) GetUserWhereNameResetKey(ctx context.Context, userName, resetKey string) (user model.User, err error) {
-	q := "SELECT `name`, `email`, `password`, `icon`, `self_introduction`, `posting_count`, `like_count`, `liked_count`, `follow_count`, `followed_count`, `activation_key`, `email_verified`, `password_reset_email_count`, `password_reset_key`, `password_reset_key_expires_at`, `created_at`, `updated_at` FROM `users` WHERE `name` = ? AND `password_reset_key` = ?"
-	err = r.db.QueryRowContext(ctx, q, userName, resetKey).Scan(&user.Name, &user.Email, &user.Password, &user.Icon, &user.SelfIntroduction, &user.PostingCount, &user.LikeCount, &user.LikedCount, &user.FollowCount, &user.FollowedCount, &user.ActivationKey, &user.EmailVerified, &user.PasswordResetEmailCount, &user.PasswordResetKey, &user.PasswordResetKeyExpiresAt, &user.CreatedAt, &user.UpdatedAt)
+func (r *UserRepository) GetUserWhereNameResetKey(ctx context.Context, userName, resetKey string, requestedAt time.Time) (user model.User, err error) {
+	q := "SELECT `name`, `email`, `password`, `icon`, `self_introduction`, `posting_count`, `like_count`, `liked_count`, `follow_count`, `followed_count`, `activation_key`, `email_verified`, `password_reset_email_count`, `password_reset_key`, `password_reset_key_expires_at`, `created_at`, `updated_at` FROM `users` WHERE `name` = ? AND `password_reset_key` = ? AND `password_reset_key_expires_at` >= ?"
+	err = r.db.QueryRowContext(ctx, q, userName, resetKey, requestedAt).Scan(&user.Name, &user.Email, &user.Password, &user.Icon, &user.SelfIntroduction, &user.PostingCount, &user.LikeCount, &user.LikedCount, &user.FollowCount, &user.FollowedCount, &user.ActivationKey, &user.EmailVerified, &user.PasswordResetEmailCount, &user.PasswordResetKey, &user.PasswordResetKeyExpiresAt, &user.CreatedAt, &user.UpdatedAt)
 	if err == sql.ErrNoRows {
 		err = ErrNotExistsData
 		return
@@ -133,7 +132,7 @@ func (r *UserRepository) UpdateEmailVerifiedWhereNameActivationKey(ctx context.C
 		return
 	}
 	if rows == 0 {
-		return errors.New(ErrUserActivationNotFound.Error())
+		return ErrUserActivationNotFound
 	}
 	return
 }
@@ -149,13 +148,13 @@ func (r *UserRepository) UpdatePasswordResetWhereEmail(ctx context.Context, coun
 	return
 }
 
-func (r *UserRepository) ResetPassword(ctx context.Context, password, userName, resetKey string, requestedAt time.Time) (err error) {
-	q := "UPDATE `users` SET `password` = ? WHERE `name` = ? AND `password_reset_key` = ? AND `password_reset_key_expires_at` >= ?"
+func (r *UserRepository) ResetPassword(ctx context.Context, password, userName, resetKey string) (err error) {
+	q := "UPDATE `users` SET `password` = ? WHERE `name` = ? AND `password_reset_key` = ?"
 	tx := m.GetTransaction(ctx)
 	if tx != nil {
-		_, err = tx.ExecContext(ctx, q, password, userName, resetKey, requestedAt)
+		_, err = tx.ExecContext(ctx, q, password, userName, resetKey)
 	} else {
-		_, err = r.db.ExecContext(ctx, q, password, userName, resetKey, requestedAt)
+		_, err = r.db.ExecContext(ctx, q, password, userName, resetKey)
 	}
 	return
 }

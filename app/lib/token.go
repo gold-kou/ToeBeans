@@ -6,6 +6,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/gold-kou/ToeBeans/app/adapter/http/helper"
+
 	jwt "github.com/dgrijalva/jwt-go"
 	"github.com/pkg/errors"
 )
@@ -15,6 +17,7 @@ var ErrNotFoundBearerToken = errors.New("not found bearer token")
 var ErrUnexpectedSigningMethod = errors.New("unexpected signing method")
 var ErrTokenExpired = errors.New("token is expired")
 var ErrTokenInvalid = errors.New("token is invalid")
+var ErrTokenInvalidNotExistingUserName = errors.New("the user name contained in token doesn't exist")
 var ErrNotFoundClaims = errors.New("not found claims in token")
 var ErrNotFoundName = errors.New("not found name in token")
 
@@ -40,7 +43,7 @@ func GenerateToken(userName string) (tokenString string, err error) {
 
 func VerifyHeaderToken(r *http.Request) (userName string, err error) {
 	// get jwt from header
-	authHeader := r.Header.Get("Authorization")
+	authHeader := r.Header.Get(helper.HeaderKeyAuthorization)
 	if authHeader == "" {
 		return "", ErrNotFoundAuthorizationHeader
 	}
@@ -53,14 +56,14 @@ func VerifyHeaderToken(r *http.Request) (userName string, err error) {
 	bearerToken := s[1]
 
 	// verify jwt
-	userName, err = verifyToken(bearerToken)
+	userName, err = VerifyToken(bearerToken)
 	if err != nil {
 		return
 	}
 	return
 }
 
-func verifyToken(tokenString string) (userName string, err error) {
+func VerifyToken(tokenString string) (userName string, err error) {
 	// verify
 	parsedToken, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		// check signing method

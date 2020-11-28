@@ -7,6 +7,8 @@ import (
 	"os"
 	"time"
 
+	"github.com/gold-kou/ToeBeans/testing/dummy"
+
 	"github.com/gold-kou/ToeBeans/app/lib"
 
 	"github.com/gold-kou/ToeBeans/app/domain/model"
@@ -89,6 +91,24 @@ func SetupDBTest() *sql.DB {
 }
 
 func TeardownDBTest(db *sql.DB) {
+	if err := DeleteAllData(db, "notifications"); err != nil {
+		panic(err)
+	}
+	if err := DeleteAllData(db, "likes"); err != nil {
+		panic(err)
+	}
+	if err := DeleteAllData(db, "comments"); err != nil {
+		panic(err)
+	}
+	if err := DeleteAllData(db, "follows"); err != nil {
+		panic(err)
+	}
+	if err := DeleteAllData(db, "postings"); err != nil {
+		panic(err)
+	}
+	if err := DeleteAllData(db, "users"); err != nil {
+		panic(err)
+	}
 	db.Close()
 }
 
@@ -116,4 +136,153 @@ func FindAllUsers(ctx context.Context, db *sql.DB) ([]model.User, error) {
 		return nil, err
 	}
 	return result, nil
+}
+
+func CreateUserPasswordReset(db *sql.DB, expiresAt time.Time) error {
+	q := "INSERT INTO `users` (`name`, `email`, `password`, `activation_key`, `password_reset_key`, `password_reset_key_expires_at`) VALUES (?, ?, ?, ?, ?, ?)"
+	_, e := db.Exec(q, dummy.User1.Name, dummy.User1.Email, dummy.User1.Password, dummy.User1.ActivationKey, dummy.User1.PasswordResetKey, expiresAt)
+	if e != nil {
+		return e
+	}
+	return nil
+}
+
+func FindAllPostings(ctx context.Context, db *sql.DB) ([]model.Posting, error) {
+	q := "SELECT `id`, `user_name`, `title`, `image_url`, `liked_count`, `created_at`, `updated_at` FROM `postings`"
+	rows, err := db.QueryContext(ctx, q)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	result := []model.Posting{}
+	for rows.Next() {
+		var p model.Posting
+		if err := rows.Scan(&p.ID, &p.UserName, &p.Title, &p.ImageURL, &p.LikedCount, &p.CreatedAt, &p.UpdatedAt); err != nil {
+			return nil, err
+		}
+		result = append(result, p)
+	}
+
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return result, nil
+}
+
+func FindAllLikes(ctx context.Context, db *sql.DB) ([]model.Like, error) {
+	q := "SELECT `id`, `user_name`, `posting_id`, `created_at`, `updated_at` FROM `likes`"
+	rows, err := db.QueryContext(ctx, q)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	result := []model.Like{}
+	for rows.Next() {
+		var l model.Like
+		if err := rows.Scan(&l.ID, &l.UserName, &l.PostingID, &l.CreatedAt, &l.UpdatedAt); err != nil {
+			return nil, err
+		}
+		result = append(result, l)
+	}
+
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return result, nil
+}
+
+func FindAllComments(ctx context.Context, db *sql.DB) ([]model.Comment, error) {
+	q := "SELECT `id`, `user_name`, `posting_id`, `comment`, `created_at`, `updated_at` FROM `comments`"
+	rows, err := db.QueryContext(ctx, q)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	result := []model.Comment{}
+	for rows.Next() {
+		var c model.Comment
+		if err := rows.Scan(&c.ID, &c.UserName, &c.PostingID, &c.Comment, &c.CreatedAt, &c.UpdatedAt); err != nil {
+			return nil, err
+		}
+		result = append(result, c)
+	}
+
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return result, nil
+}
+
+func FindAllFollows(ctx context.Context, db *sql.DB) ([]model.Follow, error) {
+	q := "SELECT `id`, `following_user_name`, `followed_user_name`, `created_at`, `updated_at` FROM `follows`"
+	rows, err := db.QueryContext(ctx, q)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	result := []model.Follow{}
+	for rows.Next() {
+		var f model.Follow
+		if err := rows.Scan(&f.ID, &f.FollowingUserName, &f.FollowedUserName, &f.CreatedAt, &f.UpdatedAt); err != nil {
+			return nil, err
+		}
+		result = append(result, f)
+	}
+
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return result, nil
+}
+
+func UpdateResetKeyExpiresAt(db *sql.DB, passwordResetKey string, expiresAt time.Time) error {
+	q := "UPDATE `users` SET `password_reset_key` = ?, `password_reset_key_expires_at` = ?"
+	_, e := db.Exec(q, passwordResetKey, expiresAt)
+	if e != nil {
+		return e
+	}
+	return nil
+}
+
+func UpdatePasswordResetEmailCount(db *sql.DB) error {
+	q := "UPDATE `users` SET `password_reset_email_count` = 10"
+	_, e := db.Exec(q)
+	if e != nil {
+		return e
+	}
+	return nil
+}
+
+func DeleteAllData(db *sql.DB, table string) error {
+	q := fmt.Sprintf("DELETE FROM `%s`", table)
+	_, e := db.Exec(q)
+	if e != nil {
+		return e
+	}
+	return nil
+}
+
+func UpdateNow(db *sql.DB, table string) error {
+	q := fmt.Sprintf("UPDATE `%s` SET `created_at` = ?, `updated_at` = ?", table)
+	_, e := db.Exec(q, lib.NowFunc(), lib.NowFunc())
+	if e != nil {
+		return e
+	}
+	return nil
 }

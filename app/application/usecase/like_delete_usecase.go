@@ -3,6 +3,8 @@ package usecase
 import (
 	"context"
 
+	"github.com/gold-kou/ToeBeans/app/lib"
+
 	"github.com/gold-kou/ToeBeans/app/adapter/mysql"
 	"github.com/gold-kou/ToeBeans/app/domain/model"
 	"github.com/gold-kou/ToeBeans/app/domain/repository"
@@ -13,28 +15,37 @@ type DeleteLikeUseCaseInterface interface {
 }
 
 type DeleteLike struct {
-	ctx         context.Context
-	tx          mysql.DBTransaction
-	userName    string
-	likeID      int64
-	userRepo    *repository.UserRepository
-	postingRepo *repository.PostingRepository
-	likeRepo    *repository.LikeRepository
+	ctx           context.Context
+	tx            mysql.DBTransaction
+	tokenUserName string
+	likeID        int64
+	userRepo      *repository.UserRepository
+	postingRepo   *repository.PostingRepository
+	likeRepo      *repository.LikeRepository
 }
 
-func NewDeleteLike(ctx context.Context, tx mysql.DBTransaction, userName string, likeID int64, userRepo *repository.UserRepository, postingRepo *repository.PostingRepository, likeRepo *repository.LikeRepository) *DeleteLike {
+func NewDeleteLike(ctx context.Context, tx mysql.DBTransaction, tokenUserName string, likeID int64, userRepo *repository.UserRepository, postingRepo *repository.PostingRepository, likeRepo *repository.LikeRepository) *DeleteLike {
 	return &DeleteLike{
-		ctx:         ctx,
-		tx:          tx,
-		userName:    userName,
-		likeID:      likeID,
-		userRepo:    userRepo,
-		postingRepo: postingRepo,
-		likeRepo:    likeRepo,
+		ctx:           ctx,
+		tx:            tx,
+		tokenUserName: tokenUserName,
+		likeID:        likeID,
+		userRepo:      userRepo,
+		postingRepo:   postingRepo,
+		likeRepo:      likeRepo,
 	}
 }
 
 func (like *DeleteLike) DeleteLikeUseCase() error {
+	// check userName in token exists
+	_, err := like.userRepo.GetUserWhereName(like.ctx, like.tokenUserName)
+	if err != nil {
+		if err == repository.ErrNotExistsData {
+			return lib.ErrTokenInvalidNotExistingUserName
+		}
+		return err
+	}
+
 	l, err := like.likeRepo.GetWhereID(like.ctx, like.likeID)
 	if err != nil {
 		return err
@@ -46,7 +57,7 @@ func (like *DeleteLike) DeleteLikeUseCase() error {
 		}
 
 		// decrement
-		if err := like.userRepo.UpdateLikeCount(ctx, like.userName, false); err != nil {
+		if err := like.userRepo.UpdateLikeCount(ctx, like.tokenUserName, false); err != nil {
 			return err
 		}
 		if err := like.userRepo.UpdateLikedCount(ctx, l.PostingID, false); err != nil {

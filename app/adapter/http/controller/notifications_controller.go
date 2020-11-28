@@ -66,7 +66,7 @@ func NotificationsController(w http.ResponseWriter, r *http.Request) {
 
 func getNotifications(r *http.Request) (notifications []model.Notification, err error) {
 	// authorization
-	_, err = lib.VerifyHeaderToken(r)
+	tokenUserName, err := lib.VerifyHeaderToken(r)
 	if err != nil {
 		log.Println(err)
 		return nil, helper.NewAuthorizationError(err.Error())
@@ -91,10 +91,11 @@ func getNotifications(r *http.Request) (notifications []model.Notification, err 
 	tx := mysql.NewDBTransaction(db)
 
 	// repository
+	userRepo := repository.NewUserRepository(db)
 	notificationRepo := repository.NewNotificationRepository(db)
 
 	// UseCase
-	u := usecase.NewGetNotifications(r.Context(), tx, visitedName, notificationRepo)
+	u := usecase.NewGetNotifications(r.Context(), tx, tokenUserName, visitedName, userRepo, notificationRepo)
 	if notifications, err = u.GetNotificationsUseCase(); err != nil {
 		log.Println(err)
 		if err == repository.ErrNotExistsData {

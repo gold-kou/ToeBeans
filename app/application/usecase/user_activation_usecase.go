@@ -32,13 +32,7 @@ func NewUserActivation(ctx context.Context, tx mysql.DBTransaction, userName, ac
 }
 
 func (ua *UserActivation) UserActivationUseCase() error {
-	err := ua.tx.Do(ua.ctx, func(ctx context.Context) error {
-		err := ua.userRepo.UpdateEmailVerifiedWhereNameActivationKey(ctx, true, ua.userName, ua.activationKey)
-		if err != nil {
-			return err
-		}
-		return nil
-	})
+	err := ua.userRepo.UpdateEmailVerifiedWhereNameActivationKey(ua.ctx, true, ua.userName, ua.activationKey)
 	if err != nil {
 		return err
 	}

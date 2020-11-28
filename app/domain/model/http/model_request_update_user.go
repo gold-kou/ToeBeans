@@ -17,6 +17,6 @@ type RequestUpdateUser struct {
 	// icon image file of base64 encoded and zipped
 	Icon string `json:"icon,omitempty"`
 
-	// self-introduction
-	SelfIntroduction string `json:"self-introduction,omitempty"`
+	// self introduction
+	SelfIntroduction string `json:"self_introduction,omitempty"`
 }

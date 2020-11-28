@@ -15,15 +15,19 @@ type GetNotificationsUseCaseInterface interface {
 type GetNotifications struct {
 	ctx              context.Context
 	tx               mysql.DBTransaction
+	tokenUserName    string
 	visitedName      string
+	userRepo         *repository.UserRepository
 	notificationRepo *repository.NotificationRepository
 }
 
-func NewGetNotifications(ctx context.Context, tx mysql.DBTransaction, visitedName string, notificationRepo *repository.NotificationRepository) *GetNotifications {
+func NewGetNotifications(ctx context.Context, tx mysql.DBTransaction, tokenUserName, visitedName string, userRepo *repository.UserRepository, notificationRepo *repository.NotificationRepository) *GetNotifications {
 	return &GetNotifications{
 		ctx:              ctx,
 		tx:               tx,
+		tokenUserName:    tokenUserName,
 		visitedName:      visitedName,
+		userRepo:         userRepo,
 		notificationRepo: notificationRepo,
 	}
 }

@@ -46,7 +46,7 @@ func LikeController(w http.ResponseWriter, r *http.Request) {
 
 func registerLike(r *http.Request) error {
 	// authorization
-	userName, err := lib.VerifyHeaderToken(r)
+	tokenUserName, err := lib.VerifyHeaderToken(r)
 	if err != nil {
 		log.Println(err)
 		return helper.NewAuthorizationError(err.Error())
@@ -88,11 +88,11 @@ func registerLike(r *http.Request) error {
 	notificationRepo := repository.NewNotificationRepository(db)
 
 	// UseCase
-	u := usecase.NewRegisterLike(r.Context(), tx, userName, reqRegisterLike, userRepo, postingRepo, likeRepo, notificationRepo)
+	u := usecase.NewRegisterLike(r.Context(), tx, tokenUserName, reqRegisterLike, userRepo, postingRepo, likeRepo, notificationRepo)
 	if err = u.RegisterLikeUseCase(); err != nil {
 		log.Println(err)
 		if err == repository.ErrDuplicateData {
-			return helper.NewBadRequestError("Whoops, you already liked that")
+			return helper.NewBadRequestError("Whoops, you already liked the posting")
 		}
 		if err == usecase.ErrLikeYourSelf {
 			return helper.NewBadRequestError(err.Error())

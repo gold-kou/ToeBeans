@@ -71,6 +71,28 @@ paths:
           $ref: '#/components/responses/badRequest'
         "401":
           $ref: '#/components/responses/unauthorized'
+        "404":
+          $ref: '#/components/responses/notFound'
+        "405":
+          $ref: '#/components/responses/notAllowedMethod'
+        "500":
+          $ref: '#/components/responses/internalServerError'
+    put:
+      description: update user info
+      operationId: updateUser
+      tags:
+        - user
+      security:
+        - bearerAuth: []
+      requestBody:
+        $ref: '#/components/requestBodies/updateUser'
+      responses:
+        "200":
+          $ref: '#/components/responses/simpleSuccess'
+        "400":
+          $ref: '#/components/responses/badRequest'
+        "401":
+          $ref: '#/components/responses/unauthorized'
         "405":
           $ref: '#/components/responses/notAllowedMethod'
         "500":
@@ -85,34 +107,6 @@ paths:
       responses:
         "200":
           $ref: '#/components/responses/simpleSuccess'
-        "401":
-          $ref: '#/components/responses/unauthorized'
-        "405":
-          $ref: '#/components/responses/notAllowedMethod'
-        "500":
-          $ref: '#/components/responses/internalServerError'
-  /user/{user_name}:
-    put:
-      description: update user info
-      operationId: updateUser
-      tags:
-        - user
-      security:
-        - bearerAuth: []
-      parameters:
-        - name: user_name
-          schema:
-            type: string
-          in: path
-          required: true
-          example: user1
-      requestBody:
-        $ref: '#/components/requestBodies/updateUser'
-      responses:
-        "200":
-          $ref: '#/components/responses/simpleSuccess'
-        "400":
-          $ref: '#/components/responses/badRequest'
         "401":
           $ref: '#/components/responses/unauthorized'
         "405":
@@ -751,9 +745,9 @@ components:
           type: string
           format: byte
           example: 'GEsDBBQACAAIAJhjzE4AAAAAAAAAAAAAAAASABAAaU9TIOOBrueUu+WDjzIucG5nVVgMAKTALl1wcQBd9gEUAIy8B'
-        self-introduction:
+        self_introduction:
           type: string
-          description: self-introduction
+          description: self introduction
           example: 'Hello'
     requestResetPassword:
       type: object
@@ -832,12 +826,6 @@ components:
       description: get postings
       type: object
       properties:
-        page:
-          description: page
-          type: integer
-          format: int64
-          minimum: 1
-          example: 1
         postings:
           description: list of posting
           type: array

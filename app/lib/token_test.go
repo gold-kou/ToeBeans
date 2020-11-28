@@ -91,7 +91,7 @@ func TestVerifyToken(t *testing.T) {
 			a := assert.New(t)
 
 			// test target
-			got, err := verifyToken(tt.args.tokenString)
+			got, err := VerifyToken(tt.args.tokenString)
 
 			// assert
 			if tt.wantErr {

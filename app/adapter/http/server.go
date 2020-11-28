@@ -15,7 +15,7 @@ func Serve() {
 	r.HandleFunc("/user", controller.UserController)
 	r.HandleFunc("/user-activation/{user_name}/{activation_key}", controller.UserActivationController)
 	r.HandleFunc("/password-reset-email", controller.PasswordResetEmailController)
-	r.HandleFunc("/password-reset", controller.PasswordReset)
+	r.HandleFunc("/password-reset", controller.PasswordResetController)
 	r.HandleFunc("/login", controller.LoginController)
 	r.HandleFunc("/posting", controller.PostingController)
 	r.HandleFunc("/postings", controller.PostingsController)

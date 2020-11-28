@@ -46,7 +46,7 @@ func PostingPostingIDController(w http.ResponseWriter, r *http.Request) {
 
 func deletePosting(r *http.Request) error {
 	// authorization
-	userName, err := lib.VerifyHeaderToken(r)
+	tokenUserName, err := lib.VerifyHeaderToken(r)
 	if err != nil {
 		log.Println(err)
 		return helper.NewAuthorizationError(err.Error())
@@ -55,9 +55,9 @@ func deletePosting(r *http.Request) error {
 	// get request parameter
 	vars := mux.Vars(r)
 	postingID, ok := vars["posting_id"]
-	if !ok {
+	if !ok || postingID == "0" {
 		log.Println(err)
-		return helper.NewBadRequestError("parameter posting_id is required")
+		return helper.NewBadRequestError("posting_id: cannot be blank")
 	}
 	id, err := strconv.Atoi(postingID)
 	if err != nil {
@@ -74,10 +74,11 @@ func deletePosting(r *http.Request) error {
 	tx := mysql.NewDBTransaction(db)
 
 	// repository
+	userRepo := repository.NewUserRepository(db)
 	postingRepo := repository.NewPostingRepository(db)
 
 	// UseCase
-	u := usecase.NewDeletePosting(r.Context(), tx, int64(id), userName, postingRepo)
+	u := usecase.NewDeletePosting(r.Context(), tx, int64(id), tokenUserName, userRepo, postingRepo)
 	if err = u.DeletePostingUseCase(); err != nil {
 		log.Println(err)
 		if err == repository.ErrNotExistsData {

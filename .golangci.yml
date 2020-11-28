@@ -109,6 +109,10 @@ issues:
         - noctx
         - gosec
 
+    - path: testing/
+      linters:
+        - gosec
+
     - path: testing/data
       linters:
         - gosec

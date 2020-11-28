@@ -39,6 +39,8 @@ func LoginController(w http.ResponseWriter, r *http.Request) {
 			}
 		case *helper.BadRequestError:
 			helper.ResponseBadRequest(w, err.Error())
+		case *helper.AuthorizationError:
+			helper.ResponseUnauthorized(w, err.Error())
 		case *helper.InternalServerError:
 			helper.ResponseInternalServerError(w, err.Error())
 		default:
@@ -87,8 +89,11 @@ func login(r *http.Request) (idToken string, err error) {
 	l := usecase.NewLogin(r.Context(), tx, reqLogin, userRepo)
 	if idToken, err = l.LoginUseCase(); err != nil {
 		log.Println(err)
-		if err == repository.ErrNotExistsData || err == usecase.ErrNotCorrectPassword {
+		if err == repository.ErrNotExistsData {
 			return "", helper.NewBadRequestError(err.Error())
+		}
+		if err == usecase.ErrNotCorrectPassword {
+			return "", helper.NewAuthorizationError(err.Error())
 		}
 		return "", helper.NewInternalServerError(err.Error())
 	}

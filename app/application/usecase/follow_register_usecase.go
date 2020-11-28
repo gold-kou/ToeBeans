@@ -3,6 +3,8 @@ package usecase
 import (
 	"context"
 
+	"github.com/gold-kou/ToeBeans/app/lib"
+
 	"github.com/gold-kou/ToeBeans/app/adapter/mysql"
 	"github.com/gold-kou/ToeBeans/app/domain/model"
 	modelHTTP "github.com/gold-kou/ToeBeans/app/domain/model/http"
@@ -16,18 +18,18 @@ type RegisterFollowUseCaseInterface interface {
 type RegisterFollow struct {
 	ctx               context.Context
 	tx                mysql.DBTransaction
-	userName          string
+	tokenUserName     string
 	reqRegisterFollow *modelHTTP.Follow
 	userRepo          *repository.UserRepository
 	followRepo        *repository.FollowRepository
 	notificationRepo  *repository.NotificationRepository
 }
 
-func NewRegisterFollow(ctx context.Context, tx mysql.DBTransaction, userName string, reqRegisterFollow *modelHTTP.Follow, userRepo *repository.UserRepository, followRepo *repository.FollowRepository, notificationRepo *repository.NotificationRepository) *RegisterFollow {
+func NewRegisterFollow(ctx context.Context, tx mysql.DBTransaction, tokenUserName string, reqRegisterFollow *modelHTTP.Follow, userRepo *repository.UserRepository, followRepo *repository.FollowRepository, notificationRepo *repository.NotificationRepository) *RegisterFollow {
 	return &RegisterFollow{
 		ctx:               ctx,
 		tx:                tx,
-		userName:          userName,
+		tokenUserName:     tokenUserName,
 		reqRegisterFollow: reqRegisterFollow,
 		userRepo:          userRepo,
 		followRepo:        followRepo,
@@ -36,9 +38,18 @@ func NewRegisterFollow(ctx context.Context, tx mysql.DBTransaction, userName str
 }
 
 func (follow *RegisterFollow) RegisterFollowUseCase() error {
-	err := follow.tx.Do(follow.ctx, func(ctx context.Context) error {
+	// check userName in token exists
+	_, err := follow.userRepo.GetUserWhereName(follow.ctx, follow.tokenUserName)
+	if err != nil {
+		if err == repository.ErrNotExistsData {
+			return lib.ErrTokenInvalidNotExistingUserName
+		}
+		return err
+	}
+
+	err = follow.tx.Do(follow.ctx, func(ctx context.Context) error {
 		u := model.Follow{
-			FollowingUserName: follow.userName,
+			FollowingUserName: follow.tokenUserName,
 			FollowedUserName:  follow.reqRegisterFollow.FollowedUserName,
 		}
 		err := follow.followRepo.Create(ctx, &u)
@@ -46,7 +57,7 @@ func (follow *RegisterFollow) RegisterFollowUseCase() error {
 			return err
 		}
 
-		err = follow.userRepo.UpdateFollowCount(ctx, follow.userName, true)
+		err = follow.userRepo.UpdateFollowCount(ctx, follow.tokenUserName, true)
 		if err != nil {
 			return err
 		}

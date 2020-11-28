@@ -46,7 +46,7 @@ func PostingController(w http.ResponseWriter, r *http.Request) {
 
 func registerPosting(r *http.Request) error {
 	// authorization
-	userName, err := lib.VerifyHeaderToken(r)
+	tokenUserName, err := lib.VerifyHeaderToken(r)
 	if err != nil {
 		log.Println(err)
 		return helper.NewAuthorizationError(err.Error())
@@ -82,10 +82,11 @@ func registerPosting(r *http.Request) error {
 	tx := mysql.NewDBTransaction(db)
 
 	// repository
+	userRepo := repository.NewUserRepository(db)
 	postingRepo := repository.NewPostingRepository(db)
 
 	// UseCase
-	u := usecase.NewRegisterPosting(r.Context(), tx, userName, reqRegisterPosting, postingRepo)
+	u := usecase.NewRegisterPosting(r.Context(), tx, tokenUserName, reqRegisterPosting, userRepo, postingRepo)
 	if err = u.RegisterPostingUseCase(); err != nil {
 		log.Println(err)
 		if err == usecase.ErrDecodeImage {

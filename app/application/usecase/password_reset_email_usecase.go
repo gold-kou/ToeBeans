@@ -46,7 +46,7 @@ func (re *PasswordResetEmail) PasswordResetEmailUseCase() (err error) {
 		return ErrOverPasswordResetCount
 	}
 
-	// password reset key
+	// set password reset key
 	resetKey, err := uuid.NewRandom()
 	if err != nil {
 		return err
@@ -56,7 +56,7 @@ func (re *PasswordResetEmail) PasswordResetEmailUseCase() (err error) {
 		return
 	}
 
-	// send an email
+	// send password reset key via an email
 	//  title := "Reset your password on ToeBeans"
 	//  resetLink := fmt.Sprintf("https://<domain>/reset-page/%s/%s", u.Name, resetKey)
 	//  body := fmt.Sprintf("We got your request to change your password.\n" +

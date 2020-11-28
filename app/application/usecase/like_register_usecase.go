@@ -3,6 +3,8 @@ package usecase
 import (
 	"context"
 
+	"github.com/gold-kou/ToeBeans/app/lib"
+
 	"github.com/gold-kou/ToeBeans/app/adapter/mysql"
 	"github.com/gold-kou/ToeBeans/app/domain/model"
 	modelHTTP "github.com/gold-kou/ToeBeans/app/domain/model/http"
@@ -16,7 +18,7 @@ type RegisterLikeUseCaseInterface interface {
 type RegisterLike struct {
 	ctx              context.Context
 	tx               mysql.DBTransaction
-	userName         string
+	tokenUserName    string
 	reqRegisterLike  *modelHTTP.Like
 	userRepo         *repository.UserRepository
 	postingRepo      *repository.PostingRepository
@@ -24,11 +26,11 @@ type RegisterLike struct {
 	notificationRepo *repository.NotificationRepository
 }
 
-func NewRegisterLike(ctx context.Context, tx mysql.DBTransaction, userName string, reqRegisterLike *modelHTTP.Like, userRepo *repository.UserRepository, postingRepo *repository.PostingRepository, likeRepo *repository.LikeRepository, notificationRepo *repository.NotificationRepository) *RegisterLike {
+func NewRegisterLike(ctx context.Context, tx mysql.DBTransaction, tokenUserName string, reqRegisterLike *modelHTTP.Like, userRepo *repository.UserRepository, postingRepo *repository.PostingRepository, likeRepo *repository.LikeRepository, notificationRepo *repository.NotificationRepository) *RegisterLike {
 	return &RegisterLike{
 		ctx:              ctx,
 		tx:               tx,
-		userName:         userName,
+		tokenUserName:    tokenUserName,
 		reqRegisterLike:  reqRegisterLike,
 		userRepo:         userRepo,
 		postingRepo:      postingRepo,
@@ -38,18 +40,27 @@ func NewRegisterLike(ctx context.Context, tx mysql.DBTransaction, userName strin
 }
 
 func (like *RegisterLike) RegisterLikeUseCase() error {
+	// check userName in token exists
+	_, err := like.userRepo.GetUserWhereName(like.ctx, like.tokenUserName)
+	if err != nil {
+		if err == repository.ErrNotExistsData {
+			return lib.ErrTokenInvalidNotExistingUserName
+		}
+		return err
+	}
+
 	p, err := like.postingRepo.GetWhereID(like.ctx, like.reqRegisterLike.PostingId)
 	if err != nil {
 		return err
 	}
 
-	if like.userName == p.UserName {
+	if like.tokenUserName == p.UserName {
 		return ErrLikeYourSelf
 	}
 
 	err = like.tx.Do(like.ctx, func(ctx context.Context) error {
 		l := model.Like{
-			UserName:  like.userName,
+			UserName:  like.tokenUserName,
 			PostingID: like.reqRegisterLike.PostingId,
 		}
 		if err := like.likeRepo.Create(ctx, &l); err != nil {
@@ -57,7 +68,7 @@ func (like *RegisterLike) RegisterLikeUseCase() error {
 		}
 
 		// increment
-		if err := like.userRepo.UpdateLikeCount(ctx, like.userName, true); err != nil {
+		if err := like.userRepo.UpdateLikeCount(ctx, like.tokenUserName, true); err != nil {
 			return err
 		}
 		if err := like.userRepo.UpdateLikedCount(ctx, like.reqRegisterLike.PostingId, true); err != nil {

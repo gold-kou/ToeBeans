@@ -34,21 +34,23 @@ func PostingsController(w http.ResponseWriter, r *http.Request) {
 		switch err := err.(type) {
 		case nil:
 			var httpPostings []modelHTTP.ResponseGetPosting
-			for _, p := range postings {
-				httpPosting := modelHTTP.ResponseGetPosting{
-					PostingId:  p.ID,
-					UserName:   p.UserName,
-					UploadedAt: p.CreatedAt,
-					Title:      p.Title,
-					ImageUrl:   p.ImageURL,
-					Liked:      p.LikedCount,
+			var resp modelHTTP.ResponseGetPostings
+			if len(postings) >= 1 {
+				for _, p := range postings {
+					httpPosting := modelHTTP.ResponseGetPosting{
+						PostingId:  p.ID,
+						UserName:   p.UserName,
+						UploadedAt: p.CreatedAt,
+						Title:      p.Title,
+						ImageUrl:   p.ImageURL,
+						Liked:      p.LikedCount,
+					}
+					httpPostings = append(httpPostings, httpPosting)
 				}
-				httpPostings = append(httpPostings, httpPosting)
+				resp = modelHTTP.ResponseGetPostings{
+					Postings: httpPostings,
+				}
 			}
-			resp := modelHTTP.ResponseGetPostings{
-				Postings: httpPostings,
-			}
-
 			w.Header().Set(helper.HeaderKeyContentType, helper.HeaderValueApplicationJSON)
 			w.WriteHeader(http.StatusOK)
 			if err := json.NewEncoder(w).Encode(resp); err != nil {
@@ -71,7 +73,7 @@ func PostingsController(w http.ResponseWriter, r *http.Request) {
 
 func getPostings(r *http.Request) (postings []model.Posting, err error) {
 	// authorization
-	_, err = lib.VerifyHeaderToken(r)
+	tokenUserName, err := lib.VerifyHeaderToken(r)
 	if err != nil {
 		log.Println(err)
 		return nil, helper.NewAuthorizationError(err.Error())
@@ -79,6 +81,10 @@ func getPostings(r *http.Request) (postings []model.Posting, err error) {
 
 	// get request parameter
 	sinceAt := r.URL.Query().Get("since_at")
+	if sinceAt == "" {
+		log.Println(err)
+		return nil, helper.NewBadRequestError("since_at: cannot be blank.")
+	}
 	sinceAtFormatted, err := time.Parse(time.RFC3339, sinceAt)
 	if err != nil {
 		log.Println(err)
@@ -88,7 +94,7 @@ func getPostings(r *http.Request) (postings []model.Posting, err error) {
 	limit := r.URL.Query().Get("limit")
 	if limit == "" {
 		log.Println(err)
-		return nil, helper.NewBadRequestError("limit: cannot be blank")
+		return nil, helper.NewBadRequestError("limit: cannot be blank.")
 	}
 	limitInt, err := strconv.Atoi(limit)
 	if err != nil {
@@ -112,10 +118,11 @@ func getPostings(r *http.Request) (postings []model.Posting, err error) {
 	tx := mysql.NewDBTransaction(db)
 
 	// repository
+	userRepo := repository.NewUserRepository(db)
 	postingRepo := repository.NewPostingRepository(db)
 
 	// UseCase
-	u := usecase.NewGetPostings(r.Context(), tx, sinceAtFormatted, int8(limitInt), userName, postingRepo)
+	u := usecase.NewGetPostings(r.Context(), tx, tokenUserName, sinceAtFormatted, int8(limitInt), userName, userRepo, postingRepo)
 	if postings, err = u.GetPostingsUseCase(); err != nil {
 		log.Println(err)
 		if err == usecase.ErrDecodeImage {

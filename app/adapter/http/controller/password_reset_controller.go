@@ -17,7 +17,7 @@ import (
 	model "github.com/gold-kou/ToeBeans/app/domain/model/http"
 )
 
-func PasswordReset(w http.ResponseWriter, r *http.Request) {
+func PasswordResetController(w http.ResponseWriter, r *http.Request) {
 	l, err := applicationLog.NewLogger()
 	if err != nil {
 		log.Panic(err)
@@ -81,7 +81,7 @@ func passwordReset(r *http.Request) error {
 	if err = re.PasswordResetUseCase(); err != nil {
 		log.Println(err)
 		if err == repository.ErrNotExistsData {
-			return helper.NewBadRequestError(err.Error())
+			return helper.NewBadRequestError(errUserNameResetKeyNotExistsResetKeyExpired)
 		}
 		return helper.NewInternalServerError(err.Error())
 	}
