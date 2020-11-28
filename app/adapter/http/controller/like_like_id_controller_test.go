@@ -68,10 +68,17 @@ func TestDeleteLike(t *testing.T) {
 			wantStatus: http.StatusBadRequest,
 		},
 		{
+			name:       "error forbidden guest user",
+			args:       args{likeID: dummy.Like1.ID},
+			method:     http.MethodDelete,
+			want:       testingHelper.ErrForbidden,
+			wantStatus: http.StatusForbidden,
+		},
+		{
 			name:       "not allowed method",
 			args:       args{},
 			method:     http.MethodHead,
-			want:       errorNotAllowedMethod,
+			want:       testingHelper.ErrNotAllowedMethod,
 			wantStatus: http.StatusMethodNotAllowed,
 		},
 	}
@@ -109,7 +116,11 @@ func TestDeleteLike(t *testing.T) {
 			assert.NoError(t, err)
 			vars := map[string]string{"like_id": strconv.Itoa(int(tt.args.likeID))}
 			req = mux.SetURLVars(req, vars)
-			token, err = lib.GenerateToken(dummy.User1.Name)
+			if tt.name == "error forbidden guest user" {
+				token, err = lib.GenerateToken(lib.GuestUserName)
+			} else {
+				token, err = lib.GenerateToken(dummy.User1.Name)
+			}
 			assert.NoError(t, err)
 			req.Header.Add(helper.HeaderKeyAuthorization, "Bearer "+token)
 			resp = httptest.NewRecorder()

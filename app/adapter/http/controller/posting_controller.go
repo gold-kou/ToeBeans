@@ -33,6 +33,8 @@ func PostingController(w http.ResponseWriter, r *http.Request) {
 			helper.ResponseBadRequest(w, err.Error())
 		case *helper.AuthorizationError:
 			helper.ResponseUnauthorized(w, err.Error())
+		case *helper.ForbiddenError:
+			helper.ResponseForbidden(w, err.Error())
 		case *helper.InternalServerError:
 			helper.ResponseInternalServerError(w, err.Error())
 		default:
@@ -50,6 +52,10 @@ func registerPosting(r *http.Request) error {
 	if err != nil {
 		log.Println(err)
 		return helper.NewAuthorizationError(err.Error())
+	}
+	if tokenUserName == lib.GuestUserName {
+		log.Println(errMsgGuestUserForbidden)
+		return helper.NewForbiddenError(errMsgGuestUserForbidden)
 	}
 
 	// get request parameter

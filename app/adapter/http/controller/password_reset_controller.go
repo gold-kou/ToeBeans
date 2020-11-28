@@ -81,7 +81,7 @@ func passwordReset(r *http.Request) error {
 	if err = re.PasswordResetUseCase(); err != nil {
 		log.Println(err)
 		if err == repository.ErrNotExistsData {
-			return helper.NewBadRequestError(errUserNameResetKeyNotExistsResetKeyExpired)
+			return helper.NewBadRequestError(errMsgUserNameResetKeyNotExistsResetKeyExpired)
 		}
 		return helper.NewInternalServerError(err.Error())
 	}

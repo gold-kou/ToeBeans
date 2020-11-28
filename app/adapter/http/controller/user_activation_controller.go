@@ -1,7 +1,6 @@
 package controller
 
 import (
-	"fmt"
 	"log"
 	"net/http"
 
@@ -86,10 +85,8 @@ func activateUser(r *http.Request) (err error) {
 	if err = u.UserActivationUseCase(); err != nil {
 		log.Println(err)
 		if err == repository.ErrUserActivationNotFound {
-			fmt.Println("koki")
 			return helper.NewBadRequestError(err.Error())
 		}
-		fmt.Println("koki2")
 		return helper.NewInternalServerError(err.Error())
 	}
 	return

@@ -196,7 +196,7 @@ func TestRegisterUser(t *testing.T) {
 			name:       "not allowed method",
 			args:       args{reqBody: errorRegisterUserPasswordShort},
 			method:     http.MethodHead,
-			want:       errorNotAllowedMethod,
+			want:       testingHelper.ErrNotAllowedMethod,
 			wantStatus: http.StatusMethodNotAllowed,
 		},
 	}
@@ -449,6 +449,13 @@ func TestUpdateUser(t *testing.T) {
 			want:       errRespUpdateUserDecodeFailure,
 			wantStatus: http.StatusBadRequest,
 		},
+		{
+			name:       "error forbidden guest user",
+			args:       args{reqBody: successReqUpdateUser},
+			method:     http.MethodPut,
+			want:       testingHelper.ErrForbidden,
+			wantStatus: http.StatusForbidden,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -466,7 +473,12 @@ func TestUpdateUser(t *testing.T) {
 			// http request
 			req, err := http.NewRequest(tt.method, "/user", strings.NewReader(tt.args.reqBody))
 			assert.NoError(t, err)
-			token, err := lib.GenerateToken(dummy.User1.Name)
+			var token string
+			if tt.name == "error forbidden guest user" {
+				token, err = lib.GenerateToken(lib.GuestUserName)
+			} else {
+				token, err = lib.GenerateToken(dummy.User1.Name)
+			}
 			assert.NoError(t, err)
 			req.Header.Add(helper.HeaderKeyAuthorization, "Bearer "+token)
 			resp := httptest.NewRecorder()
@@ -524,6 +536,13 @@ func TestDeleteUser(t *testing.T) {
 			want:       errRespDeleteUserInvalidToken,
 			wantStatus: http.StatusUnauthorized,
 		},
+		{
+			name:       "error forbidden guest user",
+			args:       args{userName: dummy.User1.Name},
+			method:     http.MethodDelete,
+			want:       testingHelper.ErrForbidden,
+			wantStatus: http.StatusForbidden,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -541,7 +560,12 @@ func TestDeleteUser(t *testing.T) {
 			// http request
 			req, err := http.NewRequest(tt.method, "/user", nil)
 			assert.NoError(t, err)
-			token, err := lib.GenerateToken(tt.args.userName)
+			var token string
+			if tt.name == "error forbidden guest user" {
+				token, err = lib.GenerateToken(lib.GuestUserName)
+			} else {
+				token, err = lib.GenerateToken(tt.args.userName)
+			}
 			assert.NoError(t, err)
 			req.Header.Add(helper.HeaderKeyAuthorization, "Bearer "+token)
 			resp := httptest.NewRecorder()

@@ -12,6 +12,10 @@ type NotFoundError struct {
 	Message string
 }
 
+type ForbiddenError struct {
+	Message string
+}
+
 type InternalServerError struct {
 	Message string
 }
@@ -22,8 +26,8 @@ func NewBadRequestError(message string) *BadRequestError {
 	}
 }
 
-func (b *BadRequestError) Error() string {
-	return b.Message
+func (e *BadRequestError) Error() string {
+	return e.Message
 }
 
 func NewAuthorizationError(message string) *AuthorizationError {
@@ -32,8 +36,8 @@ func NewAuthorizationError(message string) *AuthorizationError {
 	}
 }
 
-func (a *AuthorizationError) Error() string {
-	return a.Message
+func (e *AuthorizationError) Error() string {
+	return e.Message
 }
 
 func NewNotFoundError(message string) *NotFoundError {
@@ -42,8 +46,18 @@ func NewNotFoundError(message string) *NotFoundError {
 	}
 }
 
-func (i *NotFoundError) Error() string {
-	return i.Message
+func (e *NotFoundError) Error() string {
+	return e.Message
+}
+
+func NewForbiddenError(message string) *ForbiddenError {
+	return &ForbiddenError{
+		Message: message,
+	}
+}
+
+func (e *ForbiddenError) Error() string {
+	return e.Message
 }
 
 func NewInternalServerError(message string) *InternalServerError {
@@ -52,6 +66,6 @@ func NewInternalServerError(message string) *InternalServerError {
 	}
 }
 
-func (i *InternalServerError) Error() string {
-	return i.Message
+func (e *InternalServerError) Error() string {
+	return e.Message
 }

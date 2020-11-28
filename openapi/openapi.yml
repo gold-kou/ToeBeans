@@ -93,6 +93,8 @@ paths:
           $ref: '#/components/responses/badRequest'
         "401":
           $ref: '#/components/responses/unauthorized'
+        "403":
+          $ref: '#/components/responses/forbidden'
         "405":
           $ref: '#/components/responses/notAllowedMethod'
         "500":
@@ -109,6 +111,8 @@ paths:
           $ref: '#/components/responses/simpleSuccess'
         "401":
           $ref: '#/components/responses/unauthorized'
+        "403":
+          $ref: '#/components/responses/forbidden'
         "405":
           $ref: '#/components/responses/notAllowedMethod'
         "500":
@@ -193,6 +197,8 @@ paths:
           $ref: '#/components/responses/badRequest'
         "401":
           $ref: '#/components/responses/unauthorized'
+        "403":
+          $ref: '#/components/responses/forbidden'
         "405":
           $ref: '#/components/responses/notAllowedMethod'
         "500":
@@ -267,6 +273,8 @@ paths:
           $ref: '#/components/responses/badRequest'
         "401":
           $ref: '#/components/responses/unauthorized'
+        "403":
+          $ref: '#/components/responses/forbidden'
         "405":
           $ref: '#/components/responses/notAllowedMethod'
         "500":
@@ -288,6 +296,8 @@ paths:
           $ref: '#/components/responses/badRequest'
         "401":
           $ref: '#/components/responses/unauthorized'
+        "403":
+          $ref: '#/components/responses/forbidden'
         "405":
           $ref: '#/components/responses/notAllowedMethod'
         "500":
@@ -314,6 +324,8 @@ paths:
           $ref: '#/components/responses/badRequest'
         "401":
           $ref: '#/components/responses/unauthorized'
+        "403":
+          $ref: '#/components/responses/forbidden'
         "405":
           $ref: '#/components/responses/notAllowedMethod'
         "500":
@@ -335,6 +347,8 @@ paths:
           $ref: '#/components/responses/badRequest'
         "401":
           $ref: '#/components/responses/unauthorized'
+        "403":
+          $ref: '#/components/responses/forbidden'
         "405":
           $ref: '#/components/responses/notAllowedMethod'
         "500":
@@ -388,6 +402,8 @@ paths:
           $ref: '#/components/responses/badRequest'
         "401":
           $ref: '#/components/responses/unauthorized'
+        "403":
+          $ref: '#/components/responses/forbidden'
         "405":
           $ref: '#/components/responses/notAllowedMethod'
         "500":
@@ -409,6 +425,8 @@ paths:
           $ref: '#/components/responses/badRequest'
         "401":
           $ref: '#/components/responses/unauthorized'
+        "403":
+          $ref: '#/components/responses/forbidden'
         "405":
           $ref: '#/components/responses/notAllowedMethod'
         "500":
@@ -435,6 +453,8 @@ paths:
           $ref: '#/components/responses/badRequest'
         "401":
           $ref: '#/components/responses/unauthorized'
+        "403":
+          $ref: '#/components/responses/forbidden'
         "405":
           $ref: '#/components/responses/notAllowedMethod'
         "500":
@@ -462,6 +482,8 @@ paths:
           $ref: '#/components/responses/badRequest'
         "401":
           $ref: '#/components/responses/unauthorized'
+        "403":
+          $ref: '#/components/responses/forbidden'
         "405":
           $ref: '#/components/responses/notAllowedMethod'
         "500":
@@ -488,6 +510,8 @@ paths:
           $ref: '#/components/responses/badRequest'
         "401":
           $ref: '#/components/responses/unauthorized'
+        "403":
+          $ref: '#/components/responses/forbidden'
         "405":
           $ref: '#/components/responses/notAllowedMethod'
         "500":
@@ -616,6 +640,12 @@ components:
         'application/json':
           schema:
             $ref: '#/components/schemas/responseUnauthorized'
+    forbidden:
+      description: '403'
+      content:
+        'application/json':
+          schema:
+            $ref: '#/components/schemas/responseForbidden'
     notFound:
       description: '404'
       content:
@@ -999,6 +1029,22 @@ components:
           description: message
           type: string
           example: 'Unauthorized'
+      required:
+        - status
+        - message
+    responseForbidden:
+      description: Forbidden
+      type: object
+      properties:
+        status:
+          description: status
+          type: integer
+          format: int16
+          example: 403
+        message:
+          description: message
+          type: string
+          example: 'Forbidden'
       required:
         - status
         - message

@@ -101,7 +101,7 @@ func TestGetPostings(t *testing.T) {
 			name:       "not allowed method",
 			args:       args{},
 			method:     http.MethodHead,
-			want:       errorNotAllowedMethod,
+			want:       testingHelper.ErrNotAllowedMethod,
 			wantStatus: http.StatusMethodNotAllowed,
 		},
 	}

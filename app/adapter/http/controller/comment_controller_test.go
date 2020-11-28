@@ -84,10 +84,17 @@ func TestRegisterComment(t *testing.T) {
 			wantStatus: http.StatusBadRequest,
 		},
 		{
+			name:       "error forbidden guest user",
+			args:       args{reqBody: successReqRegisterComment},
+			method:     http.MethodPost,
+			want:       testingHelper.ErrForbidden,
+			wantStatus: http.StatusForbidden,
+		},
+		{
 			name:       "not allowed method",
 			args:       args{},
 			method:     http.MethodHead,
-			want:       errorNotAllowedMethod,
+			want:       testingHelper.ErrNotAllowedMethod,
 			wantStatus: http.StatusMethodNotAllowed,
 		},
 	}
@@ -110,7 +117,12 @@ func TestRegisterComment(t *testing.T) {
 			// http request
 			req, err := http.NewRequest(tt.method, "/comment", strings.NewReader(tt.args.reqBody))
 			assert.NoError(t, err)
-			token, err := lib.GenerateToken(dummy.User1.Name)
+			var token string
+			if tt.name == "error forbidden guest user" {
+				token, err = lib.GenerateToken(lib.GuestUserName)
+			} else {
+				token, err = lib.GenerateToken(dummy.User1.Name)
+			}
 			assert.NoError(t, err)
 			req.Header.Add(helper.HeaderKeyAuthorization, "Bearer "+token)
 			resp := httptest.NewRecorder()
