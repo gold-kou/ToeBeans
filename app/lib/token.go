@@ -21,6 +21,8 @@ var ErrTokenInvalidNotExistingUserName = errors.New("the user name contained in 
 var ErrNotFoundClaims = errors.New("not found claims in token")
 var ErrNotFoundName = errors.New("not found name in token")
 
+const GuestUserName = "guest"
+
 func GenerateToken(userName string) (tokenString string, err error) {
 	// header
 	token := jwt.New(jwt.SigningMethodHS256)

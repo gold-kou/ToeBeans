@@ -18,6 +18,7 @@ CREATE TABLE `users` (
     `updated_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP on UPDATE CURRENT_TIMESTAMP,
     INDEX idx_users_name(name)
 );
+INSERT INTO `users`(`name`, `email`, `password`, `activation_key`) VALUES("guest", "guestUser@example.com", "guest1234", "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa");
 
 CREATE TABLE `postings` (
     `id` INT NOT NULL AUTO_INCREMENT PRIMARY KEY,

@@ -1,7 +1,6 @@
 package controller
 
 import (
-	"fmt"
 	"log"
 	"net/http"
 	"strconv"
@@ -34,6 +33,8 @@ func LikeLikeIDController(w http.ResponseWriter, r *http.Request) {
 			helper.ResponseBadRequest(w, err.Error())
 		case *helper.AuthorizationError:
 			helper.ResponseUnauthorized(w, err.Error())
+		case *helper.ForbiddenError:
+			helper.ResponseForbidden(w, err.Error())
 		case *helper.InternalServerError:
 			helper.ResponseInternalServerError(w, err.Error())
 		default:
@@ -52,12 +53,14 @@ func deleteLike(r *http.Request) error {
 		log.Println(err)
 		return helper.NewAuthorizationError(err.Error())
 	}
+	if tokenUserName == lib.GuestUserName {
+		log.Println(errMsgGuestUserForbidden)
+		return helper.NewForbiddenError(errMsgGuestUserForbidden)
+	}
 
 	// get request parameter
 	vars := mux.Vars(r)
 	likeID, ok := vars["like_id"]
-	fmt.Println("koki")
-	fmt.Println(likeID)
 	if !ok || likeID == "0" {
 		log.Println(err)
 		return helper.NewBadRequestError("like_id: cannot be blank")

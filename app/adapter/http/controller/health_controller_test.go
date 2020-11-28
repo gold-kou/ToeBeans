@@ -26,7 +26,7 @@ func TestGetHealth(t *testing.T) {
 		{
 			name:       "not allowed method",
 			method:     http.MethodHead,
-			want:       errorNotAllowedMethod,
+			want:       testingHelper.ErrNotAllowedMethod,
 			wantStatus: http.StatusMethodNotAllowed,
 		},
 	}

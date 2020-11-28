@@ -38,8 +38,10 @@ func (l *Login) LoginUseCase() (idToken string, err error) {
 	}
 
 	// password check
-	if err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(l.reqLogin.Password)); err != nil {
-		return "", ErrNotCorrectPassword
+	if user.Name != lib.GuestUserName {
+		if err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(l.reqLogin.Password)); err != nil {
+			return "", ErrNotCorrectPassword
+		}
 	}
 
 	// generate token

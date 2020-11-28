@@ -6,3 +6,17 @@ var RespSimpleSuccess = `
   "status":200
 }
 `
+
+var ErrForbidden = `
+{
+  "status": 403,
+  "message": "not allowed for guest user"
+}
+`
+
+var ErrNotAllowedMethod = `
+{
+  "status": 405,
+  "message": "not allowed method"
+}
+`

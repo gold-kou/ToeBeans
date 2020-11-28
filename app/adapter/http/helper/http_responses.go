@@ -58,6 +58,19 @@ func ResponseNotFound(w http.ResponseWriter, message string) {
 	}
 }
 
+func ResponseForbidden(w http.ResponseWriter, message string) {
+	resp := model.ResponseForbidden{
+		Status:  http.StatusForbidden,
+		Message: message,
+	}
+	w.Header().Set(HeaderKeyContentType, HeaderValueApplicationJSON)
+	w.Header().Set(HeaderKeyCacheControl, HeaderValueNoStore)
+	w.WriteHeader(http.StatusForbidden)
+	if err := json.NewEncoder(w).Encode(resp); err != nil {
+		panic(err.Error())
+	}
+}
+
 func ResponseNotAllowedMethod(w http.ResponseWriter, message string, methods []string) {
 	resp := model.ResponseNotAllowedMethod{
 		Status:  http.StatusMethodNotAllowed,
