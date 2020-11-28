@@ -46,7 +46,7 @@ func CommentController(w http.ResponseWriter, r *http.Request) {
 
 func registerComment(r *http.Request) error {
 	// authorization
-	userName, err := lib.VerifyHeaderToken(r)
+	tokenUserName, err := lib.VerifyHeaderToken(r)
 	if err != nil {
 		log.Println(err)
 		return helper.NewAuthorizationError(err.Error())
@@ -82,12 +82,13 @@ func registerComment(r *http.Request) error {
 	tx := mysql.NewDBTransaction(db)
 
 	// repository
+	userRepo := repository.NewUserRepository(db)
 	postingRepo := repository.NewPostingRepository(db)
 	commentRepo := repository.NewCommentRepository(db)
 	notificationRepo := repository.NewNotificationRepository(db)
 
 	// UseCase
-	u := usecase.NewRegisterComment(r.Context(), tx, userName, reqRegisterComment, postingRepo, commentRepo, notificationRepo)
+	u := usecase.NewRegisterComment(r.Context(), tx, tokenUserName, reqRegisterComment, userRepo, postingRepo, commentRepo, notificationRepo)
 	if err = u.RegisterCommentUseCase(); err != nil {
 		log.Println(err)
 		if err == repository.ErrNotExistsData {

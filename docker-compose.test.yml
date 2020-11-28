@@ -28,6 +28,7 @@ services:
       - backend
     depends_on:
       - db-test
+      - minio
     command: dockerize -wait tcp://db-test:3306 -timeout 60s realize start --run --no-config
 
   db-test:
@@ -63,6 +64,8 @@ services:
     command: -c 'mkdir -p /images/icons && mkdir -p /images/postings && /usr/bin/minio server /images'
     networks:
       - backend
+    ports:
+      - 9000:9000
 
 networks:
   backend:

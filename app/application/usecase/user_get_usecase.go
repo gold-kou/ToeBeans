@@ -3,6 +3,8 @@ package usecase
 import (
 	"context"
 
+	"github.com/gold-kou/ToeBeans/app/lib"
+
 	"github.com/gold-kou/ToeBeans/app/adapter/mysql"
 	"github.com/gold-kou/ToeBeans/app/domain/model"
 	"github.com/gold-kou/ToeBeans/app/domain/repository"
@@ -13,22 +15,33 @@ type GetUserUseCaseInterface interface {
 }
 
 type GetUser struct {
-	ctx      context.Context
-	tx       mysql.DBTransaction
-	userName string
-	userRepo *repository.UserRepository
+	ctx           context.Context
+	tx            mysql.DBTransaction
+	tokenUserName string
+	userName      string
+	userRepo      *repository.UserRepository
 }
 
-func NewGetUser(ctx context.Context, tx mysql.DBTransaction, userName string, userRepo *repository.UserRepository) *GetUser {
+func NewGetUser(ctx context.Context, tx mysql.DBTransaction, tokenUserName, userName string, userRepo *repository.UserRepository) *GetUser {
 	return &GetUser{
-		ctx:      ctx,
-		tx:       tx,
-		userName: userName,
-		userRepo: userRepo,
+		ctx:           ctx,
+		tx:            tx,
+		tokenUserName: tokenUserName,
+		userName:      userName,
+		userRepo:      userRepo,
 	}
 }
 
 func (user *GetUser) GetUserUseCase() (u model.User, err error) {
+	// check userName in token exists
+	_, err = user.userRepo.GetUserWhereName(user.ctx, user.tokenUserName)
+	if err != nil {
+		if err == repository.ErrNotExistsData {
+			return model.User{}, lib.ErrTokenInvalidNotExistingUserName
+		}
+		return model.User{}, err
+	}
+
 	u, err = user.userRepo.GetUserWhereName(user.ctx, user.userName)
 	if err != nil {
 		return

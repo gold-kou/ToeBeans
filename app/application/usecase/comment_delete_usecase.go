@@ -3,6 +3,8 @@ package usecase
 import (
 	"context"
 
+	"github.com/gold-kou/ToeBeans/app/lib"
+
 	"github.com/gold-kou/ToeBeans/app/adapter/mysql"
 	"github.com/gold-kou/ToeBeans/app/domain/model"
 	"github.com/gold-kou/ToeBeans/app/domain/repository"
@@ -13,24 +15,35 @@ type DeleteCommentUseCaseInterface interface {
 }
 
 type DeleteComment struct {
-	ctx         context.Context
-	tx          mysql.DBTransaction
-	userName    string
-	commentID   int64
-	commentRepo *repository.CommentRepository
+	ctx           context.Context
+	tx            mysql.DBTransaction
+	tokenUserName string
+	commentID     int64
+	userRepo      *repository.UserRepository
+	commentRepo   *repository.CommentRepository
 }
 
-func NewDeleteComment(ctx context.Context, tx mysql.DBTransaction, userName string, commentID int64, commentRepo *repository.CommentRepository) *DeleteComment {
+func NewDeleteComment(ctx context.Context, tx mysql.DBTransaction, tokenUserName string, commentID int64, userRepo *repository.UserRepository, commentRepo *repository.CommentRepository) *DeleteComment {
 	return &DeleteComment{
-		ctx:         ctx,
-		tx:          tx,
-		userName:    userName,
-		commentID:   commentID,
-		commentRepo: commentRepo,
+		ctx:           ctx,
+		tx:            tx,
+		tokenUserName: tokenUserName,
+		commentID:     commentID,
+		userRepo:      userRepo,
+		commentRepo:   commentRepo,
 	}
 }
 
 func (comment *DeleteComment) DeleteCommentUseCase() error {
+	// check userName in token exists
+	_, err := comment.userRepo.GetUserWhereName(comment.ctx, comment.tokenUserName)
+	if err != nil {
+		if err == repository.ErrNotExistsData {
+			return lib.ErrTokenInvalidNotExistingUserName
+		}
+		return err
+	}
+
 	if err := comment.commentRepo.DeleteWhereID(comment.ctx, comment.commentID); err != nil {
 		return err
 	}

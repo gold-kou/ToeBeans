@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 
@@ -48,14 +49,14 @@ func activateUser(r *http.Request) (err error) {
 	// get path parameter
 	vars := mux.Vars(r)
 	userName, ok := vars["user_name"]
-	if !ok {
+	if !ok || userName == "" {
 		log.Println(err)
-		return helper.NewBadRequestError("parameter user_name is required")
+		return helper.NewBadRequestError("user_name cannot be blank")
 	}
 	activationKey, ok := vars["activation_key"]
-	if !ok {
+	if !ok || activationKey == "" {
 		log.Println(err)
-		return helper.NewBadRequestError("parameter activation_key is required")
+		return helper.NewBadRequestError("activation_key cannot be blank")
 	}
 
 	// validation check
@@ -63,7 +64,7 @@ func activateUser(r *http.Request) (err error) {
 		log.Println(err)
 		return helper.NewBadRequestError(err.Error())
 	}
-	if err = validation.Validate(activationKey, validation.Required, validation.Length(modelHTTP.UUIDLength, modelHTTP.UUIDLength)); err != nil {
+	if err = validation.Validate(activationKey, validation.Required, is.UUID); err != nil {
 		log.Println(err)
 		return helper.NewBadRequestError(err.Error())
 	}
@@ -84,9 +85,11 @@ func activateUser(r *http.Request) (err error) {
 	u := usecase.NewUserActivation(r.Context(), tx, userName, activationKey, userRepo)
 	if err = u.UserActivationUseCase(); err != nil {
 		log.Println(err)
-		if err == repository.ErrNotExistsData || err == repository.ErrUserActivationNotFound {
+		if err == repository.ErrUserActivationNotFound {
+			fmt.Println("koki")
 			return helper.NewBadRequestError(err.Error())
 		}
+		fmt.Println("koki2")
 		return helper.NewInternalServerError(err.Error())
 	}
 	return

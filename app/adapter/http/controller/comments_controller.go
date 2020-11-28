@@ -31,20 +31,22 @@ func CommentsController(w http.ResponseWriter, r *http.Request) {
 		switch err := err.(type) {
 		case nil:
 			var httpComments []modelHTTP.ResponseGetComment
-			for _, c := range comments {
-				httpComment := modelHTTP.ResponseGetComment{
-					CommentId:   c.ID,
-					UserName:    c.UserName,
-					CommentedAt: c.CreatedAt,
-					Comment:     c.Comment,
+			var resp modelHTTP.ResponseGetComments
+			if len(comments) >= 1 {
+				for _, c := range comments {
+					httpComment := modelHTTP.ResponseGetComment{
+						CommentId:   c.ID,
+						UserName:    c.UserName,
+						CommentedAt: c.CreatedAt,
+						Comment:     c.Comment,
+					}
+					httpComments = append(httpComments, httpComment)
 				}
-				httpComments = append(httpComments, httpComment)
+				resp = modelHTTP.ResponseGetComments{
+					PostingId: comments[0].PostingID,
+					Comments:  httpComments,
+				}
 			}
-			resp := modelHTTP.ResponseGetComments{
-				PostingId: comments[0].PostingID,
-				Comments:  httpComments,
-			}
-
 			w.Header().Set(helper.HeaderKeyContentType, helper.HeaderValueApplicationJSON)
 			w.WriteHeader(http.StatusOK)
 			if err := json.NewEncoder(w).Encode(resp); err != nil {
@@ -67,7 +69,7 @@ func CommentsController(w http.ResponseWriter, r *http.Request) {
 
 func getComments(r *http.Request) (comments []model.Comment, err error) {
 	// authorization
-	_, err = lib.VerifyHeaderToken(r)
+	tokenUserName, err := lib.VerifyHeaderToken(r)
 	if err != nil {
 		log.Println(err)
 		return nil, helper.NewAuthorizationError(err.Error())
@@ -77,7 +79,7 @@ func getComments(r *http.Request) (comments []model.Comment, err error) {
 	postingID := r.URL.Query().Get("posting_id")
 	if postingID == "" {
 		log.Println(err)
-		return nil, helper.NewBadRequestError("posting_id: cannot be blank")
+		return nil, helper.NewBadRequestError("posting_id: cannot be blank.")
 	}
 	id, err := strconv.Atoi(postingID)
 	if err != nil {
@@ -95,10 +97,12 @@ func getComments(r *http.Request) (comments []model.Comment, err error) {
 	tx := mysql.NewDBTransaction(db)
 
 	// repository
+	userRepo := repository.NewUserRepository(db)
+	postingRepo := repository.NewPostingRepository(db)
 	commentRepo := repository.NewCommentRepository(db)
 
 	// UseCase
-	u := usecase.NewGetComments(r.Context(), tx, int64(id), commentRepo)
+	u := usecase.NewGetComments(r.Context(), tx, tokenUserName, int64(id), userRepo, postingRepo, commentRepo)
 	if comments, err = u.GetCommentsUseCase(); err != nil {
 		log.Println(err)
 		if err == repository.ErrNotExistsData {

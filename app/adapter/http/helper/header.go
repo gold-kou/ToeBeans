@@ -5,6 +5,7 @@ const (
 	HeaderKeyContentType   = "content-type"
 	HeaderKeyCacheControl  = "cache-control"
 	HeaderKeyAllow         = "allow"
+	HeaderKeyAuthorization = "Authorization"
 
 	HeaderValueApplicationJSON = "application/json; charset=UTF-8"
 	HeaderValueNoStore         = "no-store"

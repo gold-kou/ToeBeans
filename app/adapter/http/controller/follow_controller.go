@@ -46,7 +46,7 @@ func FollowController(w http.ResponseWriter, r *http.Request) {
 
 func registerFollow(r *http.Request) error {
 	// authorization
-	userName, err := lib.VerifyHeaderToken(r)
+	tokenUserName, err := lib.VerifyHeaderToken(r)
 	if err != nil {
 		log.Println(err)
 		return helper.NewAuthorizationError(err.Error())
@@ -87,7 +87,7 @@ func registerFollow(r *http.Request) error {
 	notificationRepo := repository.NewNotificationRepository(db)
 
 	// UseCase
-	u := usecase.NewRegisterFollow(r.Context(), tx, userName, reqRegisterFollow, userRepo, followRepo, notificationRepo)
+	u := usecase.NewRegisterFollow(r.Context(), tx, tokenUserName, reqRegisterFollow, userRepo, followRepo, notificationRepo)
 	if err = u.RegisterFollowUseCase(); err != nil {
 		log.Println(err)
 		if err == repository.ErrDuplicateData {

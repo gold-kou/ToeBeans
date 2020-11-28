@@ -60,6 +60,8 @@ func UserController(w http.ResponseWriter, r *http.Request) {
 			helper.ResponseBadRequest(w, err.Error())
 		case *helper.AuthorizationError:
 			helper.ResponseUnauthorized(w, err.Error())
+		case *helper.NotFoundError:
+			helper.ResponseNotFound(w, err.Error())
 		case *helper.InternalServerError:
 			helper.ResponseInternalServerError(w, err.Error())
 		default:
@@ -146,7 +148,7 @@ func registerUser(r *http.Request) error {
 
 func getUser(r *http.Request) (user model.User, err error) {
 	// authorization
-	_, err = lib.VerifyHeaderToken(r)
+	tokenUserName, err := lib.VerifyHeaderToken(r)
 	if err != nil {
 		log.Println(err)
 		return model.User{}, helper.NewAuthorizationError(err.Error())
@@ -174,11 +176,14 @@ func getUser(r *http.Request) (user model.User, err error) {
 	userRepo := repository.NewUserRepository(db)
 
 	// UseCase
-	u := usecase.NewGetUser(r.Context(), tx, userName, userRepo)
+	u := usecase.NewGetUser(r.Context(), tx, tokenUserName, userName, userRepo)
 	if user, err = u.GetUserUseCase(); err != nil {
 		log.Println(err)
 		if err == repository.ErrNotExistsData {
-			return model.User{}, helper.NewBadRequestError(err.Error())
+			return model.User{}, helper.NewNotFoundError(err.Error())
+		}
+		if err == lib.ErrTokenInvalidNotExistingUserName {
+			return model.User{}, helper.NewAuthorizationError(err.Error())
 		}
 		return model.User{}, helper.NewInternalServerError(err.Error())
 	}
@@ -187,7 +192,7 @@ func getUser(r *http.Request) (user model.User, err error) {
 
 func updateUser(r *http.Request) (err error) {
 	// authorization
-	userName, err := lib.VerifyHeaderToken(r)
+	tokenUserName, err := lib.VerifyHeaderToken(r)
 	if err != nil {
 		log.Println(err)
 		return helper.NewAuthorizationError(err.Error())
@@ -207,10 +212,17 @@ func updateUser(r *http.Request) (err error) {
 	}
 
 	// validation check
-	err = reqUpdateUser.ValidateParam()
-	if err != nil {
-		log.Println(err)
-		return helper.NewBadRequestError(err.Error())
+	if reqUpdateUser.Password != "" {
+		if err = validation.Validate(reqUpdateUser.Password, validation.By(modelHTTP.PasswordValidation)); err != nil {
+			log.Println(err)
+			return helper.NewBadRequestError(err.Error())
+		}
+	}
+	if reqUpdateUser.SelfIntroduction != "" {
+		if err = validation.Validate(reqUpdateUser.SelfIntroduction, validation.Length(modelHTTP.MinVarcharLength, modelHTTP.MaxVarcharLength)); err != nil {
+			log.Println(err)
+			return helper.NewBadRequestError(err.Error())
+		}
 	}
 
 	// db connect
@@ -226,11 +238,14 @@ func updateUser(r *http.Request) (err error) {
 	userRepo := repository.NewUserRepository(db)
 
 	// UseCase
-	u := usecase.NewUpdateUser(r.Context(), tx, userName, reqUpdateUser, userRepo)
+	u := usecase.NewUpdateUser(r.Context(), tx, tokenUserName, reqUpdateUser, userRepo)
 	if err = u.UpdateUserUseCase(); err != nil {
 		log.Println(err)
-		if err == repository.ErrNotExistsData {
+		if err == repository.ErrNotExistsData || err == usecase.ErrDecodeImage {
 			return helper.NewBadRequestError(err.Error())
+		}
+		if err == lib.ErrTokenInvalidNotExistingUserName {
+			return helper.NewAuthorizationError(err.Error())
 		}
 		return helper.NewInternalServerError(err.Error())
 	}
@@ -239,7 +254,7 @@ func updateUser(r *http.Request) (err error) {
 
 func deleteUser(r *http.Request) (err error) {
 	// authorization
-	userName, err := lib.VerifyHeaderToken(r)
+	tokenUserName, err := lib.VerifyHeaderToken(r)
 	if err != nil {
 		log.Println(err)
 		return helper.NewAuthorizationError(err.Error())
@@ -262,9 +277,12 @@ func deleteUser(r *http.Request) (err error) {
 	followRepo := repository.NewFollowRepository(db)
 
 	// UseCase
-	u := usecase.NewDeleteUser(r.Context(), tx, userName, userRepo, postingRepo, likeRepo, commentRepo, followRepo)
+	u := usecase.NewDeleteUser(r.Context(), tx, tokenUserName, userRepo, postingRepo, likeRepo, commentRepo, followRepo)
 	if err = u.DeleteUserUseCase(); err != nil {
 		log.Println(err)
+		if err == lib.ErrTokenInvalidNotExistingUserName {
+			return helper.NewAuthorizationError(err.Error())
+		}
 		return helper.NewInternalServerError(err.Error())
 	}
 	return

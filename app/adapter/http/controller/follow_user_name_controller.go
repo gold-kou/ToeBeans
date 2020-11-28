@@ -45,7 +45,7 @@ func FollowUserNameController(w http.ResponseWriter, r *http.Request) {
 
 func deleteFollow(r *http.Request) error {
 	// authorization
-	userName, err := lib.VerifyHeaderToken(r)
+	tokenUserName, err := lib.VerifyHeaderToken(r)
 	if err != nil {
 		log.Println(err)
 		return helper.NewAuthorizationError(err.Error())
@@ -54,9 +54,9 @@ func deleteFollow(r *http.Request) error {
 	// get request parameter
 	vars := mux.Vars(r)
 	followedUserName, ok := vars["followed_user_name"]
-	if !ok {
+	if !ok || followedUserName == "" {
 		log.Println(err)
-		return helper.NewBadRequestError("parameter followed_user_name is required")
+		return helper.NewBadRequestError("followed_user_name: cannot be blank.")
 	}
 
 	// db connect
@@ -73,9 +73,12 @@ func deleteFollow(r *http.Request) error {
 	followRepo := repository.NewFollowRepository(db)
 
 	// UseCase
-	u := usecase.NewDeleteFollow(r.Context(), tx, userName, followedUserName, userRepo, followRepo)
+	u := usecase.NewDeleteFollow(r.Context(), tx, tokenUserName, followedUserName, userRepo, followRepo)
 	if err = u.DeleteFollowUseCase(); err != nil {
 		log.Println(err)
+		if err == repository.ErrNotExistsData {
+			return helper.NewBadRequestError(err.Error())
+		}
 		return helper.NewInternalServerError(err.Error())
 	}
 	return err

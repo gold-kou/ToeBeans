@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 	"strconv"
@@ -46,7 +47,7 @@ func LikeLikeIDController(w http.ResponseWriter, r *http.Request) {
 
 func deleteLike(r *http.Request) error {
 	// authorization
-	userName, err := lib.VerifyHeaderToken(r)
+	tokenUserName, err := lib.VerifyHeaderToken(r)
 	if err != nil {
 		log.Println(err)
 		return helper.NewAuthorizationError(err.Error())
@@ -55,9 +56,11 @@ func deleteLike(r *http.Request) error {
 	// get request parameter
 	vars := mux.Vars(r)
 	likeID, ok := vars["like_id"]
-	if !ok {
+	fmt.Println("koki")
+	fmt.Println(likeID)
+	if !ok || likeID == "0" {
 		log.Println(err)
-		return helper.NewBadRequestError("parameter like_id is required")
+		return helper.NewBadRequestError("like_id: cannot be blank")
 	}
 	id, err := strconv.Atoi(likeID)
 	if err != nil {
@@ -79,7 +82,7 @@ func deleteLike(r *http.Request) error {
 	likeRepo := repository.NewLikeRepository(db)
 
 	// UseCase
-	u := usecase.NewDeleteLike(r.Context(), tx, userName, int64(id), userRepo, postingRepo, likeRepo)
+	u := usecase.NewDeleteLike(r.Context(), tx, tokenUserName, int64(id), userRepo, postingRepo, likeRepo)
 	if err = u.DeleteLikeUseCase(); err != nil {
 		log.Println(err)
 		if err == repository.ErrNotExistsData {

@@ -4,6 +4,8 @@ import (
 	"context"
 	"os"
 
+	"github.com/gold-kou/ToeBeans/app/lib"
+
 	"github.com/gold-kou/ToeBeans/app/adapter/aws"
 	"github.com/gold-kou/ToeBeans/app/adapter/mysql"
 	"github.com/gold-kou/ToeBeans/app/domain/repository"
@@ -14,25 +16,36 @@ type DeletePostingUseCaseInterface interface {
 }
 
 type DeletePosting struct {
-	ctx         context.Context
-	tx          mysql.DBTransaction
-	postingID   int64
-	userName    string
-	postingRepo *repository.PostingRepository
+	ctx           context.Context
+	tx            mysql.DBTransaction
+	postingID     int64
+	tokenUserName string
+	userRepo      *repository.UserRepository
+	postingRepo   *repository.PostingRepository
 }
 
-func NewDeletePosting(ctx context.Context, tx mysql.DBTransaction, postingID int64, userName string, postingRepo *repository.PostingRepository) *DeletePosting {
+func NewDeletePosting(ctx context.Context, tx mysql.DBTransaction, postingID int64, tokenUserName string, userRepo *repository.UserRepository, postingRepo *repository.PostingRepository) *DeletePosting {
 	return &DeletePosting{
-		ctx:         ctx,
-		tx:          tx,
-		postingID:   postingID,
-		userName:    userName,
-		postingRepo: postingRepo,
+		ctx:           ctx,
+		tx:            tx,
+		postingID:     postingID,
+		tokenUserName: tokenUserName,
+		userRepo:      userRepo,
+		postingRepo:   postingRepo,
 	}
 }
 
 func (posting *DeletePosting) DeletePostingUseCase() error {
-	p, err := posting.postingRepo.GetWhereIDUserName(posting.ctx, posting.postingID, posting.userName)
+	// check userName in token exists
+	_, err := posting.userRepo.GetUserWhereName(posting.ctx, posting.tokenUserName)
+	if err != nil {
+		if err == repository.ErrNotExistsData {
+			return lib.ErrTokenInvalidNotExistingUserName
+		}
+		return err
+	}
+
+	p, err := posting.postingRepo.GetWhereIDUserName(posting.ctx, posting.postingID, posting.tokenUserName)
 	if err != nil {
 		return err
 	}

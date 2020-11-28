@@ -22,28 +22,21 @@ func (req *RequestRegisterUser) ValidateParam() error {
 	var fieldRules []*validation.FieldRules
 	fieldRules = append(fieldRules, validation.Field(&req.UserName, validation.Required, validation.Length(MinVarcharLength, MaxVarcharLength), is.Alphanumeric),
 		validation.Field(&req.Email, validation.Required, is.Email, validation.Length(MinVarcharLength, MaxVarcharLength)),
-		validation.Field(&req.Password, validation.Required, validation.By(passwordValidation)))
-	return validation.ValidateStruct(req, fieldRules...)
-}
-
-func (req *RequestUpdateUser) ValidateParam() error {
-	var fieldRules []*validation.FieldRules
-	fieldRules = append(fieldRules, validation.Field(&req.Password, validation.By(passwordValidation)),
-		validation.Field(&req.SelfIntroduction, validation.Length(MinVarcharLength, MaxVarcharLength)))
+		validation.Field(&req.Password, validation.Required, validation.By(PasswordValidation)))
 	return validation.ValidateStruct(req, fieldRules...)
 }
 
 func (req *RequestLogin) ValidateParam() error {
 	var fieldRules []*validation.FieldRules
 	fieldRules = append(fieldRules, validation.Field(&req.Email, validation.Required, is.Email, validation.Length(MinVarcharLength, MaxVarcharLength)),
-		validation.Field(&req.Password, validation.Required, validation.By(passwordValidation)))
+		validation.Field(&req.Password, validation.Required, validation.By(PasswordValidation)))
 	return validation.ValidateStruct(req, fieldRules...)
 }
 
 func (req *RequestResetPassword) ValidateParam() error {
 	var fieldRules []*validation.FieldRules
 	fieldRules = append(fieldRules, validation.Field(&req.UserName, validation.Required, validation.Length(MinVarcharLength, MaxVarcharLength), is.Alphanumeric),
-		validation.Field(&req.Password, validation.Required, validation.By(passwordValidation)),
+		validation.Field(&req.Password, validation.Required, validation.By(PasswordValidation)),
 		validation.Field(&req.PasswordResetKey, validation.Required, is.UUID))
 	return validation.ValidateStruct(req, fieldRules...)
 }
@@ -87,7 +80,7 @@ func (f *Follow) ValidateParam() error {
 // num: at least one digit.
 // tot: at least eight characters long.
 // No empty string or whitespace.
-func passwordValidation(pass interface{}) error {
+func PasswordValidation(pass interface{}) error {
 	var (
 		upp, low, num bool
 		tot           uint8
