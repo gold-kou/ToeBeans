@@ -6,7 +6,9 @@ on:
   pull_request:
     branches:
       - master
-
+defaults:
+  run:
+    working-directory: ./backend
 jobs:
   golangci:
     name: lint
@@ -17,4 +19,4 @@ jobs:
         uses: golangci/golangci-lint-action@v2
         with:
           version: v1.29
-          args: --config=.golangci.yml
+          args: --config=backend/.golangci.yml
