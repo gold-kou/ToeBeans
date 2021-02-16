@@ -12,13 +12,13 @@ import (
 
 	"github.com/gorilla/mux"
 
-	"github.com/gold-kou/ToeBeans/app/domain/repository"
+	"github.com/gold-kou/ToeBeans/backend/app/domain/repository"
 
-	"github.com/gold-kou/ToeBeans/app/adapter/http/helper"
-	"github.com/gold-kou/ToeBeans/app/lib"
-	"github.com/gold-kou/ToeBeans/testing/dummy"
+	"github.com/gold-kou/ToeBeans/backend/app/adapter/http/helper"
+	"github.com/gold-kou/ToeBeans/backend/app/lib"
+	"github.com/gold-kou/ToeBeans/backend/testing/dummy"
 
-	testingHelper "github.com/gold-kou/ToeBeans/testing"
+	testingHelper "github.com/gold-kou/ToeBeans/backend/testing"
 	"github.com/stretchr/testify/assert"
 )
 

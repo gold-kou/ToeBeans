@@ -4,9 +4,9 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/gold-kou/ToeBeans/app/adapter/http/helper"
+	"github.com/gold-kou/ToeBeans/backend/app/adapter/http/helper"
 
-	applicationLog "github.com/gold-kou/ToeBeans/app/adapter/http/log"
+	applicationLog "github.com/gold-kou/ToeBeans/backend/app/adapter/http/log"
 )
 
 func HealthController(w http.ResponseWriter, r *http.Request) {

@@ -4,11 +4,11 @@ import (
 	"context"
 	"time"
 
-	"github.com/gold-kou/ToeBeans/app/lib"
+	"github.com/gold-kou/ToeBeans/backend/app/lib"
 
-	"github.com/gold-kou/ToeBeans/app/adapter/mysql"
-	"github.com/gold-kou/ToeBeans/app/domain/model"
-	"github.com/gold-kou/ToeBeans/app/domain/repository"
+	"github.com/gold-kou/ToeBeans/backend/app/adapter/mysql"
+	"github.com/gold-kou/ToeBeans/backend/app/domain/model"
+	"github.com/gold-kou/ToeBeans/backend/app/domain/repository"
 )
 
 type GetPostingsUseCaseInterface interface {

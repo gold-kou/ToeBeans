@@ -6,8 +6,8 @@ import (
 
 	"github.com/go-sql-driver/mysql"
 
-	m "github.com/gold-kou/ToeBeans/app/adapter/mysql"
-	"github.com/gold-kou/ToeBeans/app/domain/model"
+	m "github.com/gold-kou/ToeBeans/backend/app/adapter/mysql"
+	"github.com/gold-kou/ToeBeans/backend/app/domain/model"
 )
 
 type CommentRepositoryInterface interface {

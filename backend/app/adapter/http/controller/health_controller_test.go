@@ -6,7 +6,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	testingHelper "github.com/gold-kou/ToeBeans/testing"
+	testingHelper "github.com/gold-kou/ToeBeans/backend/testing"
 	"github.com/stretchr/testify/assert"
 )
 

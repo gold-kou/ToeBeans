@@ -1,7 +1,7 @@
 package dummy
 
 import (
-	"github.com/gold-kou/ToeBeans/app/domain/model"
+	"github.com/gold-kou/ToeBeans/backend/app/domain/model"
 )
 
 var Posting1 = model.Posting{

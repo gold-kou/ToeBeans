@@ -4,7 +4,7 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/gold-kou/ToeBeans/app/adapter/http/controller"
+	"github.com/gold-kou/ToeBeans/backend/app/adapter/http/controller"
 
 	"gopkg.in/DataDog/dd-trace-go.v1/contrib/gorilla/mux"
 )

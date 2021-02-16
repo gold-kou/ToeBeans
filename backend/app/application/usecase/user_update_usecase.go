@@ -5,17 +5,17 @@ import (
 	"encoding/base64"
 	"os"
 
-	"github.com/gold-kou/ToeBeans/app/lib"
+	"github.com/gold-kou/ToeBeans/backend/app/lib"
 
-	"github.com/gold-kou/ToeBeans/app/adapter/aws"
+	"github.com/gold-kou/ToeBeans/backend/app/adapter/aws"
 
-	"github.com/gold-kou/ToeBeans/app/domain/model"
+	"github.com/gold-kou/ToeBeans/backend/app/domain/model"
 
 	"golang.org/x/crypto/bcrypt"
 
-	"github.com/gold-kou/ToeBeans/app/adapter/mysql"
-	modelHTTP "github.com/gold-kou/ToeBeans/app/domain/model/http"
-	"github.com/gold-kou/ToeBeans/app/domain/repository"
+	"github.com/gold-kou/ToeBeans/backend/app/adapter/mysql"
+	modelHTTP "github.com/gold-kou/ToeBeans/backend/app/domain/model/http"
+	"github.com/gold-kou/ToeBeans/backend/app/domain/repository"
 )
 
 type UpdateUserUseCaseInterface interface {

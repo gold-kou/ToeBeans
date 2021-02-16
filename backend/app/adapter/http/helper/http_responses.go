@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 
-	model "github.com/gold-kou/ToeBeans/app/domain/model/http"
+	model "github.com/gold-kou/ToeBeans/backend/app/domain/model/http"
 )
 
 func ResponseSimpleSuccess(w http.ResponseWriter) {

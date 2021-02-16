@@ -11,14 +11,14 @@ import (
 
 	"golang.org/x/crypto/bcrypt"
 
-	"github.com/gold-kou/ToeBeans/app/lib"
+	"github.com/gold-kou/ToeBeans/backend/app/lib"
 
-	"github.com/gold-kou/ToeBeans/app/domain/repository"
+	"github.com/gold-kou/ToeBeans/backend/app/domain/repository"
 
-	"github.com/gold-kou/ToeBeans/testing/dummy"
+	"github.com/gold-kou/ToeBeans/backend/testing/dummy"
 
-	modelHttp "github.com/gold-kou/ToeBeans/app/domain/model/http"
-	testingHelper "github.com/gold-kou/ToeBeans/testing"
+	modelHttp "github.com/gold-kou/ToeBeans/backend/app/domain/model/http"
+	testingHelper "github.com/gold-kou/ToeBeans/backend/testing"
 	"github.com/stretchr/testify/assert"
 )
 

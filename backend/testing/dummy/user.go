@@ -1,7 +1,7 @@
 package dummy
 
 import (
-	"github.com/gold-kou/ToeBeans/app/domain/model"
+	"github.com/gold-kou/ToeBeans/backend/app/domain/model"
 )
 
 var User1 = model.User{

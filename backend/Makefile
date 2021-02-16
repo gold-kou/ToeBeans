@@ -5,11 +5,11 @@ setup:
 
 .PHONY: install
 install:
-	@go install github.com/gold-kou/ToeBeans/app/...
+	@go install github.com/gold-kou/ToeBeans/backend/app/...
 
 .PHONY: cross-install
 cross-install:
-	@CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go install -a -installsuffix cgo -ldflags '-w -extldflags "-static"' github.com/gold-kou/ToeBeans/app/...
+	@CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go install -a -installsuffix cgo -ldflags '-w -extldflags "-static"' github.com/gold-kou/ToeBeans/backend/app/...
 
 .PHONY: openapi
 openapi:
@@ -18,7 +18,7 @@ openapi:
 .PHONY: test
 test:
 	@docker-compose -f docker-compose.test.yml build app
-	-@docker-compose -f docker-compose.test.yml run --rm app dockerize -wait tcp://db-test:3306 -timeout 60s dockerize -wait tcp://minio:9000 -timeout 60s gotest -p 1 -v github.com/gold-kou/ToeBeans/app/...
+	-@docker-compose -f docker-compose.test.yml run --rm app dockerize -wait tcp://db-test:3306 -timeout 60s dockerize -wait tcp://minio:9000 -timeout 60s gotest -p 1 -v github.com/gold-kou/ToeBeans/backend/app/...
 	@docker-compose -f docker-compose.test.yml down --remove-orphans
 
 .PHONY: lint

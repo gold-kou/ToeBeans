@@ -6,15 +6,15 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/gold-kou/ToeBeans/app/adapter/mysql"
-	"github.com/gold-kou/ToeBeans/app/domain/repository"
+	"github.com/gold-kou/ToeBeans/backend/app/adapter/mysql"
+	"github.com/gold-kou/ToeBeans/backend/app/domain/repository"
 
-	"github.com/gold-kou/ToeBeans/app/application/usecase"
+	"github.com/gold-kou/ToeBeans/backend/app/application/usecase"
 
-	"github.com/gold-kou/ToeBeans/app/adapter/http/helper"
+	"github.com/gold-kou/ToeBeans/backend/app/adapter/http/helper"
 
-	applicationLog "github.com/gold-kou/ToeBeans/app/adapter/http/log"
-	model "github.com/gold-kou/ToeBeans/app/domain/model/http"
+	applicationLog "github.com/gold-kou/ToeBeans/backend/app/adapter/http/log"
+	model "github.com/gold-kou/ToeBeans/backend/app/domain/model/http"
 )
 
 func LoginController(w http.ResponseWriter, r *http.Request) {

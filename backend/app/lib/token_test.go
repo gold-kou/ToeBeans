@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/gold-kou/ToeBeans/testing/dummy"
+	"github.com/gold-kou/ToeBeans/backend/testing/dummy"
 
 	"github.com/stretchr/testify/assert"
 )

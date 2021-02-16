@@ -4,15 +4,15 @@ import (
 	"context"
 	"time"
 
-	"github.com/gold-kou/ToeBeans/app/domain/model"
+	"github.com/gold-kou/ToeBeans/backend/app/domain/model"
 
-	"github.com/gold-kou/ToeBeans/app/lib"
+	"github.com/gold-kou/ToeBeans/backend/app/lib"
 	"github.com/google/uuid"
 
-	"github.com/gold-kou/ToeBeans/app/adapter/mysql"
+	"github.com/gold-kou/ToeBeans/backend/app/adapter/mysql"
 
-	modelHTTP "github.com/gold-kou/ToeBeans/app/domain/model/http"
-	"github.com/gold-kou/ToeBeans/app/domain/repository"
+	modelHTTP "github.com/gold-kou/ToeBeans/backend/app/domain/model/http"
+	"github.com/gold-kou/ToeBeans/backend/app/domain/repository"
 )
 
 type PasswordResetEmailUseCaseInterface interface {

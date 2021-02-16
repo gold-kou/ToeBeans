@@ -9,14 +9,14 @@ import (
 	validation "github.com/go-ozzo/ozzo-validation"
 	"github.com/go-ozzo/ozzo-validation/is"
 
-	"github.com/gold-kou/ToeBeans/app/adapter/http/helper"
-	applicationLog "github.com/gold-kou/ToeBeans/app/adapter/http/log"
-	"github.com/gold-kou/ToeBeans/app/adapter/mysql"
-	"github.com/gold-kou/ToeBeans/app/application/usecase"
-	"github.com/gold-kou/ToeBeans/app/domain/model"
-	modelHTTP "github.com/gold-kou/ToeBeans/app/domain/model/http"
-	"github.com/gold-kou/ToeBeans/app/domain/repository"
-	"github.com/gold-kou/ToeBeans/app/lib"
+	"github.com/gold-kou/ToeBeans/backend/app/adapter/http/helper"
+	applicationLog "github.com/gold-kou/ToeBeans/backend/app/adapter/http/log"
+	"github.com/gold-kou/ToeBeans/backend/app/adapter/mysql"
+	"github.com/gold-kou/ToeBeans/backend/app/application/usecase"
+	"github.com/gold-kou/ToeBeans/backend/app/domain/model"
+	modelHTTP "github.com/gold-kou/ToeBeans/backend/app/domain/model/http"
+	"github.com/gold-kou/ToeBeans/backend/app/domain/repository"
+	"github.com/gold-kou/ToeBeans/backend/app/lib"
 )
 
 func UserController(w http.ResponseWriter, r *http.Request) {

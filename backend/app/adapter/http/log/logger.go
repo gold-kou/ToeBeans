@@ -7,7 +7,7 @@ import (
 	"os"
 	"text/template"
 
-	"github.com/gold-kou/ToeBeans/app/adapter/http/helper"
+	"github.com/gold-kou/ToeBeans/backend/app/adapter/http/helper"
 	"gopkg.in/yaml.v3"
 
 	"go.uber.org/zap"
@@ -44,7 +44,7 @@ func (a *accessLog) MarshalLogObject(enc zapcore.ObjectEncoder) error {
 }
 
 func NewLogger() (*Logger, error) {
-	tmpl, err := template.ParseFiles("/go/src/github.com/gold-kou/ToeBeans/config/logger.yml.tpl")
+	tmpl, err := template.ParseFiles("/go/src/github.com/gold-kou/ToeBeans/backend/config/logger.yml.tpl")
 	if err != nil {
 		return nil, err
 	}

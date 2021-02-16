@@ -8,11 +8,11 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/gold-kou/ToeBeans/app/domain/repository"
-	"github.com/gold-kou/ToeBeans/testing/dummy"
+	"github.com/gold-kou/ToeBeans/backend/app/domain/repository"
+	"github.com/gold-kou/ToeBeans/backend/testing/dummy"
 
-	"github.com/gold-kou/ToeBeans/app/adapter/http/helper"
-	testingHelper "github.com/gold-kou/ToeBeans/testing"
+	"github.com/gold-kou/ToeBeans/backend/app/adapter/http/helper"
+	testingHelper "github.com/gold-kou/ToeBeans/backend/testing"
 	"github.com/stretchr/testify/assert"
 )
 

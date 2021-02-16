@@ -7,13 +7,13 @@ import (
 	"os"
 	"time"
 
-	"github.com/gold-kou/ToeBeans/testing/dummy"
+	"github.com/gold-kou/ToeBeans/backend/testing/dummy"
 
-	"github.com/gold-kou/ToeBeans/app/lib"
+	"github.com/gold-kou/ToeBeans/backend/app/lib"
 
-	"github.com/gold-kou/ToeBeans/app/domain/model"
+	"github.com/gold-kou/ToeBeans/backend/app/domain/model"
 
-	"github.com/gold-kou/ToeBeans/app/adapter/mysql"
+	"github.com/gold-kou/ToeBeans/backend/app/adapter/mysql"
 )
 
 func SetTime(t time.Time) {

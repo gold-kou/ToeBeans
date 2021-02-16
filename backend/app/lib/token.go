@@ -6,7 +6,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/gold-kou/ToeBeans/app/adapter/http/helper"
+	"github.com/gold-kou/ToeBeans/backend/app/adapter/http/helper"
 
 	jwt "github.com/dgrijalva/jwt-go"
 	"github.com/pkg/errors"

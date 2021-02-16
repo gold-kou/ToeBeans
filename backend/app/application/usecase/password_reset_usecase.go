@@ -3,13 +3,13 @@ package usecase
 import (
 	"context"
 
-	"github.com/gold-kou/ToeBeans/app/lib"
+	"github.com/gold-kou/ToeBeans/backend/app/lib"
 
-	"github.com/gold-kou/ToeBeans/app/adapter/mysql"
+	"github.com/gold-kou/ToeBeans/backend/app/adapter/mysql"
 	"golang.org/x/crypto/bcrypt"
 
-	modelHTTP "github.com/gold-kou/ToeBeans/app/domain/model/http"
-	"github.com/gold-kou/ToeBeans/app/domain/repository"
+	modelHTTP "github.com/gold-kou/ToeBeans/backend/app/domain/model/http"
+	"github.com/gold-kou/ToeBeans/backend/app/domain/repository"
 )
 
 type PasswordResetUseCaseInterface interface {

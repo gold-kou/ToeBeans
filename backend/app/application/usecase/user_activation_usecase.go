@@ -3,10 +3,10 @@ package usecase
 import (
 	"context"
 
-	"github.com/gold-kou/ToeBeans/app/domain/model"
+	"github.com/gold-kou/ToeBeans/backend/app/domain/model"
 
-	"github.com/gold-kou/ToeBeans/app/adapter/mysql"
-	"github.com/gold-kou/ToeBeans/app/domain/repository"
+	"github.com/gold-kou/ToeBeans/backend/app/adapter/mysql"
+	"github.com/gold-kou/ToeBeans/backend/app/domain/repository"
 )
 
 type UpdateActivationUseCaseInterface interface {

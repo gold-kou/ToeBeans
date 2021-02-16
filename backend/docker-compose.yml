@@ -22,8 +22,8 @@ services:
       - S3_BUCKET_POSTINGS=/postings
       - S3_BUCKET_ICONS=/icons
     volumes:
-      - ./:/go/src/github.com/gold-kou/ToeBeans:cached
-      - /go/src/github.com/gold-kou/ToeBeans/.git
+      - ./:/go/src/github.com/gold-kou/ToeBeans/backend:cached
+      - /go/src/github.com/gold-kou/ToeBeans/backend/.git
     networks:
       - backend
     ports:

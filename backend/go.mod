@@ -1,4 +1,4 @@
-module github.com/gold-kou/ToeBeans
+module github.com/gold-kou/ToeBeans/backend
 
 go 1.15
 

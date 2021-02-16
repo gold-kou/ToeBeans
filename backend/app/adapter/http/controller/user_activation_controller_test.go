@@ -10,10 +10,10 @@ import (
 
 	"github.com/gorilla/mux"
 
-	"github.com/gold-kou/ToeBeans/app/domain/repository"
+	"github.com/gold-kou/ToeBeans/backend/app/domain/repository"
 
-	testingHelper "github.com/gold-kou/ToeBeans/testing"
-	"github.com/gold-kou/ToeBeans/testing/dummy"
+	testingHelper "github.com/gold-kou/ToeBeans/backend/testing"
+	"github.com/gold-kou/ToeBeans/backend/testing/dummy"
 	"github.com/stretchr/testify/assert"
 )
 
