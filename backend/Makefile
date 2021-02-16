@@ -7,10 +7,6 @@ setup:
 install:
 	@go install github.com/gold-kou/ToeBeans/backend/app/...
 
-.PHONY: cross-install
-cross-install:
-	@CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go install -a -installsuffix cgo -ldflags '-w -extldflags "-static"' github.com/gold-kou/ToeBeans/backend/app/...
-
 .PHONY: openapi
 openapi:
 	@./hack/openapi/openapi-generate.sh
@@ -23,4 +19,6 @@ test:
 
 .PHONY: lint
 lint:
-	@./hack/lint.sh
+	@docker-compose -f docker-compose.test.yml build app
+	-@docker-compose -f docker-compose.test.yml run --rm app golangci-lint run --config /go/src/github.com/gold-kou/ToeBeans/backend/.golangci.yml -v
+	@docker-compose -f docker-compose.test.yml down --remove-orphans

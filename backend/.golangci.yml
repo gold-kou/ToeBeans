@@ -97,6 +97,8 @@ linters:
 
 issues:
   # Excluding configuration per-path, per-linter, per-text and per-source
+  exclude:
+    - backend/main.go
   exclude-rules:
     # these are auto generated codes
     - path: app/domain/model/http
