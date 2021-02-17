@@ -14,6 +14,7 @@ coverage.html
 
 # OpenAPI-generate
 backend/openapi/openapi-generated/api
+backend/openapi/openapi-generated/go
 
 # Go
 backend/go-modules/
