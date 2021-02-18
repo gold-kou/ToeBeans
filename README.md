@@ -1,7 +1,7 @@
 WIP
 
 # ToeBeans
-ToeBeans is a social media for cat-lovers!
+ToeBeans is a social media service for cat-lovers!
 
 # Tech stacks
 ## Frontend
@@ -33,26 +33,22 @@ GitHub/GitHub Actions
 - Posting
 - Comment
 - Follow
-- Incident report
-- Mute user
-- Block user
-- Direct message
-- Other SNS sharing
 
 Basically, guest user only can do read actions.
 
 ## Coming features
 - Notification
-- Other social media services sharing
+- Other SNS sharing
 - Refresh token
 - Ranking
 - Incident report
+- Direct message
 - Block user
 - Movie posting
 
 # Documents
 ## API
-See openapi/openapi.yml
+See backend/openapi/openapi.yml
 
 ## RDB
 https://docs.google.com/spreadsheets/d/1xIYH9PO4Hry3wTN6KYULvxmKMUQ6kwIWJNJJTyijZ_g/edit?usp=sharing
@@ -69,53 +65,3 @@ This is written in Japanese.
 ## Auto Scaling
 ## Pagenation
 
-# Development tips
-## Launch servers in local
-```
-$ ./serverrun.sh
-# go run main.go
-```
-
-If the error of `listen tcp :8080: bind: address already in use exit status 1` happens, you might have failed to stop previous launching. 
-Try below.
-
-Kill process.
-
-```
-On app
-
-# ps ax |grep main.go
-# kill -9 <process>
-```
-
-Or another container might be block in local.
-Remove unused container.
-
-```
-On Host
-
-$ docker system prune -f
-```
-
-## Stop servers in local
-
-```
-# (control + Z)
-^X^Z[1] + Stopped                    go run main.go
-
-# ps ax |grep main.go
-
-# kill -9 <process>
-
-# exit
-```
-
-## curl
-
-
-## UT
-```
-$ make test
-```
-
-Not enough test cases now.

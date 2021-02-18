@@ -13,14 +13,15 @@
 coverage.html
 
 # OpenAPI-generate
-openapi/openapi-generated/api
+backend/openapi/openapi-generated/api
+backend/openapi/openapi-generated/go
 
 # Go
-go-modules/
-Gododir/godobin*
+backend/go-modules/
+backend/Gododir/godobin*
 
 # Docker
-.docker-compose-data/
+backend/.docker-compose-data/
 
 # IDE
 .idea/
