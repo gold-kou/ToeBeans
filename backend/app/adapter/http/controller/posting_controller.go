@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"strings"
 
 	"github.com/gold-kou/ToeBeans/backend/app/lib"
 
@@ -76,6 +77,9 @@ func registerPosting(r *http.Request) error {
 	if err != nil {
 		log.Println(err)
 		return helper.NewBadRequestError(err.Error())
+	}
+	if strings.Contains(reqRegisterPosting.Title, "_") {
+		return helper.NewBadRequestError("title: must not contain _.")
 	}
 
 	// db connect
