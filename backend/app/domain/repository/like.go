@@ -12,6 +12,7 @@ import (
 
 type LikeRepositoryInterface interface {
 	Create(ctx context.Context, like *model.Like) (err error)
+	GetWhereUserName(ctx context.Context, userName string) (like model.Like, err error)
 	GetWhereID(ctx context.Context, id int64) (like model.Like, err error)
 	DeleteWhereID(ctx context.Context, id int64) (err error)
 	DeleteWhereUserName(ctx context.Context, userName string) (err error)
@@ -39,6 +40,33 @@ func (r *LikeRepository) Create(ctx context.Context, like *model.Like) (err erro
 	if ok && mysqlErr.Number == 1062 {
 		return ErrDuplicateData
 	}
+	return
+}
+
+func (r *LikeRepository) GetWhereUserName(ctx context.Context, userName string) (likes []model.Like, err error) {
+	q := "SELECT `id`, `user_name`, `posting_id`, `created_at`, `updated_at` FROM `likes` WHERE `user_name` = ?"
+	rows, err := r.db.QueryContext(ctx, q, userName)
+	if err == sql.ErrNoRows {
+		err = ErrNotExistsData
+		return
+	}
+	if err != nil {
+		return
+	}
+	defer rows.Close()
+
+	var like model.Like
+	for rows.Next() {
+		if err = rows.Scan(&like.ID, &like.UserName, &like.PostingID, &like.CreatedAt, &like.UpdatedAt); err != nil {
+			return
+		}
+		likes = append(likes, like)
+		like = model.Like{}
+	}
+	if err = rows.Err(); err != nil {
+		return
+	}
+
 	return
 }
 

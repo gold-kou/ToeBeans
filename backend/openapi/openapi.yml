@@ -886,16 +886,21 @@ components:
           type: string
           description: image url
           example: 'https://s3-ap-northeast-1.amazonaws.c/sample_bucket/sample1.jpg'
-        liked:
+        liked_count:
           type: integer
           format: int64
           description: the number of liked
           example: 20
+        liked:
+          type: boolean
+          description: liked or not by request user
+          example: false
       required:
         - posting_id
         - user_name
         - uploaded_at
         - title
+        - liked_count
         - liked
     responseGetComments:
       description: get comments

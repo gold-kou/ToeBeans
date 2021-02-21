@@ -30,7 +30,7 @@ func PostingsController(w http.ResponseWriter, r *http.Request) {
 
 	switch r.Method {
 	case http.MethodGet:
-		postings, err := getPostings(r)
+		postings, likes, err := getPostings(r)
 		switch err := err.(type) {
 		case nil:
 			var httpPostings []modelHTTP.ResponseGetPosting
@@ -43,7 +43,13 @@ func PostingsController(w http.ResponseWriter, r *http.Request) {
 						UploadedAt: p.CreatedAt,
 						Title:      p.Title,
 						ImageUrl:   p.ImageURL,
-						Liked:      p.LikedCount,
+						LikedCount: p.LikedCount,
+						Liked:      false,
+					}
+					for _, l := range likes {
+						if p.ID == l.PostingID {
+							httpPosting.Liked = true
+						}
 					}
 					httpPostings = append(httpPostings, httpPosting)
 				}
@@ -71,48 +77,49 @@ func PostingsController(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func getPostings(r *http.Request) (postings []model.Posting, err error) {
+func getPostings(r *http.Request) (postings []model.Posting, likes []model.Like, err error) {
 	// authorization
 	tokenUserName, err := lib.VerifyHeaderToken(r)
 	if err != nil {
 		log.Println(err)
-		return nil, helper.NewAuthorizationError(err.Error())
+		return nil, nil, helper.NewAuthorizationError(err.Error())
 	}
 
 	// get request parameter
 	sinceAt := r.URL.Query().Get("since_at")
 	if sinceAt == "" {
 		log.Println(err)
-		return nil, helper.NewBadRequestError("since_at: cannot be blank.")
+		return nil, nil, helper.NewBadRequestError("since_at: cannot be blank.")
 	}
 	sinceAtFormatted, err := time.Parse(time.RFC3339, sinceAt)
 	if err != nil {
 		log.Println(err)
-		return nil, helper.NewBadRequestError(err.Error())
+		return nil, nil, helper.NewBadRequestError(err.Error())
 	}
 
 	limit := r.URL.Query().Get("limit")
 	if limit == "" {
 		log.Println(err)
-		return nil, helper.NewBadRequestError("limit: cannot be blank.")
+		return nil, nil, helper.NewBadRequestError("limit: cannot be blank.")
 	}
 	limitInt, err := strconv.Atoi(limit)
 	if err != nil {
 		log.Println(err)
-		return nil, helper.NewBadRequestError(err.Error())
+		return nil, nil, helper.NewBadRequestError(err.Error())
 	}
 
+	// here user means selected user to see user profile
 	userName := r.URL.Query().Get("user_name")
 	if err := validation.Validate(userName, validation.Length(modelHTTP.MinVarcharLength, modelHTTP.MaxVarcharLength), is.Alphanumeric); err != nil {
 		log.Println(err)
-		return nil, helper.NewBadRequestError(err.Error())
+		return nil, nil, helper.NewBadRequestError(err.Error())
 	}
 
 	// db connect
 	db, err := mysql.NewDB()
 	if err != nil {
 		log.Println(err)
-		return nil, helper.NewInternalServerError(err.Error())
+		return nil, nil, helper.NewInternalServerError(err.Error())
 	}
 	defer db.Close()
 	tx := mysql.NewDBTransaction(db)
@@ -120,18 +127,19 @@ func getPostings(r *http.Request) (postings []model.Posting, err error) {
 	// repository
 	userRepo := repository.NewUserRepository(db)
 	postingRepo := repository.NewPostingRepository(db)
+	likeRepo := repository.NewLikeRepository(db)
 
 	// UseCase
-	u := usecase.NewGetPostings(r.Context(), tx, tokenUserName, sinceAtFormatted, int8(limitInt), userName, userRepo, postingRepo)
-	if postings, err = u.GetPostingsUseCase(); err != nil {
+	u := usecase.NewGetPostings(r.Context(), tx, tokenUserName, sinceAtFormatted, int8(limitInt), userName, userRepo, postingRepo, likeRepo)
+	if postings, likes, err = u.GetPostingsUseCase(); err != nil {
 		log.Println(err)
 		if err == usecase.ErrDecodeImage {
-			return nil, helper.NewBadRequestError(err.Error())
+			return nil, nil, helper.NewBadRequestError(err.Error())
 		}
 		if err == repository.ErrNotExistsData {
-			return nil, helper.NewBadRequestError(err.Error())
+			return nil, nil, helper.NewBadRequestError(err.Error())
 		}
-		return nil, helper.NewInternalServerError(err.Error())
+		return nil, nil, helper.NewInternalServerError(err.Error())
 	}
 	return
 }

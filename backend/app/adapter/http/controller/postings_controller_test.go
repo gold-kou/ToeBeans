@@ -25,7 +25,8 @@ var successRespGetPostings = `
       "uploaded_at": "2020-01-01T00:00:00+09:00",
       "title": "20200101000000_testUser1_This is a sample posting.",
       "image_url": "http://minio:9000/postings/20200101000000_testUser1_This%20is%20a%20sample%20posting.",
-      "liked": 0
+      "liked_count": 0,
+      "liked": false
     }
   ]
 }
