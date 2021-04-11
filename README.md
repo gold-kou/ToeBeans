@@ -65,3 +65,12 @@ This is written in Japanese.
 ## Auto Scaling
 ## Pagenation
 
+# セキュリティ面で工夫しているところ
+- XSS対策
+  - トークンはCookieに保存
+- CSRF対策
+  - CSRFトークン
+- オプトイン
+  - Email確認
+- パスワードはハッシュ化して保存
+- HTTPS対応

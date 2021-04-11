@@ -138,13 +138,6 @@ func TestRegisterPosting(t *testing.T) {
 			wantStatus: http.StatusBadRequest,
 		},
 		{
-			name:       "error forbidden guest user",
-			args:       args{reqBody: successReqRegisterPosting},
-			method:     http.MethodPost,
-			want:       testingHelper.ErrForbidden,
-			wantStatus: http.StatusForbidden,
-		},
-		{
 			name:       "not allowed method",
 			args:       args{},
 			method:     http.MethodHead,
@@ -171,13 +164,13 @@ func TestRegisterPosting(t *testing.T) {
 			req, err := http.NewRequest(tt.method, "/posting", strings.NewReader(tt.args.reqBody))
 			assert.NoError(t, err)
 			var token string
-			if tt.name == "error forbidden guest user" {
-				token, err = lib.GenerateToken(lib.GuestUserName)
-			} else {
-				token, err = lib.GenerateToken(dummy.User1.Name)
-			}
+			token, err = lib.GenerateToken(dummy.User1.Name)
 			assert.NoError(t, err)
-			req.Header.Add(helper.HeaderKeyAuthorization, "Bearer "+token)
+			cookie := &http.Cookie{
+				Name:  helper.CookieIDToken,
+				Value: token,
+			}
+			req.AddCookie(cookie)
 			resp := httptest.NewRecorder()
 
 			// test target

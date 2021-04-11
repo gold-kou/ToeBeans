@@ -22,13 +22,13 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-var errRespDeleteLikeWithoutLikeID = `
+var errRespDeleteLikeWithoutPostingID = `
 {
   "status": 400,
-  "message": "like_id: cannot be blank"
+  "message": "posting_id: cannot be blank"
 }
 `
-var errRespDeleteLikeNotExistingID = `
+var errRespDeleteLikeNotExistingPostingID = `
 {
   "status": 400,
   "message": "not exists data error"
@@ -37,7 +37,7 @@ var errRespDeleteLikeNotExistingID = `
 
 func TestDeleteLike(t *testing.T) {
 	type args struct {
-		likeID int64
+		postingID int64
 	}
 	tests := []struct {
 		name       string
@@ -48,31 +48,24 @@ func TestDeleteLike(t *testing.T) {
 	}{
 		{
 			name:       "success",
-			args:       args{likeID: dummy.Like1.ID},
+			args:       args{postingID: dummy.Posting2.ID},
 			method:     http.MethodDelete,
 			want:       testingHelper.RespSimpleSuccess,
 			wantStatus: http.StatusOK,
 		},
 		{
-			name:       "error empty like_id",
+			name:       "error empty posting_id",
 			args:       args{},
 			method:     http.MethodDelete,
-			want:       errRespDeleteLikeWithoutLikeID,
+			want:       errRespDeleteLikeWithoutPostingID,
 			wantStatus: http.StatusBadRequest,
 		},
 		{
-			name:       "error not existing like_id",
-			args:       args{likeID: 99999},
+			name:       "error not existing posting_id",
+			args:       args{postingID: 99999},
 			method:     http.MethodDelete,
-			want:       errRespDeleteLikeNotExistingID,
+			want:       errRespDeleteLikeNotExistingPostingID,
 			wantStatus: http.StatusBadRequest,
-		},
-		{
-			name:       "error forbidden guest user",
-			args:       args{likeID: dummy.Like1.ID},
-			method:     http.MethodDelete,
-			want:       testingHelper.ErrForbidden,
-			wantStatus: http.StatusForbidden,
 		},
 		{
 			name:       "not allowed method",
@@ -106,28 +99,39 @@ func TestDeleteLike(t *testing.T) {
 			assert.NoError(t, err)
 			token, err := lib.GenerateToken(dummy.User1.Name)
 			assert.NoError(t, err)
-			req.Header.Add(helper.HeaderKeyAuthorization, "Bearer "+token)
+			cookie := &http.Cookie{
+				Name:  helper.CookieIDToken,
+				Value: token,
+			}
+			req.AddCookie(cookie)
 			resp := httptest.NewRecorder()
 			LikeController(resp, req)
 			assert.NoError(t, err)
 
 			// http request
-			req, err = http.NewRequest(tt.method, fmt.Sprintf("/like/%v", tt.args.likeID), nil)
+			req, err = http.NewRequest(tt.method, fmt.Sprintf("/like/%v", tt.args.postingID), nil)
 			assert.NoError(t, err)
-			vars := map[string]string{"like_id": strconv.Itoa(int(tt.args.likeID))}
+			vars := map[string]string{"posting_id": strconv.Itoa(int(tt.args.postingID))}
 			req = mux.SetURLVars(req, vars)
-			if tt.name == "error forbidden guest user" {
-				token, err = lib.GenerateToken(lib.GuestUserName)
-			} else {
-				token, err = lib.GenerateToken(dummy.User1.Name)
-			}
+			token, err = lib.GenerateToken(dummy.User1.Name)
 			assert.NoError(t, err)
-			req.Header.Add(helper.HeaderKeyAuthorization, "Bearer "+token)
+			cookie = &http.Cookie{
+				Name:  helper.CookieIDToken,
+				Value: token,
+			}
+			req.AddCookie(cookie)
 			resp = httptest.NewRecorder()
 
 			// test target
-			LikeLikeIDController(resp, req)
+			LikePostingIDController(resp, req)
 			assert.NoError(t, err)
+
+			// assert http
+			assert.Equal(t, tt.wantStatus, resp.Code)
+			respBodyByte, err := ioutil.ReadAll(resp.Body)
+			assert.NoError(t, err)
+			respBody := string(respBodyByte)
+			assert.JSONEq(t, tt.want, respBody)
 
 			// assert db
 			if tt.wantStatus == 200 {
@@ -152,13 +156,6 @@ func TestDeleteLike(t *testing.T) {
 				assert.NoError(t, err)
 				assert.Equal(t, int64(0), postings[0].LikedCount)
 			}
-
-			// assert http
-			assert.Equal(t, tt.wantStatus, resp.Code)
-			respBodyByte, err := ioutil.ReadAll(resp.Body)
-			assert.NoError(t, err)
-			respBody := string(respBodyByte)
-			assert.JSONEq(t, tt.want, respBody)
 		})
 	}
 }

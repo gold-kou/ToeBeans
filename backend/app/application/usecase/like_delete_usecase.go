@@ -18,18 +18,18 @@ type DeleteLike struct {
 	ctx           context.Context
 	tx            mysql.DBTransaction
 	tokenUserName string
-	likeID        int64
+	postingID     int64
 	userRepo      *repository.UserRepository
 	postingRepo   *repository.PostingRepository
 	likeRepo      *repository.LikeRepository
 }
 
-func NewDeleteLike(ctx context.Context, tx mysql.DBTransaction, tokenUserName string, likeID int64, userRepo *repository.UserRepository, postingRepo *repository.PostingRepository, likeRepo *repository.LikeRepository) *DeleteLike {
+func NewDeleteLike(ctx context.Context, tx mysql.DBTransaction, tokenUserName string, postingID int64, userRepo *repository.UserRepository, postingRepo *repository.PostingRepository, likeRepo *repository.LikeRepository) *DeleteLike {
 	return &DeleteLike{
 		ctx:           ctx,
 		tx:            tx,
 		tokenUserName: tokenUserName,
-		likeID:        likeID,
+		postingID:     postingID,
 		userRepo:      userRepo,
 		postingRepo:   postingRepo,
 		likeRepo:      likeRepo,
@@ -46,13 +46,13 @@ func (like *DeleteLike) DeleteLikeUseCase() error {
 		return err
 	}
 
-	l, err := like.likeRepo.GetWhereID(like.ctx, like.likeID)
+	l, err := like.likeRepo.GetWhereUserNamePostingID(like.ctx, like.tokenUserName, like.postingID)
 	if err != nil {
 		return err
 	}
 
 	err = like.tx.Do(like.ctx, func(ctx context.Context) error {
-		if err := like.likeRepo.DeleteWhereID(ctx, like.likeID); err != nil {
+		if err := like.likeRepo.DeleteWhereUserNamePostingID(ctx, like.tokenUserName, like.postingID); err != nil {
 			return err
 		}
 

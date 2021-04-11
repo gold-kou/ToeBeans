@@ -41,12 +41,13 @@ func DeleteObject(bucket, filename string) (err error) {
 }
 
 func generateS3Config() *aws.Config {
+	// use minio in local or test
 	if os.Getenv("APP_ENV") == "development" || flag.Lookup("test.v") != nil {
-		// use minio in local or test
 		creds := credentials.NewStaticCredentials(os.Getenv("AWS_ACCESS_KEY"), os.Getenv("AWS_SECRET_KEY"), "")
 		return &aws.Config{
-			Credentials:      creds,
-			Region:           aws.String(os.Getenv("AWS_REGION")),
+			Credentials: creds,
+			Region:      aws.String(os.Getenv("AWS_REGION")),
+			// TODO コンテナ間でもlocalhostにできないか
 			Endpoint:         aws.String("http://minio:9000"),
 			S3ForcePathStyle: aws.Bool(true),
 		}

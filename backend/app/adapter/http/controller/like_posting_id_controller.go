@@ -16,7 +16,7 @@ import (
 	"github.com/gold-kou/ToeBeans/backend/app/domain/repository"
 )
 
-func LikeLikeIDController(w http.ResponseWriter, r *http.Request) {
+func LikePostingIDController(w http.ResponseWriter, r *http.Request) {
 	l, err := applicationLog.NewLogger()
 	if err != nil {
 		log.Panic(err)
@@ -33,8 +33,6 @@ func LikeLikeIDController(w http.ResponseWriter, r *http.Request) {
 			helper.ResponseBadRequest(w, err.Error())
 		case *helper.AuthorizationError:
 			helper.ResponseUnauthorized(w, err.Error())
-		case *helper.ForbiddenError:
-			helper.ResponseForbidden(w, err.Error())
 		case *helper.InternalServerError:
 			helper.ResponseInternalServerError(w, err.Error())
 		default:
@@ -48,24 +46,24 @@ func LikeLikeIDController(w http.ResponseWriter, r *http.Request) {
 
 func deleteLike(r *http.Request) error {
 	// authorization
-	tokenUserName, err := lib.VerifyHeaderToken(r)
+	cookie, err := r.Cookie(helper.CookieIDToken)
 	if err != nil {
 		log.Println(err)
 		return helper.NewAuthorizationError(err.Error())
 	}
-	if tokenUserName == lib.GuestUserName {
-		log.Println(errMsgGuestUserForbidden)
-		return helper.NewForbiddenError(errMsgGuestUserForbidden)
+	tokenUserName, err := lib.VerifyToken(cookie.Value)
+	if err != nil {
+		return helper.NewAuthorizationError(err.Error())
 	}
 
 	// get request parameter
 	vars := mux.Vars(r)
-	likeID, ok := vars["like_id"]
-	if !ok || likeID == "0" {
+	paramPostingID, ok := vars["posting_id"]
+	if !ok || paramPostingID == "0" {
 		log.Println(err)
-		return helper.NewBadRequestError("like_id: cannot be blank")
+		return helper.NewBadRequestError("posting_id: cannot be blank")
 	}
-	id, err := strconv.Atoi(likeID)
+	postingID, err := strconv.Atoi(paramPostingID)
 	if err != nil {
 		return helper.NewInternalServerError(err.Error())
 	}
@@ -85,7 +83,7 @@ func deleteLike(r *http.Request) error {
 	likeRepo := repository.NewLikeRepository(db)
 
 	// UseCase
-	u := usecase.NewDeleteLike(r.Context(), tx, tokenUserName, int64(id), userRepo, postingRepo, likeRepo)
+	u := usecase.NewDeleteLike(r.Context(), tx, tokenUserName, int64(postingID), userRepo, postingRepo, likeRepo)
 	if err = u.DeleteLikeUseCase(); err != nil {
 		log.Println(err)
 		if err == repository.ErrNotExistsData {

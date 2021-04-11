@@ -119,7 +119,7 @@ var errRespPasswordResetUserNameNotAlphanumeric = `
 var errorRespPasswordResetPasswordRuleBreak = `
 {
   "status": 400,
-  "message": "password: at least one upper case letter / at least one lower case letter / at least one digit / at least eight characters long."
+  "message": "password: Your password must be at least 8 characters long, contain at least one number and have a mixture of uppercase and lowercase letters."
 }
 `
 var errRespPasswordResetKeyNotUUID = `

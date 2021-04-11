@@ -76,5 +76,10 @@ func (p *GetPostings) GetPostingsUseCase() (postings []model.Posting, likes []mo
 		}
 		return
 	}
+	//for i, posting := range postings {
+	//	if os.Getenv("APP_ENV") == "development" && strings.Contains(posting.ImageURL, "minio") {
+	//		postings[i].ImageURL = strings.Replace(posting.ImageURL, "minio", "localhost", -1)
+	//	}
+	//}
 	return
 }

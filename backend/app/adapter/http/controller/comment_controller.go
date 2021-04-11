@@ -48,9 +48,13 @@ func CommentController(w http.ResponseWriter, r *http.Request) {
 
 func registerComment(r *http.Request) error {
 	// authorization
-	tokenUserName, err := lib.VerifyHeaderToken(r)
+	cookie, err := r.Cookie(helper.CookieIDToken)
 	if err != nil {
 		log.Println(err)
+		return helper.NewAuthorizationError(err.Error())
+	}
+	tokenUserName, err := lib.VerifyToken(cookie.Value)
+	if err != nil {
 		return helper.NewAuthorizationError(err.Error())
 	}
 	if tokenUserName == lib.GuestUserName {

@@ -7,11 +7,11 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/gold-kou/ToeBeans/backend/app/lib"
+
 	validation "github.com/go-ozzo/ozzo-validation"
 	"github.com/go-ozzo/ozzo-validation/is"
 	"github.com/gold-kou/ToeBeans/backend/app/domain/model"
-
-	"github.com/gold-kou/ToeBeans/backend/app/lib"
 
 	"github.com/gold-kou/ToeBeans/backend/app/adapter/http/helper"
 	applicationLog "github.com/gold-kou/ToeBeans/backend/app/adapter/http/log"
@@ -79,9 +79,13 @@ func PostingsController(w http.ResponseWriter, r *http.Request) {
 
 func getPostings(r *http.Request) (postings []model.Posting, likes []model.Like, err error) {
 	// authorization
-	tokenUserName, err := lib.VerifyHeaderToken(r)
+	cookie, err := r.Cookie(helper.CookieIDToken)
 	if err != nil {
 		log.Println(err)
+		return nil, nil, helper.NewAuthorizationError(err.Error())
+	}
+	tokenUserName, err := lib.VerifyToken(cookie.Value)
+	if err != nil {
 		return nil, nil, helper.NewAuthorizationError(err.Error())
 	}
 

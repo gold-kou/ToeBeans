@@ -9,11 +9,9 @@
 
 package http
 
-type RequestRegisterPosting struct {
+// ResponseGetCsrfToken - get csrf token
+type ResponseGetCsrfToken struct {
 
-	// the title of posting
-	Title string `json:"title"`
-
-	// base64 encoded file
-	Image string `json:"image"`
+	// csrf token
+	CsrfToken string `json:"csrf_token"`
 }

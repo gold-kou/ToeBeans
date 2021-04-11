@@ -4,6 +4,8 @@ FROM golang:1.15.0-buster as debugger
 RUN apt-get update && apt install -y --no-install-recommends \
     tzdata \
     wget \
+    curl \
+    lsof \
  && apt-get clean \
  && rm -rf /var/lib/apt/lists/*
 RUN wget -O- -nv https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh \

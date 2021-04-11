@@ -78,13 +78,13 @@ var errRespLoginNotEmailFormat = `
 var errRespLoginNotExistingEmail = `
 {
   "status": 400,
-  "message": "not exists data error"
+  "message": "Wrong username or password"
 }
 `
 var errRespLoginWrongPassword = `
 {
-  "status": 401,
-  "message": "not correct password"
+  "status": 400,
+  "message": "Wrong username or password"
 }
 `
 
@@ -138,7 +138,7 @@ func TestLoginController(t *testing.T) {
 			args:       args{reqBody: errReqLoginWrongPassword},
 			method:     http.MethodPost,
 			want:       errRespLoginWrongPassword,
-			wantStatus: http.StatusUnauthorized,
+			wantStatus: http.StatusBadRequest,
 		},
 		{
 			name:       "not allowed method",

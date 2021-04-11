@@ -15,7 +15,7 @@ const (
 	UUIDLength        = 36
 
 	/* #nosec */
-	errMsgPasswordValidation = "at least one upper case letter / at least one lower case letter / at least one digit / at least eight characters long"
+	errMsgPasswordValidation = "Your password must be at least 8 characters long, contain at least one number and have a mixture of uppercase and lowercase letters"
 )
 
 func (req *RequestRegisterUser) ValidateParam() error {
@@ -30,6 +30,13 @@ func (req *RequestLogin) ValidateParam() error {
 	var fieldRules []*validation.FieldRules
 	fieldRules = append(fieldRules, validation.Field(&req.Email, validation.Required, is.Email, validation.Length(MinVarcharLength, MaxVarcharLength)),
 		validation.Field(&req.Password, validation.Required, validation.By(PasswordValidation)))
+	return validation.ValidateStruct(req, fieldRules...)
+}
+
+func (req *RequestChangePassword) ValidateParam() error {
+	var fieldRules []*validation.FieldRules
+	fieldRules = append(fieldRules, validation.Field(&req.OldPassword, validation.Required, validation.By(PasswordValidation)),
+		validation.Field(&req.NewPassword, validation.Required, validation.By(PasswordValidation)))
 	return validation.ValidateStruct(req, fieldRules...)
 }
 

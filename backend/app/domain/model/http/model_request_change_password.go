@@ -9,11 +9,11 @@
 
 package http
 
-type RequestRegisterPosting struct {
+type RequestChangePassword struct {
 
-	// the title of posting
-	Title string `json:"title"`
+	// old password
+	OldPassword string `json:"old_password"`
 
-	// base64 encoded file
-	Image string `json:"image"`
+	// new password
+	NewPassword string `json:"new_password"`
 }

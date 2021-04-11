@@ -7,8 +7,8 @@ import (
 var Posting1 = model.Posting{
 	ID:         1,
 	UserName:   User1.Name,
-	Title:      "20200101000000_testUser1_This is a sample posting.",
-	ImageURL:   "http://minio:9000/postings/20200101000000_testUser1_This%20is%20a%20sample%20posting.",
+	Title:      "This is a sample posting.",
+	ImageURL:   "http://localhost:9000/postings/20200101000000_testUser1",
 	LikedCount: 0,
 }
 
