@@ -1,0 +1,28 @@
+.loginForm {
+  max-width: 500px;
+  min-width: 300px;
+  max-height: 700px;
+  width: 30%;
+  height: 60%;
+  margin: 100px auto;
+  background-color: #ffffff;
+  border-radius: 25px;
+}
+
+.loginButton{
+  /* display:flex;
+  justify-content:center; */
+  border-radius: 25px;
+  width: 80%;
+  height: 40px;
+  font-size: 1.3rem;
+  font-weight: 700;
+  border: 0px;
+  cursor: pointer;
+  transition: opacity 0.25s ease-out;
+  padding-bottom: 1.5rem;
+}
+
+.loginButton:hover{
+  opacity: 0.8;
+}

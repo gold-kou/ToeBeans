@@ -1,0 +1,5 @@
+.settings {
+    border-left: 1px solid var(--toebeans-background);
+    border-right: 1px solid var(--toebeans-background);
+    border-bottom: 1px solid var(--toebeans-background);
+}
