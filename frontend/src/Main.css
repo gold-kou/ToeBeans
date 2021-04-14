@@ -1,0 +1,11 @@
+body {
+  /* --toebeans-color: #e2cfb6; */
+  --toebeans-background: #e6ecf0;
+}
+
+.main {
+  /* height: 100vh;
+  max-width: 1300px;*/
+  margin-left: auto;
+  margin-right: auto; 
+}

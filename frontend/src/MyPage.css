@@ -1,0 +1,12 @@
+.mypage {
+    border-left: 1px solid var(--toebeans-background);
+    border-right: 1px solid var(--toebeans-background);
+    min-width: fit-content;
+    overflow-y: scroll;
+}
+
+.mypage-data {
+    font-size:1.0rem;
+    font-family:Arial, sans-serif;
+    text-align: center;
+}

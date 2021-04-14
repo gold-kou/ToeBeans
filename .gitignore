@@ -1,27 +1,30 @@
+#Backend
 # Binaries for programs and plugins
 *.exe
 *.exe~
 *.dll
 *.so
 *.dylib
-
 # Test binary, built with `go test -c`
 *.test
-
 # Output of the go coverage tool, specifically when used with LiteIDE
 *.out
 coverage.html
-
 # OpenAPI-generate
 backend/openapi/openapi-generated/api
 backend/openapi/openapi-generated/go
-
 # Go
 backend/go-modules/
 backend/Gododir/godobin*
-
 # Docker
 backend/.docker-compose-data/
-
 # IDE
 .idea/
+
+# Frontend
+# dependencies
+frontend/node_modules
+frontend/.pnp
+.pnp.js
+# production
+frontend/build

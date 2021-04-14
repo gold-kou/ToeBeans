@@ -1,0 +1,30 @@
+.post {
+  border-bottom: 1px solid var(--toebeans-background);
+}
+
+.post__body {
+  padding: 1rem;
+}
+
+.post__body > img {
+  border-radius: 1.5rem;
+}
+
+.post__footer {
+  justify-content: space-between;
+  margin-top: 1rem;
+}
+
+.post__headerTitle {
+  margin-bottom: 1rem;
+  font-size: 1rem;
+}
+
+.post__headerText > h3 {
+  font-size: 1rem;
+  margin-bottom: 0.3rem;
+}
+
+.post__avatar {
+  padding: 1.5rem;
+}
