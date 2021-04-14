@@ -9,9 +9,22 @@ servers:
   - url: will be written
     description: production
 paths:
+  /csrf-token:
+    get:
+      description: get csrf token
+      operationId: getCSRFToken
+      tags:
+        - user
+      responses:
+        "200":
+          $ref: '#/components/responses/getCSRFToken'
+        "405":
+          $ref: '#/components/responses/notAllowedMethod'
+        "500":
+          $ref: '#/components/responses/internalServerError'
   /login:
     post:
-      description: login
+      description: login.
       operationId: login
       tags:
         - user
@@ -20,6 +33,11 @@ paths:
       responses:
         "200":
           description: return token
+          headers:
+            Set-Cookie:
+              schema:
+                type: string
+                example: id_token=abcde12345; Path=/; HttpOnly
           content:
             application/json:
               schema:
@@ -55,12 +73,11 @@ paths:
       tags:
         - user
       security:
-        - bearerAuth: []
+        - cookieAuth: []
       parameters:
         - name: user_name
           in: query
           description: user name
-          required: true
           schema:
             type: string
             example: user1
@@ -78,12 +95,12 @@ paths:
         "500":
           $ref: '#/components/responses/internalServerError'
     put:
-      description: update user info
+      description: update user info. Not allowed to guest user.
       operationId: updateUser
       tags:
         - user
       security:
-        - bearerAuth: []
+        - cookieAuth: []
       requestBody:
         $ref: '#/components/requestBodies/updateUser'
       responses:
@@ -100,12 +117,12 @@ paths:
         "500":
           $ref: '#/components/responses/internalServerError'
     delete:
-      description: delete user info
+      description: delete user info. Not allowed to guest user.
       operationId: deleteUser
       tags:
         - user
       security:
-        - bearerAuth: []
+        - cookieAuth: []
       responses:
         "200":
           $ref: '#/components/responses/simpleSuccess'
@@ -146,9 +163,32 @@ paths:
           $ref: '#/components/responses/notAllowedMethod'
         "500":
           $ref: '#/components/responses/internalServerError'
+  /password:
+    put:
+      description: change password. Not allowed to guest user.
+      operationId: changePassword
+      tags:
+        - user
+      security:
+        - cookieAuth: []
+      requestBody:
+        $ref: '#/components/requestBodies/changePassword'
+      responses:
+        "200":
+          $ref: '#/components/responses/simpleSuccess'
+        "400":
+          $ref: '#/components/responses/badRequest'
+        "401":
+          $ref: '#/components/responses/unauthorized'
+        "403":
+          $ref: '#/components/responses/forbidden'
+        "405":
+          $ref: '#/components/responses/notAllowedMethod'
+        "500":
+          $ref: '#/components/responses/internalServerError'
   /password-reset-email:
     post:
-      description: send an email to reset password
+      description: send an email to reset password. Not allowed to guest user.
       operationId: sendPasswordResetEmail
       tags:
         - user
@@ -165,7 +205,7 @@ paths:
           $ref: '#/components/responses/internalServerError'
   /password-reset:
     post:
-      description: reset password
+      description: reset password. Not allowed to guest user.
       operationId: resetPassword
       tags:
         - user
@@ -187,7 +227,7 @@ paths:
       tags:
         - posting
       security:
-        - bearerAuth: []
+        - cookieAuth: []
       requestBody:
         $ref: '#/components/requestBodies/registerPosting'
       responses:
@@ -210,7 +250,7 @@ paths:
       tags:
         - posting
       security:
-        - bearerAuth: []
+        - cookieAuth: []
       parameters:
         - name: since_at
           description: get older data than since_at. If it's first request, the current time is used. If not, the oldest uploaded_at from previous data is used.
@@ -253,12 +293,12 @@ paths:
           $ref: '#/components/responses/internalServerError'
   /posting/{posting_id}:
     delete:
-      description: delete posting
+      description: delete posting.
       operationId: deletePosting
       tags:
         - posting
       security:
-        - bearerAuth: []
+        - cookieAuth: []
       parameters:
         - name: posting_id
           schema:
@@ -286,7 +326,7 @@ paths:
       tags:
         - like
       security:
-        - bearerAuth: []
+        - cookieAuth: []
       requestBody:
         $ref: '#/components/requestBodies/registerLike'
       responses:
@@ -302,16 +342,16 @@ paths:
           $ref: '#/components/responses/notAllowedMethod'
         "500":
           $ref: '#/components/responses/internalServerError'
-  /like/{like_id}:
+  /like/{posting_id}:
     delete:
       description: delete like
       operationId: deleteLike
       tags:
         - like
       security:
-        - bearerAuth: []
+        - cookieAuth: []
       parameters:
-        - name: like_id
+        - name: posting_id
           schema:
             type: integer
             format: int64
@@ -332,12 +372,12 @@ paths:
           $ref: '#/components/responses/internalServerError'
   /comment:
     post:
-      description: register comment
+      description: register comment. Not allowed to guest user.
       operationId: registerComment
       tags:
         - comment
       security:
-        - bearerAuth: []
+        - cookieAuth: []
       requestBody:
         $ref: '#/components/requestBodies/registerComment'
       responses:
@@ -360,7 +400,7 @@ paths:
       tags:
         - comment
       security:
-        - bearerAuth: []
+        - cookieAuth: []
       parameters:
         - name: posting_id
           in: query
@@ -382,12 +422,12 @@ paths:
           $ref: '#/components/responses/internalServerError'
   /comment/{comment_id}:
     delete:
-      description: delete comment
+      description: delete comment. Not allowed to guest user.
       operationId: deleteComment
       tags:
         - comment
       security:
-        - bearerAuth: []
+        - cookieAuth: []
       parameters:
         - name: comment_id
           schema:
@@ -410,12 +450,12 @@ paths:
           $ref: '#/components/responses/internalServerError'
   /follow:
     post:
-      description: register follow
+      description: register follow. Not allowed to guest user.
       operationId: registerFollow
       tags:
         - follow
       security:
-        - bearerAuth: []
+        - cookieAuth: []
       requestBody:
         $ref: '#/components/requestBodies/registerFollow'
       responses:
@@ -433,12 +473,12 @@ paths:
           $ref: '#/components/responses/internalServerError'
   /follow/{followed_user_name}:
     delete:
-      description: delete follow
+      description: delete follow. Not allowed to guest user.
       operationId: deleteFollow
       tags:
         - follow
       security:
-        - bearerAuth: []
+        - cookieAuth: []
       parameters:
         - name: followed_user_name
           schema:
@@ -466,7 +506,7 @@ paths:
       tags:
         - notification
       security:
-        - bearerAuth: []
+        - cookieAuth: []
       parameters:
         - name: user_name
           description: user name
@@ -495,7 +535,7 @@ paths:
       tags:
         - notification
       security:
-        - bearerAuth: []
+        - cookieAuth: []
       parameters:
         - name: user_name
           schema:
@@ -527,10 +567,10 @@ paths:
           $ref: '#/components/responses/simpleSuccess'
 components:
   securitySchemes:
-    bearerAuth:
-      type: http
-      scheme: bearer
-      bearerFormat: JWT
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: id_token
   requestBodies:
     login:
       description: login
@@ -550,6 +590,12 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/requestUpdateUser'
+    changePassword:
+      description: change password
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/requestChangePassword'
     sendPasswordResetEmail:
       content:
         application/json:
@@ -592,6 +638,12 @@ components:
           schema:
             $ref: '#/components/schemas/follow'
   responses:
+    getCSRFToken:
+      description: get csrf token
+      content:
+        'application/json':
+          schema:
+            $ref: '#/components/schemas/responseGetCSRFToken'
     getUser:
       description: get user
       content:
@@ -771,7 +823,7 @@ components:
           description: password
           example: Password1234
         icon:
-          description: icon image file of base64 encoded and zipped
+          description: base64 encoded file
           type: string
           format: byte
           example: 'GEsDBBQACAAIAJhjzE4AAAAAAAAAAAAAAAASABAAaU9TIOOBrueUu+WDjzIucG5nVVgMAKTALl1wcQBd9gEUAIy8B'
@@ -779,6 +831,20 @@ components:
           type: string
           description: self introduction
           example: 'Hello'
+    requestChangePassword:
+      type: object
+      properties:
+        old_password:
+          type: string
+          description: old password
+          example: Password1234
+        new_password:
+          type: string
+          description: new password
+          example: Password5678
+      required:
+        - old_password
+        - new_password
     requestResetPassword:
       type: object
       properties:
@@ -808,11 +874,21 @@ components:
         image:
           type: string
           format: byte
-          description: posting image file of base64 encoded and zipped
+          description: base64 encoded file
           example: 'GEsDBBQACAAIAJhjzE4AAAAAAAAAAAAAAAASABAAaU9TIOOBrueUu+WDjzIucG5nVVgMAKTALl1wcQBd9gEUAIy8B'
       required:
         - title
         - image
+    responseGetCSRFToken:
+      description: get csrf token
+      type: object
+      properties:
+        csrf_token:
+          description: csrf token
+          type: string
+          example: 'AAAAA'
+      required:
+        - csrf_token
     responseGetUser:
       description: get user
       type: object
@@ -825,6 +901,10 @@ components:
           description: icon
           type: string
           example: icon url
+        self_introduction:
+          description: self introduction
+          type: string
+          example: 'Hello'
         posting_count:
           description: the total count of posting
           type: integer
@@ -840,6 +920,16 @@ components:
           type: integer
           format: int64
           example: 20
+        follow_count:
+          description: the total count of follow
+          type: integer
+          format: int64
+          example: 10
+        followed_count:
+          description: the total count of followed
+          type: integer
+          format: int64
+          example: 10
         created_at:
           description: the datetime when the account is created
           type: string
@@ -848,9 +938,12 @@ components:
       required:
         - user_name
         - icon
+        - self_introduction
         - posting_count
         - like_count
         - liked_count
+        - follow_count
+        - followed_count
         - created_at
     responseGetPostings:
       description: get postings
@@ -886,16 +979,21 @@ components:
           type: string
           description: image url
           example: 'https://s3-ap-northeast-1.amazonaws.c/sample_bucket/sample1.jpg'
-        liked:
+        liked_count:
           type: integer
           format: int64
           description: the number of liked
           example: 20
+        liked:
+          type: boolean
+          description: liked or not by request user
+          example: false
       required:
         - posting_id
         - user_name
         - uploaded_at
         - title
+        - liked_count
         - liked
     responseGetComments:
       description: get comments

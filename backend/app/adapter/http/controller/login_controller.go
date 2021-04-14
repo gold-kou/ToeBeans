@@ -5,6 +5,9 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"time"
+
+	"github.com/gold-kou/ToeBeans/backend/app/lib"
 
 	"github.com/gold-kou/ToeBeans/backend/app/adapter/mysql"
 	"github.com/gold-kou/ToeBeans/backend/app/domain/repository"
@@ -29,11 +32,22 @@ func LoginController(w http.ResponseWriter, r *http.Request) {
 		idToken, err := login(r)
 		switch err := err.(type) {
 		case nil:
+			expiration := time.Now().Add(lib.TokenExpirationHour * time.Hour)
+			cookie := &http.Cookie{
+				Name:     helper.CookieIDToken,
+				Value:    idToken,
+				Expires:  expiration,
+				HttpOnly: true,
+				Secure:   false,
+			}
+			http.SetCookie(w, cookie)
+
+			w.Header().Set(helper.HeaderKeyContentType, helper.HeaderValueApplicationJSON)
+			w.WriteHeader(http.StatusOK)
+
 			resp := model.Token{
 				IdToken: idToken,
 			}
-			w.Header().Set(helper.HeaderKeyContentType, helper.HeaderValueApplicationJSON)
-			w.WriteHeader(http.StatusOK)
 			if err := json.NewEncoder(w).Encode(resp); err != nil {
 				panic(err.Error())
 			}
@@ -89,11 +103,8 @@ func login(r *http.Request) (idToken string, err error) {
 	l := usecase.NewLogin(r.Context(), tx, reqLogin, userRepo)
 	if idToken, err = l.LoginUseCase(); err != nil {
 		log.Println(err)
-		if err == repository.ErrNotExistsData {
-			return "", helper.NewBadRequestError(err.Error())
-		}
-		if err == usecase.ErrNotCorrectPassword {
-			return "", helper.NewAuthorizationError(err.Error())
+		if err == repository.ErrNotExistsData || err == usecase.ErrNotCorrectPassword {
+			return "", helper.NewBadRequestError(errMsgWrongUserNameOrPassword)
 		}
 		return "", helper.NewInternalServerError(err.Error())
 	}

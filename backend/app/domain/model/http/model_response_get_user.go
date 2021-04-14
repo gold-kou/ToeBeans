@@ -22,6 +22,9 @@ type ResponseGetUser struct {
 	// icon
 	Icon string `json:"icon"`
 
+	// self introduction
+	SelfIntroduction string `json:"self_introduction"`
+
 	// the total count of posting
 	PostingCount int64 `json:"posting_count"`
 
@@ -30,6 +33,12 @@ type ResponseGetUser struct {
 
 	// the total count of liked
 	LikedCount int64 `json:"liked_count"`
+
+	// the total count of follow
+	FollowCount int64 `json:"follow_count"`
+
+	// the total count of followed
+	FollowedCount int64 `json:"followed_count"`
 
 	// the datetime when the account is created
 	CreatedAt time.Time `json:"created_at"`

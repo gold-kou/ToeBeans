@@ -121,7 +121,7 @@ var errorRegisterUserPasswordShort = `
 var errorRespPassword = `
 {
   "status": 400,
-  "message": "password: at least one upper case letter / at least one lower case letter / at least one digit / at least eight characters long."
+  "message": "password: Your password must be at least 8 characters long, contain at least one number and have a mixture of uppercase and lowercase letters."
 }
 `
 
@@ -242,16 +242,13 @@ var successRespGetUser = `
 {
   "user_name": "testUser2",
   "icon": "UNKNOWN",
+  "self_introduction": "UNKNOWN",
   "posting_count": 0,
   "like_count": 0,
   "liked_count": 0,
+  "follow_count": 0,
+  "followed_count": 0,
   "created_at": "2020-01-01T00:00:00+09:00"
-}
-`
-var errorRespGetUserWithoutUserName = `
-{
-  "status": 400,
-  "message": "cannot be blank"
 }
 `
 var errorRespGetUserNameShort = `
@@ -290,13 +287,6 @@ func TestGetUser(t *testing.T) {
 			method:     http.MethodGet,
 			want:       successRespGetUser,
 			wantStatus: http.StatusOK,
-		},
-		{
-			name:       "error empty user_name",
-			args:       args{},
-			method:     http.MethodGet,
-			want:       errorRespGetUserWithoutUserName,
-			wantStatus: http.StatusBadRequest,
 		},
 		{
 			name:       "error user_name short",
@@ -340,7 +330,11 @@ func TestGetUser(t *testing.T) {
 			assert.NoError(t, err)
 			token, err := lib.GenerateToken(dummy.User1.Name)
 			assert.NoError(t, err)
-			req.Header.Add(helper.HeaderKeyAuthorization, "Bearer "+token)
+			cookie := &http.Cookie{
+				Name:  helper.CookieIDToken,
+				Value: token,
+			}
+			req.AddCookie(cookie)
 			resp := httptest.NewRecorder()
 
 			// test target
@@ -394,7 +388,7 @@ var errReqUpdateUserIconDecodeFail = `
 var errRespUpdateUserInvalidPassword = `
 {
   "status": 400,
-  "message": "at least one upper case letter / at least one lower case letter / at least one digit / at least eight characters long"
+  "message": "Your password must be at least 8 characters long, contain at least one number and have a mixture of uppercase and lowercase letters"
 }
 `
 var errRespUpdateUserSelfIntroductionShort = `
@@ -480,7 +474,11 @@ func TestUpdateUser(t *testing.T) {
 				token, err = lib.GenerateToken(dummy.User1.Name)
 			}
 			assert.NoError(t, err)
-			req.Header.Add(helper.HeaderKeyAuthorization, "Bearer "+token)
+			cookie := &http.Cookie{
+				Name:  helper.CookieIDToken,
+				Value: token,
+			}
+			req.AddCookie(cookie)
 			resp := httptest.NewRecorder()
 
 			// test target
@@ -490,7 +488,7 @@ func TestUpdateUser(t *testing.T) {
 			if tt.wantStatus == 200 {
 				users, err := testingHelper.FindAllUsers(context.Background(), db)
 				assert.NoError(t, err)
-				assert.Equal(t, "http://minio:9000/icons/testUser1", users[0].Icon)
+				assert.Equal(t, "http://localhost:9000/icons/testUser1", users[0].Icon)
 				assert.Equal(t, "Hello!", users[0].SelfIntroduction)
 			}
 
@@ -567,7 +565,11 @@ func TestDeleteUser(t *testing.T) {
 				token, err = lib.GenerateToken(tt.args.userName)
 			}
 			assert.NoError(t, err)
-			req.Header.Add(helper.HeaderKeyAuthorization, "Bearer "+token)
+			cookie := &http.Cookie{
+				Name:  helper.CookieIDToken,
+				Value: token,
+			}
+			req.AddCookie(cookie)
 			resp := httptest.NewRecorder()
 
 			// test target

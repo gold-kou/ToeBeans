@@ -6,17 +6,16 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/gold-kou/ToeBeans/backend/app/lib"
-
 	"github.com/gold-kou/ToeBeans/backend/app/adapter/http/helper"
 	applicationLog "github.com/gold-kou/ToeBeans/backend/app/adapter/http/log"
 	"github.com/gold-kou/ToeBeans/backend/app/adapter/mysql"
 	"github.com/gold-kou/ToeBeans/backend/app/application/usecase"
 	modelHTTP "github.com/gold-kou/ToeBeans/backend/app/domain/model/http"
 	"github.com/gold-kou/ToeBeans/backend/app/domain/repository"
+	"github.com/gold-kou/ToeBeans/backend/app/lib"
 )
 
-func FollowController(w http.ResponseWriter, r *http.Request) {
+func PasswordController(w http.ResponseWriter, r *http.Request) {
 	l, err := applicationLog.NewLogger()
 	if err != nil {
 		log.Panic(err)
@@ -24,8 +23,8 @@ func FollowController(w http.ResponseWriter, r *http.Request) {
 	l.LogHTTPAccess(r)
 
 	switch r.Method {
-	case http.MethodPost:
-		err = registerFollow(r)
+	case http.MethodPut:
+		err = changePassword(r)
 		switch err := err.(type) {
 		case nil:
 			helper.ResponseSimpleSuccess(w)
@@ -41,12 +40,12 @@ func FollowController(w http.ResponseWriter, r *http.Request) {
 			helper.ResponseInternalServerError(w, err.Error())
 		}
 	default:
-		methods := []string{http.MethodPost}
+		methods := []string{http.MethodPut}
 		helper.ResponseNotAllowedMethod(w, "not allowed method", methods)
 	}
 }
 
-func registerFollow(r *http.Request) error {
+func changePassword(r *http.Request) (err error) {
 	// authorization
 	cookie, err := r.Cookie(helper.CookieIDToken)
 	if err != nil {
@@ -63,20 +62,20 @@ func registerFollow(r *http.Request) error {
 	}
 
 	// get request parameter
-	var reqRegisterFollow *modelHTTP.Follow
+	var reqChangePassword *modelHTTP.RequestChangePassword
 	b, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		log.Println(err)
 		return helper.NewBadRequestError(err.Error())
 	}
 	defer r.Body.Close()
-	if err := json.Unmarshal(b, &reqRegisterFollow); err != nil {
+	if err = json.Unmarshal(b, &reqChangePassword); err != nil {
 		log.Println(err)
 		return helper.NewBadRequestError(err.Error())
 	}
 
 	// validation check
-	err = reqRegisterFollow.ValidateParam()
+	err = reqChangePassword.ValidateParam()
 	if err != nil {
 		log.Println(err)
 		return helper.NewBadRequestError(err.Error())
@@ -93,17 +92,18 @@ func registerFollow(r *http.Request) error {
 
 	// repository
 	userRepo := repository.NewUserRepository(db)
-	followRepo := repository.NewFollowRepository(db)
-	notificationRepo := repository.NewNotificationRepository(db)
 
 	// UseCase
-	u := usecase.NewRegisterFollow(r.Context(), tx, tokenUserName, reqRegisterFollow, userRepo, followRepo, notificationRepo)
-	if err = u.RegisterFollowUseCase(); err != nil {
+	u := usecase.NewChangePassword(r.Context(), tx, tokenUserName, reqChangePassword, userRepo)
+	if err = u.ChangePasswordUseCase(); err != nil {
 		log.Println(err)
-		if err == repository.ErrDuplicateData {
-			return helper.NewBadRequestError("Whoops, you already followed the user")
+		if err == repository.ErrNotExistsData || err == usecase.ErrNotCorrectPassword {
+			return helper.NewBadRequestError(err.Error())
+		}
+		if err == lib.ErrTokenInvalidNotExistingUserName {
+			return helper.NewAuthorizationError(err.Error())
 		}
 		return helper.NewInternalServerError(err.Error())
 	}
-	return err
+	return
 }

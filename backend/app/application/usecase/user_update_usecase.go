@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/base64"
 	"os"
+	"strings"
 
 	"github.com/gold-kou/ToeBeans/backend/app/lib"
 
@@ -71,6 +72,9 @@ func (user *UpdateUser) UpdateUserUseCase() error {
 		if err != nil {
 			return err
 		}
+		// localhostに置換したが、ブラウザの仕様でCORBされる。imgタグでオリジン跨ぎの画像を読み込みできない。
+		// with MIME type text/html. See https://www.chromestatus.com/feature/5629709824032768 for more details.
+		o.Location = strings.Replace(o.Location, "minio", "localhost", 1)
 		err = user.userRepo.UpdateIconWhereName(user.ctx, o.Location, user.userName)
 		if err != nil {
 			return err
@@ -82,9 +86,6 @@ func (user *UpdateUser) UpdateUserUseCase() error {
 		if err != nil {
 			return err
 		}
-	}
-	if err != nil {
-		return err
 	}
 	return nil
 }

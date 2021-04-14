@@ -109,7 +109,11 @@ func TestDeletePosting(t *testing.T) {
 				token, err = lib.GenerateToken(dummy.User1.Name)
 			}
 			assert.NoError(t, err)
-			req.Header.Add(helper.HeaderKeyAuthorization, "Bearer "+token)
+			cookie := &http.Cookie{
+				Name:  helper.CookieIDToken,
+				Value: token,
+			}
+			req.AddCookie(cookie)
 			resp := httptest.NewRecorder()
 
 			// test target

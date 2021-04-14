@@ -69,9 +69,18 @@ func CommentsController(w http.ResponseWriter, r *http.Request) {
 
 func getComments(r *http.Request) (comments []model.Comment, err error) {
 	// authorization
-	tokenUserName, err := lib.VerifyHeaderToken(r)
+	//tokenUserName, err := lib.VerifyHeaderToken(r)
+	//if err != nil {
+	//	log.Println(err)
+	//	return nil, helper.NewAuthorizationError(err.Error())
+	//}
+	cookie, err := r.Cookie(helper.CookieIDToken)
 	if err != nil {
 		log.Println(err)
+		return nil, helper.NewAuthorizationError(err.Error())
+	}
+	tokenUserName, err := lib.VerifyToken(cookie.Value)
+	if err != nil {
 		return nil, helper.NewAuthorizationError(err.Error())
 	}
 

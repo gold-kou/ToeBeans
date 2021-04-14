@@ -10,7 +10,7 @@ var RespSimpleSuccess = `
 var ErrForbidden = `
 {
   "status": 403,
-  "message": "not allowed for guest user"
+  "message": "not allowed to guest user"
 }
 `
 

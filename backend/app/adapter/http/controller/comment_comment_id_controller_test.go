@@ -9,11 +9,12 @@ import (
 	"strconv"
 	"testing"
 
+	"github.com/gold-kou/ToeBeans/backend/app/adapter/http/helper"
+
 	"github.com/gorilla/mux"
 
 	"github.com/gold-kou/ToeBeans/backend/app/domain/repository"
 
-	"github.com/gold-kou/ToeBeans/backend/app/adapter/http/helper"
 	"github.com/gold-kou/ToeBeans/backend/app/lib"
 	"github.com/gold-kou/ToeBeans/backend/testing/dummy"
 
@@ -96,7 +97,11 @@ func TestDeleteComment(t *testing.T) {
 				token, err = lib.GenerateToken(dummy.User1.Name)
 			}
 			assert.NoError(t, err)
-			req.Header.Add(helper.HeaderKeyAuthorization, "Bearer "+token)
+			cookie := &http.Cookie{
+				Name:  helper.CookieIDToken,
+				Value: token,
+			}
+			req.AddCookie(cookie)
 			resp := httptest.NewRecorder()
 
 			// test target

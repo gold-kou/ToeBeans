@@ -23,9 +23,10 @@ var successRespGetPostings = `
       "posting_id": 1,
       "user_name": "testUser1",
       "uploaded_at": "2020-01-01T00:00:00+09:00",
-      "title": "20200101000000_testUser1_This is a sample posting.",
-      "image_url": "http://minio:9000/postings/20200101000000_testUser1_This%20is%20a%20sample%20posting.",
-      "liked": 0
+      "title": "This is a sample posting.",
+      "image_url": "http://localhost:9000/postings/20200101000000_testUser1",
+      "liked_count": 0,
+      "liked": false
     }
   ]
 }
@@ -133,7 +134,11 @@ func TestGetPostings(t *testing.T) {
 			assert.NoError(t, err)
 			token, err := lib.GenerateToken(dummy.User1.Name)
 			assert.NoError(t, err)
-			req.Header.Add(helper.HeaderKeyAuthorization, "Bearer "+token)
+			cookie := &http.Cookie{
+				Name:  helper.CookieIDToken,
+				Value: token,
+			}
+			req.AddCookie(cookie)
 			resp := httptest.NewRecorder()
 
 			// test target

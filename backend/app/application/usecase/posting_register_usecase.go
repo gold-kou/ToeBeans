@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/base64"
 	"os"
+	"strings"
 
 	"github.com/gold-kou/ToeBeans/backend/app/lib"
 
@@ -55,20 +56,23 @@ func (posting *RegisterPosting) RegisterPostingUseCase() error {
 		return ErrDecodeImage
 	}
 
-	// TODO need zip?
-
 	// put decoded file to s3
-	key := lib.NowFunc().Format(lib.DateTimeFormatNoSeparator) + "_" + posting.tokenUserName + "_" + posting.reqRegisterPosting.Title
+	key := lib.NowFunc().Format(lib.DateTimeFormatNoSeparator) + "_" + posting.tokenUserName
 	o, err := aws.UploadObject(os.Getenv("S3_BUCKET_POSTINGS"), key, decodedImg)
 	if err != nil {
 		return err
 	}
 
 	// INSERT
+	if os.Getenv("APP_ENV") == "development" {
+		// localhostに置換したが、ブラウザの仕様でCORBされる。imgタグでオリジン跨ぎの画像を読み込みできない。
+		// with MIME type text/html. See https://www.chromestatus.com/feature/5629709824032768 for more details.
+		o.Location = strings.Replace(o.Location, "minio", "localhost", 1)
+	}
 	err = posting.tx.Do(posting.ctx, func(ctx context.Context) error {
 		u := model.Posting{
 			UserName: posting.tokenUserName,
-			Title:    key,
+			Title:    posting.reqRegisterPosting.Title,
 			ImageURL: o.Location,
 		}
 		err := posting.postingRepo.Create(ctx, &u)

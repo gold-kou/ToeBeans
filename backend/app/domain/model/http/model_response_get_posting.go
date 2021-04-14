@@ -31,5 +31,8 @@ type ResponseGetPosting struct {
 	ImageUrl string `json:"image_url,omitempty"`
 
 	// the number of liked
-	Liked int64 `json:"liked"`
+	LikedCount int64 `json:"liked_count"`
+
+	// liked or not by request user
+	Liked bool `json:"liked"`
 }

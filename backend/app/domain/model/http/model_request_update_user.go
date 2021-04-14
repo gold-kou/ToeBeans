@@ -14,7 +14,7 @@ type RequestUpdateUser struct {
 	// password
 	Password string `json:"password,omitempty"`
 
-	// icon image file of base64 encoded and zipped
+	// base64 encoded file
 	Icon string `json:"icon,omitempty"`
 
 	// self introduction

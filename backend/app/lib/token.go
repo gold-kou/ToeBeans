@@ -22,6 +22,7 @@ var ErrNotFoundClaims = errors.New("not found claims in token")
 var ErrNotFoundName = errors.New("not found name in token")
 
 const GuestUserName = "guest"
+const TokenExpirationHour = 24
 
 func GenerateToken(userName string) (tokenString string, err error) {
 	// header
@@ -32,7 +33,7 @@ func GenerateToken(userName string) (tokenString string, err error) {
 	claims["iss"] = "ToeBeans"
 	claims["name"] = userName
 	claims["iat"] = time.Now()
-	claims["exp"] = time.Now().Add(time.Hour * 24).Unix()
+	claims["exp"] = time.Now().Add(time.Hour * TokenExpirationHour).Unix()
 
 	// generate token by secret key
 	tokenString, err = token.SignedString([]byte(os.Getenv("JWT_SECRET_KEY")))

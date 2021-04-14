@@ -10,6 +10,7 @@ services:
       - LOG_LEVEL=debug
       - SYSTEM_EMAIL=
       - JWT_SECRET_KEY=samplekey
+      - CSRF_AUTH_KEY=abcdefghijklmnopqrstuvwxyz123456 # must be 32 length
       - DB_NAME=toebeans
       - DB_USER=toebeans
       - DB_PASS=secret

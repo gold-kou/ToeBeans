@@ -44,12 +44,15 @@ func UserController(w http.ResponseWriter, r *http.Request) {
 		switch err := err.(type) {
 		case nil:
 			resp := modelHTTP.ResponseGetUser{
-				UserName:     user.Name,
-				Icon:         user.Icon,
-				PostingCount: user.PostingCount,
-				LikeCount:    user.LikeCount,
-				LikedCount:   user.LikedCount,
-				CreatedAt:    user.CreatedAt,
+				UserName:         user.Name,
+				Icon:             user.Icon,
+				SelfIntroduction: user.SelfIntroduction,
+				PostingCount:     user.PostingCount,
+				LikeCount:        user.LikeCount,
+				LikedCount:       user.LikedCount,
+				FollowCount:      user.FollowCount,
+				FollowedCount:    user.FollowedCount,
+				CreatedAt:        user.CreatedAt,
 			}
 			w.Header().Set(helper.HeaderKeyContentType, helper.HeaderValueApplicationJSON)
 			w.WriteHeader(http.StatusOK)
@@ -152,19 +155,28 @@ func registerUser(r *http.Request) error {
 
 func getUser(r *http.Request) (user model.User, err error) {
 	// authorization
-	tokenUserName, err := lib.VerifyHeaderToken(r)
+	cookie, err := r.Cookie(helper.CookieIDToken)
 	if err != nil {
 		log.Println(err)
-		return model.User{}, helper.NewAuthorizationError(err.Error())
+		return user, helper.NewAuthorizationError(err.Error())
+	}
+	tokenUserName, err := lib.VerifyToken(cookie.Value)
+	if err != nil {
+		return user, helper.NewAuthorizationError(err.Error())
 	}
 
 	// get request parameter
 	userName := r.URL.Query().Get("user_name")
 
 	// validation check
-	if err = validation.Validate(userName, validation.Required, validation.Length(modelHTTP.MinVarcharLength, modelHTTP.MaxVarcharLength), is.Alphanumeric); err != nil {
-		log.Println(err)
-		return model.User{}, helper.NewBadRequestError(err.Error())
+	if userName != "" {
+		if err = validation.Validate(userName, validation.Length(modelHTTP.MinVarcharLength, modelHTTP.MaxVarcharLength), is.Alphanumeric); err != nil {
+			log.Println(err)
+			return model.User{}, helper.NewBadRequestError(err.Error())
+		}
+	} else {
+		// パラメータuser_nameが指定されていなければIDトークンのユーザ名を使う
+		userName = tokenUserName
 	}
 
 	// db connect
@@ -196,9 +208,13 @@ func getUser(r *http.Request) (user model.User, err error) {
 
 func updateUser(r *http.Request) (err error) {
 	// authorization
-	tokenUserName, err := lib.VerifyHeaderToken(r)
+	cookie, err := r.Cookie(helper.CookieIDToken)
 	if err != nil {
 		log.Println(err)
+		return helper.NewAuthorizationError(err.Error())
+	}
+	tokenUserName, err := lib.VerifyToken(cookie.Value)
+	if err != nil {
 		return helper.NewAuthorizationError(err.Error())
 	}
 	if tokenUserName == lib.GuestUserName {
@@ -262,9 +278,13 @@ func updateUser(r *http.Request) (err error) {
 
 func deleteUser(r *http.Request) (err error) {
 	// authorization
-	tokenUserName, err := lib.VerifyHeaderToken(r)
+	cookie, err := r.Cookie(helper.CookieIDToken)
 	if err != nil {
 		log.Println(err)
+		return helper.NewAuthorizationError(err.Error())
+	}
+	tokenUserName, err := lib.VerifyToken(cookie.Value)
+	if err != nil {
 		return helper.NewAuthorizationError(err.Error())
 	}
 	if tokenUserName == lib.GuestUserName {

@@ -24,9 +24,10 @@ type GetPostings struct {
 	userName      string
 	userRepo      *repository.UserRepository
 	postingRepo   *repository.PostingRepository
+	likeRepo      *repository.LikeRepository
 }
 
-func NewGetPostings(ctx context.Context, tx mysql.DBTransaction, tokenUserName string, sinceAt time.Time, limit int8, userName string, userRepo *repository.UserRepository, postingRepo *repository.PostingRepository) *GetPostings {
+func NewGetPostings(ctx context.Context, tx mysql.DBTransaction, tokenUserName string, sinceAt time.Time, limit int8, userName string, userRepo *repository.UserRepository, postingRepo *repository.PostingRepository, likeRepo *repository.LikeRepository) *GetPostings {
 	return &GetPostings{
 		ctx:           ctx,
 		tx:            tx,
@@ -36,17 +37,18 @@ func NewGetPostings(ctx context.Context, tx mysql.DBTransaction, tokenUserName s
 		userName:      userName,
 		userRepo:      userRepo,
 		postingRepo:   postingRepo,
+		likeRepo:      likeRepo,
 	}
 }
 
-func (p *GetPostings) GetPostingsUseCase() (postings []model.Posting, err error) {
+func (p *GetPostings) GetPostingsUseCase() (postings []model.Posting, likes []model.Like, err error) {
 	// check userName in token exists
 	_, err = p.userRepo.GetUserWhereName(p.ctx, p.tokenUserName)
 	if err != nil {
 		if err == repository.ErrNotExistsData {
-			return nil, lib.ErrTokenInvalidNotExistingUserName
+			return nil, nil, lib.ErrTokenInvalidNotExistingUserName
 		}
-		return nil, err
+		return nil, nil, err
 	}
 
 	// check userName exists
@@ -57,13 +59,27 @@ func (p *GetPostings) GetPostingsUseCase() (postings []model.Posting, err error)
 		}
 	}
 
+	likes, err = p.likeRepo.GetWhereUserName(p.ctx, p.tokenUserName)
+	if err != nil {
+		if err == repository.ErrNotExistsData {
+			// not error
+			return nil, nil, nil
+		}
+		return
+	}
+
 	postings, err = p.postingRepo.GetPostings(p.ctx, p.sinceAt, p.limit, p.userName)
 	if err != nil {
 		if err == repository.ErrNotExistsData {
 			// not error
-			return nil, nil
+			return nil, nil, nil
 		}
 		return
 	}
+	//for i, posting := range postings {
+	//	if os.Getenv("APP_ENV") == "development" && strings.Contains(posting.ImageURL, "minio") {
+	//		postings[i].ImageURL = strings.Replace(posting.ImageURL, "minio", "localhost", -1)
+	//	}
+	//}
 	return
 }
