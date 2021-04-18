@@ -135,7 +135,7 @@ paths:
         "500":
           $ref: '#/components/responses/internalServerError'
   /user-activation/{user_name}/{activation_key}:
-    put:
+    get:
       description: activate user by email
       operationId: activateUser
       tags:

@@ -21,6 +21,15 @@ export async function getMyProfile() {
   }
 }
 
+export async function registerUser(userName, email, password) {
+  const reqBody = { user_name: userName, email: email, password: password };
+  try {
+    return await axios.post("/user", reqBody);
+  } catch (error) {
+    throw error.response;
+  }
+}
+
 export async function getUser(userName) {
   try {
     return await axios.get(`/user?{userName}`);

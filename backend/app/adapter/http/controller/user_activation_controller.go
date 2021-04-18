@@ -24,7 +24,7 @@ func UserActivationController(w http.ResponseWriter, r *http.Request) {
 	l.LogHTTPAccess(r)
 
 	switch r.Method {
-	case http.MethodPut:
+	case http.MethodGet:
 		err = activateUser(r)
 		switch err := err.(type) {
 		case nil:
@@ -39,7 +39,7 @@ func UserActivationController(w http.ResponseWriter, r *http.Request) {
 			helper.ResponseInternalServerError(w, err.Error())
 		}
 	default:
-		methods := []string{http.MethodPut}
+		methods := []string{http.MethodGet}
 		helper.ResponseNotAllowedMethod(w, "not allowed method", methods)
 	}
 }

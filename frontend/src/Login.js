@@ -5,7 +5,6 @@ import { login } from "./User";
 
 import "./Login.css";
 
-// TODO ディレクトリをToeBeansへ移す
 const Login = props => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -36,7 +35,7 @@ const Login = props => {
   }
 
   return (
-    <Form className="loginForm">
+    <Form className="registrationLoginForm">
       {errMessage && <Alert variant="danger">{errMessage}</Alert>}
       <p>
         <b>Login</b>

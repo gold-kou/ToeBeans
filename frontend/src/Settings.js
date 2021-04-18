@@ -8,6 +8,7 @@ import Sidebar from "./Sidebar";
 import "./Settings.css";
 import "./common.css";
 
+// TODO ユーザ削除（退会）
 const Settings = () => {
   useEffect(() => {}, []);
 

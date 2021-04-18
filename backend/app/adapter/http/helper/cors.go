@@ -4,19 +4,6 @@ import (
 	"net/http"
 )
 
-//func CORS(router *mux.Router) http.Handler {
-//	var options []handlers.CORSOption
-//	if os.Getenv("APP_ENV") == "development" {
-//		options = []handlers.CORSOption{
-//			handlers.AllowedMethods([]string{"GET", "HEAD", "POST", "PUT", "DELETE"}),
-//			handlers.AllowedHeaders([]string{"X-Requested-With", "Content-Type", "Authorization"}),
-//			handlers.AllowCredentials(),
-//			//handlers.AllowedOrigins([]string{"http://localhost:3000"}),
-//		}
-//	}
-//	return handlers.CORS(options...)(router)
-//}
-
 func CORSMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Access-Control-Allow-Headers", "X-Requested-With, Content-Type, Authorization, X-CSRF-Token")
