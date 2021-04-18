@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
 import axios from "axios";
 
 import Auth from "./Auth";
+import UserRegistration from "./UserRegistration";
 import Login from "./Login";
 import Logout from "./Logout";
 import Main from "./Main";
@@ -26,6 +27,7 @@ function App() {
   return (
     <Router>
       <Switch>
+        <Route exact path="/user-registration" component={UserRegistration} />
         <Route exact path="/login" component={Login} />
         <Route exact path="/logout" component={Logout} />
         <Auth>

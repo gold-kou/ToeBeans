@@ -6,9 +6,9 @@ services:
       target: debugger
     environment:
       - APP_ENV=development
+      - DOMAIN=localhost:8080
       - TZ=Asia/Tokyo
       - LOG_LEVEL=debug
-      - SYSTEM_EMAIL=
       - JWT_SECRET_KEY=samplekey
       - CSRF_AUTH_KEY=abcdefghijklmnopqrstuvwxyz123456 # must be 32 length
       - DB_NAME=toebeans
@@ -16,10 +16,10 @@ services:
       - DB_PASS=secret
       - DB_HOST=db
       - DB_PORT=3306
-      - AWS_ACCESS_KEY=test_access_key
-      - AWS_SECRET_KEY=test_secret_key
-      - AWS_REGION=us-east-1
-      - AWS_SES_ENDPOINT=email.us-east-1.amazonaws.com # https://docs.aws.amazon.com/general/latest/gr/ses.html
+      - AWS_ACCESS_KEY=
+      - AWS_SECRET_KEY=
+      - AWS_REGION=us-west-2
+      - SYSTEM_EMAIL=no-reply@toebeans.tk
       - S3_BUCKET_POSTINGS=/postings
       - S3_BUCKET_ICONS=/icons
     volumes:

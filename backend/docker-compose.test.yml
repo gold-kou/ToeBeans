@@ -8,7 +8,6 @@ services:
       - APP_ENV=development
       - TZ=Asia/Tokyo
       - LOG_LEVEL=debug
-      - SYSTEM_EMAIL=
       - JWT_SECRET_KEY=samplekey
       - DB_NAME=toebeans
       - DB_USER=toebeans
@@ -17,8 +16,8 @@ services:
       - DB_PORT=3306
       - AWS_ACCESS_KEY=test_access_key
       - AWS_SECRET_KEY=test_secret_key
-      - AWS_REGION=us-east-1
-      - AWS_SES_ENDPOINT=email.us-east-1.amazonaws.com # https://docs.aws.amazon.com/general/latest/gr/ses.html
+      - AWS_REGION=us-west-2
+      - SYSTEM_EMAIL=no-reply@toebeans.tk
       - S3_BUCKET_POSTINGS=/postings
       - S3_BUCKET_ICONS=/icons
     volumes:
@@ -59,7 +58,7 @@ services:
     environment:
       MINIO_ACCESS_KEY: test_access_key
       MINIO_SECRET_KEY: test_secret_key
-      MINIO_REGION: us-east-1
+      MINIO_REGION: us-west-2
     entrypoint: sh
     command: -c 'mkdir -p /images/icons && mkdir -p /images/postings && /usr/bin/minio server /images'
     networks:

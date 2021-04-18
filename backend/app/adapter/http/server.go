@@ -41,6 +41,5 @@ func Serve() {
 	r.HandleFunc("/follow/{followed_user_name}", controller.FollowUserNameController)
 
 	log.Println("Server started!")
-	//log.Fatal(http.ListenAndServe(":8080", helper.CORS(r)))
 	log.Fatal(http.ListenAndServe(":8080", r))
 }
