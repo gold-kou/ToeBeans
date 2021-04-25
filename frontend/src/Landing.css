@@ -1,0 +1,18 @@
+.landing {
+    text-align: center;
+    font-family: system-ui;
+}
+
+.landing-image {
+    width: 100%;
+    max-width: 100%;
+    height: auto; 
+}
+
+.image-center {
+    text-align: center;
+}
+
+.landing-button {
+    textTransform: 'none',
+}

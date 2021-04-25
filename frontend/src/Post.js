@@ -100,7 +100,7 @@ const Post = forwardRef(
             <p>{title}</p>
           </div>
 
-          <img src={imageURL} alt="" />
+          <img className="post__image" src={imageURL} alt="" />
 
           <div className="post__footer">
             <IconButton onClick={changeLiked}>
