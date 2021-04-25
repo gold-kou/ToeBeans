@@ -51,6 +51,14 @@ export async function updateUser(newPassword, avator, selfIntroduction) {
   }
 }
 
+export async function deleteUser() {
+  try {
+    return await axios.delete("/user");
+  } catch (error) {
+    throw error.response;
+  }
+}
+
 export async function changePassword(oldPassword, newPassword) {
   const reqBody = {
     old_password: oldPassword,
