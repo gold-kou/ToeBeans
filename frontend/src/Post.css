@@ -28,3 +28,8 @@
 .post__avatar {
   padding: 1.5rem;
 }
+
+.post__image {
+  max-width: 300px;
+  height: auto; 
+}

@@ -124,8 +124,10 @@ const UserRegistration = props => {
         </button>
       </form>
 
+      <br />
       <div className="mt-2">
         <span>Already have an account? </span>
+        <br />
         <span className="loginText" onClick={() => redirectToLogin()}>
           Login here
         </span>

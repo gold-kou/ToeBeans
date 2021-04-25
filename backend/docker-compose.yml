@@ -16,8 +16,8 @@ services:
       - DB_PASS=secret
       - DB_HOST=db
       - DB_PORT=3306
-      - AWS_ACCESS_KEY=
-      - AWS_SECRET_KEY=
+      - AWS_ACCESS_KEY= # must not be real key
+      - AWS_SECRET_KEY= # must not be real key
       - AWS_REGION=us-west-2
       - SYSTEM_EMAIL=no-reply@toebeans.tk
       - S3_BUCKET_POSTINGS=/postings
