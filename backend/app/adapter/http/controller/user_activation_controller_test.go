@@ -50,7 +50,7 @@ var errRespUserActivationActivationKeyNotUUID = `
 var errRespUserActivationNotFound = `
 {
   "status": 400,
-  "message": "no such user_name and activation_key"
+  "message": "wrong user_name or activation_key, or might be already activated"
 }
 `
 

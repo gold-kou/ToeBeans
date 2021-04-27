@@ -44,15 +44,15 @@ var errReqLoginNotEmailFormat = `
   "password": "Password1234"
 }
 `
-var errReqLoginWrongPassword = `
-{
-  "email": "testUser1@example.com",
-  "password": "Password9999"
-}
-`
 var errReqLoginNotExistingEmail = `
 {
   "email": "XXXXX@example.com",
+  "password": "Password9999"
+}
+`
+var errReqLoginWrongPassword = `
+{
+  "email": "testUser1@example.com",
   "password": "Password9999"
 }
 `
@@ -85,6 +85,12 @@ var errRespLoginWrongPassword = `
 {
   "status": 400,
   "message": "Wrong username or password"
+}
+`
+var errRespLoginNotVerifiedUser = `
+{
+  "status": 403,
+  "message": "not email verified user"
 }
 `
 
@@ -141,6 +147,13 @@ func TestLoginController(t *testing.T) {
 			wantStatus: http.StatusBadRequest,
 		},
 		{
+			name:       "error not verified user",
+			args:       args{reqBody: successReqLogin},
+			method:     http.MethodPost,
+			want:       errRespLoginNotVerifiedUser,
+			wantStatus: http.StatusForbidden,
+		},
+		{
 			name:       "not allowed method",
 			args:       args{},
 			method:     http.MethodHead,
@@ -163,6 +176,10 @@ func TestLoginController(t *testing.T) {
 			dummy.User1.Password = string(hashedPassword)
 			err = userRepo.Create(context.Background(), &dummy.User1)
 			assert.NoError(t, err)
+			if tt.want != errRespLoginNotVerifiedUser {
+				err = userRepo.UpdateEmailVerifiedWhereNameActivationKey(context.Background(), true, dummy.User1.Name, dummy.User1.ActivationKey)
+				assert.NoError(t, err)
+			}
 
 			// http request
 			req, err := http.NewRequest(tt.method, "/login", strings.NewReader(tt.args.reqBody))

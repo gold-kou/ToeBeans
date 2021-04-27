@@ -40,16 +40,6 @@ func (e *AuthorizationError) Error() string {
 	return e.Message
 }
 
-func NewNotFoundError(message string) *NotFoundError {
-	return &NotFoundError{
-		Message: message,
-	}
-}
-
-func (e *NotFoundError) Error() string {
-	return e.Message
-}
-
 func NewForbiddenError(message string) *ForbiddenError {
 	return &ForbiddenError{
 		Message: message,
@@ -57,6 +47,16 @@ func NewForbiddenError(message string) *ForbiddenError {
 }
 
 func (e *ForbiddenError) Error() string {
+	return e.Message
+}
+
+func NewNotFoundError(message string) *NotFoundError {
+	return &NotFoundError{
+		Message: message,
+	}
+}
+
+func (e *NotFoundError) Error() string {
 	return e.Message
 }
 
