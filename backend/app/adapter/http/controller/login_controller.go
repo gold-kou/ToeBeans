@@ -55,6 +55,8 @@ func LoginController(w http.ResponseWriter, r *http.Request) {
 			helper.ResponseBadRequest(w, err.Error())
 		case *helper.AuthorizationError:
 			helper.ResponseUnauthorized(w, err.Error())
+		case *helper.ForbiddenError:
+			helper.ResponseForbidden(w, err.Error())
 		case *helper.InternalServerError:
 			helper.ResponseInternalServerError(w, err.Error())
 		default:
@@ -105,6 +107,9 @@ func login(r *http.Request) (idToken string, err error) {
 		log.Println(err)
 		if err == repository.ErrNotExistsData || err == usecase.ErrNotCorrectPassword {
 			return "", helper.NewBadRequestError(errMsgWrongUserNameOrPassword)
+		}
+		if err == usecase.ErrNotVerifiedUser {
+			return "", helper.NewForbiddenError(err.Error())
 		}
 		return "", helper.NewInternalServerError(err.Error())
 	}

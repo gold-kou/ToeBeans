@@ -46,6 +46,8 @@ paths:
           $ref: '#/components/responses/badRequest'
         "401":
           $ref: '#/components/responses/unauthorized'
+        "403":
+          $ref: '#/components/responses/forbidden'
         "405":
           $ref: '#/components/responses/notAllowedMethod'
         "500":

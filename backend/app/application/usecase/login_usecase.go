@@ -37,6 +37,10 @@ func (l *Login) LoginUseCase() (idToken string, err error) {
 		return
 	}
 
+	if !user.EmailVerified {
+		return "", ErrNotVerifiedUser
+	}
+
 	// password check
 	if user.Name != lib.GuestUserName {
 		if err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(l.reqLogin.Password)); err != nil {
