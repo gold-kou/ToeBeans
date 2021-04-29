@@ -27,23 +27,31 @@ func Serve() {
 	r.Use(csrfMiddleware)
 
 	r.HandleFunc("/health", controller.HealthController)
+
 	r.HandleFunc("/csrf-token", controller.CSRFTokenController)
-	r.HandleFunc("/user", controller.UserController)
-	r.HandleFunc("/user-activation/{user_name}/{activation_key}", controller.UserActivationController)
-	r.HandleFunc("/password", controller.PasswordController)
-	r.HandleFunc("/password-reset-email", controller.PasswordResetEmailController)
-	r.HandleFunc("/password-reset", controller.PasswordResetController)
+
 	r.HandleFunc("/login", controller.LoginController)
+
+	r.HandleFunc("/user", controller.UserController)
+	r.HandleFunc("/user-activation/{user_name}/{activation_key}", controller.UserController)
+
+	r.HandleFunc("/password", controller.PasswordController)
+	r.HandleFunc("/password-reset-email", controller.PasswordController)
+	r.HandleFunc("/password-reset", controller.PasswordController)
+
 	r.HandleFunc("/posting", controller.PostingController)
-	r.HandleFunc("/postings", controller.PostingsController)
-	r.HandleFunc("/posting/{posting_id}", controller.PostingPostingIDController)
+	r.HandleFunc("/postings", controller.PostingController)
+	r.HandleFunc("/posting/{posting_id}", controller.PostingController)
+
 	r.HandleFunc("/like", controller.LikeController)
-	r.HandleFunc("/like/{posting_id}", controller.LikePostingIDController)
+	r.HandleFunc("/like/{posting_id}", controller.LikeController)
+
 	r.HandleFunc("/comment", controller.CommentController)
-	r.HandleFunc("/comments", controller.CommentsController)
-	r.HandleFunc("/comment/{comment_id}", controller.CommentCommentIDController)
+	r.HandleFunc("/comments", controller.CommentController)
+	r.HandleFunc("/comment/{comment_id}", controller.CommentController)
+
 	r.HandleFunc("/follow", controller.FollowController)
-	r.HandleFunc("/follow/{followed_user_name}", controller.FollowUserNameController)
+	r.HandleFunc("/follow/{followed_user_name}", controller.FollowController)
 
 	// graceful shutdown
 	server := &http.Server{Addr: fmt.Sprintf(":%v", 8080), Handler: r}

@@ -1176,7 +1176,7 @@ components:
         message:
           description: message
           type: string
-          example: 'Not Allowed Method'
+          example: 'Not Allowed Method Error'
       required:
         - status
         - message

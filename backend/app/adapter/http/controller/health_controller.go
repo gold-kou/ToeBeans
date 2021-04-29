@@ -21,6 +21,6 @@ func HealthController(w http.ResponseWriter, r *http.Request) {
 		helper.ResponseSimpleSuccess(w)
 	default:
 		methods := []string{http.MethodGet}
-		helper.ResponseNotAllowedMethod(w, "not allowed method", methods)
+		helper.ResponseNotAllowedMethod(w, errMsgNotAllowedMethod, methods)
 	}
 }

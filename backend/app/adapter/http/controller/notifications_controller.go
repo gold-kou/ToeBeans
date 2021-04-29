@@ -60,7 +60,7 @@ func NotificationsController(w http.ResponseWriter, r *http.Request) {
 		}
 	default:
 		methods := []string{http.MethodGet}
-		helper.ResponseNotAllowedMethod(w, "not allowed method", methods)
+		helper.ResponseNotAllowedMethod(w, errMsgNotAllowedMethod, methods)
 	}
 }
 
