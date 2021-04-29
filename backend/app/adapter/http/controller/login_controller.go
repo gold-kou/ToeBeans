@@ -64,7 +64,7 @@ func LoginController(w http.ResponseWriter, r *http.Request) {
 		}
 	default:
 		methods := []string{http.MethodPost}
-		helper.ResponseNotAllowedMethod(w, "not allowed method", methods)
+		helper.ResponseNotAllowedMethod(w, errMsgNotAllowedMethod, methods)
 	}
 }
 

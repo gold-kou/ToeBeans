@@ -43,7 +43,7 @@ func PasswordController(w http.ResponseWriter, r *http.Request) {
 			}
 		default:
 			methods := []string{http.MethodPut}
-			helper.ResponseNotAllowedMethod(w, "not allowed method", methods)
+			helper.ResponseNotAllowedMethod(w, errMsgNotAllowedMethod, methods)
 		}
 	case "/password-reset":
 		switch r.Method {
@@ -61,7 +61,7 @@ func PasswordController(w http.ResponseWriter, r *http.Request) {
 			}
 		default:
 			methods := []string{http.MethodPost}
-			helper.ResponseNotAllowedMethod(w, "not allowed method", methods)
+			helper.ResponseNotAllowedMethod(w, errMsgNotAllowedMethod, methods)
 		}
 	case "/password-reset-email":
 		switch r.Method {
@@ -79,7 +79,7 @@ func PasswordController(w http.ResponseWriter, r *http.Request) {
 			}
 		default:
 			methods := []string{http.MethodPost}
-			helper.ResponseNotAllowedMethod(w, "not allowed method", methods)
+			helper.ResponseNotAllowedMethod(w, errMsgNotAllowedMethod, methods)
 		}
 	default:
 		helper.ResponseInternalServerError(w, errMsgControllerPath)

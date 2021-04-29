@@ -50,7 +50,7 @@ func PostingController(w http.ResponseWriter, r *http.Request) {
 			}
 		default:
 			methods := []string{http.MethodPost}
-			helper.ResponseNotAllowedMethod(w, "not allowed method", methods)
+			helper.ResponseNotAllowedMethod(w, errMsgNotAllowedMethod, methods)
 		}
 	case r.URL.Path == "/postings":
 		switch r.Method {
@@ -98,7 +98,7 @@ func PostingController(w http.ResponseWriter, r *http.Request) {
 			}
 		default:
 			methods := []string{http.MethodGet}
-			helper.ResponseNotAllowedMethod(w, "not allowed method", methods)
+			helper.ResponseNotAllowedMethod(w, errMsgNotAllowedMethod, methods)
 		}
 	case strings.HasPrefix(r.URL.Path, "/posting/"):
 		switch r.Method {
@@ -120,7 +120,7 @@ func PostingController(w http.ResponseWriter, r *http.Request) {
 			}
 		default:
 			methods := []string{http.MethodDelete}
-			helper.ResponseNotAllowedMethod(w, "not allowed method", methods)
+			helper.ResponseNotAllowedMethod(w, errMsgNotAllowedMethod, methods)
 		}
 	default:
 		helper.ResponseInternalServerError(w, errMsgControllerPath)

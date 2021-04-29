@@ -46,7 +46,7 @@ func FollowController(w http.ResponseWriter, r *http.Request) {
 			}
 		default:
 			methods := []string{http.MethodPost}
-			helper.ResponseNotAllowedMethod(w, "not allowed method", methods)
+			helper.ResponseNotAllowedMethod(w, errMsgNotAllowedMethod, methods)
 		}
 	case strings.HasPrefix(r.URL.Path, "/follow/"):
 		switch r.Method {
@@ -68,7 +68,7 @@ func FollowController(w http.ResponseWriter, r *http.Request) {
 			}
 		default:
 			methods := []string{http.MethodDelete}
-			helper.ResponseNotAllowedMethod(w, "not allowed method", methods)
+			helper.ResponseNotAllowedMethod(w, errMsgNotAllowedMethod, methods)
 		}
 	default:
 		helper.ResponseInternalServerError(w, errMsgControllerPath)

@@ -108,7 +108,7 @@ func UserController(w http.ResponseWriter, r *http.Request) {
 			}
 		default:
 			methods := []string{http.MethodPost, http.MethodGet, http.MethodPut, http.MethodDelete}
-			helper.ResponseNotAllowedMethod(w, "not allowed method", methods)
+			helper.ResponseNotAllowedMethod(w, errMsgNotAllowedMethod, methods)
 		}
 	case strings.HasPrefix(r.URL.Path, "/user-activation/"):
 		switch r.Method {
@@ -128,7 +128,7 @@ func UserController(w http.ResponseWriter, r *http.Request) {
 			}
 		default:
 			methods := []string{http.MethodGet}
-			helper.ResponseNotAllowedMethod(w, "not allowed method", methods)
+			helper.ResponseNotAllowedMethod(w, errMsgNotAllowedMethod, methods)
 		}
 	default:
 		helper.ResponseInternalServerError(w, errMsgControllerPath)

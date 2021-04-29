@@ -17,6 +17,6 @@ var ErrForbidden = `
 var ErrNotAllowedMethod = `
 {
   "status": 405,
-  "message": "not allowed method"
+  "message": "not allowed method error"
 }
 `
