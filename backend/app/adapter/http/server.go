@@ -1,9 +1,14 @@
 package http
 
 import (
+	"context"
+	"fmt"
 	"log"
 	"net/http"
 	"os"
+	"os/signal"
+	"syscall"
+	"time"
 
 	"github.com/gorilla/csrf"
 
@@ -40,6 +45,26 @@ func Serve() {
 	r.HandleFunc("/follow", controller.FollowController)
 	r.HandleFunc("/follow/{followed_user_name}", controller.FollowUserNameController)
 
+	// graceful shutdown
+	server := &http.Server{Addr: fmt.Sprintf(":%v", 8080), Handler: r}
+	idleConnsClosed := make(chan struct{})
+	go func() {
+		sigCh := make(chan os.Signal, 1)
+		signal.Notify(sigCh, syscall.SIGTERM)
+		<-sigCh
+
+		ctx, cancel := context.WithTimeout(context.Background(), time.Duration(5))
+		defer cancel()
+		if e := server.Shutdown(ctx); e != nil {
+			// Error from closing listeners, or context timeout:
+			log.Panic("Failed to gracefully shutdown ", e)
+		}
+		close(idleConnsClosed)
+	}()
+
 	log.Println("Server started!")
-	log.Fatal(http.ListenAndServe(":8080", r))
+	if err := server.ListenAndServe(); err != http.ErrServerClosed {
+		log.Panic(err)
+	}
+	<-idleConnsClosed
 }
