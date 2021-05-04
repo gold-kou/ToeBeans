@@ -558,10 +558,19 @@ paths:
           $ref: '#/components/responses/notAllowedMethod'
         "500":
           $ref: '#/components/responses/internalServerError'
-  /health:
+  /health/liveness:
     get:
-      description: health check
-      operationId: getHealth
+      description: health check liveness
+      operationId: getHealthLiveness
+      tags:
+        - system
+      responses:
+        '200':
+          $ref: '#/components/responses/simpleSuccess'
+  /health/readiness:
+    get:
+      description: health check readiness
+      operationId: getHealthReadiness
       tags:
         - system
       responses:

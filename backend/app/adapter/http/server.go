@@ -12,9 +12,8 @@ import (
 
 	"github.com/gorilla/csrf"
 
-	"github.com/gold-kou/ToeBeans/backend/app/adapter/http/helper"
-
 	"github.com/gold-kou/ToeBeans/backend/app/adapter/http/controller"
+	"github.com/gold-kou/ToeBeans/backend/app/adapter/http/helper"
 
 	"github.com/gorilla/mux"
 )
@@ -26,30 +25,23 @@ func Serve() {
 	csrfMiddleware := csrf.Protect([]byte(os.Getenv("CSRF_AUTH_KEY")))
 	r.Use(csrfMiddleware)
 
-	r.HandleFunc("/health", controller.HealthController)
-
+	r.HandleFunc("/health/liveness", controller.HealthController)
+	r.HandleFunc("/health/readiness", controller.HealthController)
 	r.HandleFunc("/csrf-token", controller.CSRFTokenController)
-
 	r.HandleFunc("/login", controller.LoginController)
-
 	r.HandleFunc("/user", controller.UserController)
 	r.HandleFunc("/user-activation/{user_name}/{activation_key}", controller.UserController)
-
 	r.HandleFunc("/password", controller.PasswordController)
 	r.HandleFunc("/password-reset-email", controller.PasswordController)
 	r.HandleFunc("/password-reset", controller.PasswordController)
-
 	r.HandleFunc("/posting", controller.PostingController)
 	r.HandleFunc("/postings", controller.PostingController)
 	r.HandleFunc("/posting/{posting_id}", controller.PostingController)
-
 	r.HandleFunc("/like", controller.LikeController)
 	r.HandleFunc("/like/{posting_id}", controller.LikeController)
-
 	r.HandleFunc("/comment", controller.CommentController)
 	r.HandleFunc("/comments", controller.CommentController)
 	r.HandleFunc("/comment/{comment_id}", controller.CommentController)
-
 	r.HandleFunc("/follow", controller.FollowController)
 	r.HandleFunc("/follow/{followed_user_name}", controller.FollowController)
 
