@@ -13,5 +13,5 @@ package http
 type ResponseGetPostings struct {
 
 	// list of posting
-	Postings []ResponseGetPosting `json:"postings,omitempty"`
+	Postings []ResponseGetPosting `json:"postings"`
 }

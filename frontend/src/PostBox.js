@@ -74,7 +74,7 @@ function PostBox(onFileSelect) {
           type="submit"
           variant="contained"
           color="primary"
-          size="sm"
+          size="small"
           className="mt-5 mr-2 float-right"
           disabled={!isValid()}
         >

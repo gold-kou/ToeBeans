@@ -32,7 +32,7 @@ export async function registerUser(userName, email, password) {
 
 export async function getUser(userName) {
   try {
-    return await axios.get(`/user?{userName}`);
+    return await axios.get(`/user?${userName}`);
   } catch (error) {
     throw error.response;
   }
