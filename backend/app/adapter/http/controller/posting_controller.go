@@ -60,27 +60,25 @@ func PostingController(w http.ResponseWriter, r *http.Request) {
 			case nil:
 				var httpPostings []modelHTTP.ResponseGetPosting
 				var resp modelHTTP.ResponseGetPostings
-				if len(postings) >= 1 {
-					for _, p := range postings {
-						httpPosting := modelHTTP.ResponseGetPosting{
-							PostingId:  p.ID,
-							UserName:   p.UserName,
-							UploadedAt: p.CreatedAt,
-							Title:      p.Title,
-							ImageUrl:   p.ImageURL,
-							LikedCount: p.LikedCount,
-							Liked:      false,
-						}
-						for _, l := range likes {
-							if p.ID == l.PostingID {
-								httpPosting.Liked = true
-							}
-						}
-						httpPostings = append(httpPostings, httpPosting)
+				for _, p := range postings {
+					httpPosting := modelHTTP.ResponseGetPosting{
+						PostingId:  p.ID,
+						UserName:   p.UserName,
+						UploadedAt: p.CreatedAt,
+						Title:      p.Title,
+						ImageUrl:   p.ImageURL,
+						LikedCount: p.LikedCount,
+						Liked:      false,
 					}
-					resp = modelHTTP.ResponseGetPostings{
-						Postings: httpPostings,
+					for _, l := range likes {
+						if p.ID == l.PostingID {
+							httpPosting.Liked = true
+						}
 					}
+					httpPostings = append(httpPostings, httpPosting)
+				}
+				resp = modelHTTP.ResponseGetPostings{
+					Postings: httpPostings,
 				}
 				w.Header().Set(helper.HeaderKeyContentType, helper.HeaderValueApplicationJSON)
 				w.WriteHeader(http.StatusOK)
@@ -205,7 +203,10 @@ func getPostings(r *http.Request) (postings []model.Posting, likes []model.Like,
 		log.Println(err)
 		return nil, nil, helper.NewBadRequestError("since_at: cannot be blank.")
 	}
-	sinceAtFormatted, err := time.Parse(time.RFC3339, sinceAt)
+
+	jst, _ := time.LoadLocation("Asia/Tokyo")
+	// 例えば 2020-01-01T00:00:00+09:00 でリクエストされても 2020-01-01T00:00:00 09:00 と変換されてしまうため、それをreplaceしている。
+	sinceAtFormatted, err := time.ParseInLocation("2006-01-02T15:04:05+09:00", strings.Replace(sinceAt, " ", "+", 1), jst)
 	if err != nil {
 		log.Println(err)
 		return nil, nil, helper.NewBadRequestError(err.Error())

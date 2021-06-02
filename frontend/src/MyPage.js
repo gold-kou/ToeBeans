@@ -3,11 +3,13 @@ import { Button } from "@material-ui/core";
 import { Container, Row, Col, Alert, Form } from "react-bootstrap";
 import axios from "axios";
 import { useHistory } from "react-router-dom";
+import InfiniteScroll from "react-infinite-scroller";
 import FlipMove from "react-flip-move";
 
 import Sidebar from "./Sidebar";
 import { getMyProfile, updateUser } from "./User";
 import Post from "./Post";
+import loader from "./Feed";
 
 import "./MyPage.css";
 import "./common.css";
@@ -23,11 +25,54 @@ const MyPage = props => {
   const [followedCount, setFollowedCount] = useState(0);
   const [createdAt, setCreatedAt] = useState("");
   const [posts, setPosts] = useState([]);
+  const [sinceAt, setSinceAt] = useState("2100-01-01T00:00:00+09:00");
+  const [hasMore, setHasMore] = useState(true);
 
   const [successMessage, setSuccessMessage] = useState("");
   const [errMessage, setErrMessage] = useState("");
 
   const history = useHistory();
+
+  const getUserPosts = async () => {
+    await axios
+      .get(`/postings?since_at=${sinceAt}&limit=10&user_name=${userName}`)
+      .then(response => {
+        if (response.data.postings == null) {
+          setHasMore(false);
+          return;
+        }
+
+        setPosts([...posts, ...response.data.postings]);
+
+        setSinceAt(
+          response.data.postings[response.data.postings.length - 1].uploaded_at
+        );
+      })
+      .catch(error => {
+        if (error.response.data.status === 401) {
+          localStorage.removeItem("isLoggedIn");
+          history.push({ pathname: "login" });
+        } else {
+          setErrMessage(error.response.data.message);
+        }
+      });
+  };
+
+  const loader = (
+    <div className="loader" key={0}>
+      Loading ...
+    </div>
+  );
+
+  async function updateSelfIntroduction() {
+    updateUser("", "", selfIntroduction)
+      .then(() => {
+        setSuccessMessage("update success");
+      })
+      .catch(error => {
+        setErrMessage(error.data.message);
+      });
+  }
 
   // TODO 優先度低（アバターのアップロード表示機能）
   useEffect(() => {
@@ -51,36 +96,7 @@ const MyPage = props => {
           setErrMessage(error.response.data.message);
         }
       });
-
-    const getUserPosts = async () => {
-      await axios
-        .get(
-          `/postings?since_at=2100-01-01T00:00:00Z&limit=50&user_name=${userName}`
-        )
-        .then(response => {
-          setPosts(response.data.postings);
-        })
-        .catch(error => {
-          if (error.response.data.status === 401) {
-            localStorage.removeItem("isLoggedIn");
-            history.push({ pathname: "login" });
-          } else {
-            setErrMessage(error.response.data.message);
-          }
-        });
-    };
-    getUserPosts();
   }, []);
-
-  async function updateSelfIntroduction() {
-    updateUser("", "", selfIntroduction)
-      .then(() => {
-        setSuccessMessage("update success");
-      })
-      .catch(error => {
-        setErrMessage(error.data.message);
-      });
-  }
 
   return (
     <div className="main">
@@ -176,21 +192,28 @@ const MyPage = props => {
               </Container>
               <br></br>
               <br></br>
-              <FlipMove>
-                {posts.map(post => (
-                  <Post
-                    key={post.posting_id}
-                    postingID={post.posting_id}
-                    userName={post.user_name}
-                    title={post.title}
-                    imageURL={post.image_url}
-                    uploadedAt={post.uploaded_at}
-                    likedCount={post.liked_count}
-                    liked={post.liked}
-                    loginUserName={userName}
-                  />
-                ))}
-              </FlipMove>
+
+              <InfiniteScroll
+                loadMore={getUserPosts} //項目を読み込む際に処理するコールバック関数
+                hasMore={hasMore} //読み込みを行うかどうかの判定
+                loader={loader}
+              >
+                <FlipMove>
+                  {posts.map(post => (
+                    <Post
+                      key={post.posting_id}
+                      postingID={post.posting_id}
+                      userName={post.user_name}
+                      title={post.title}
+                      imageURL={post.image_url}
+                      uploadedAt={post.uploaded_at}
+                      likedCount={post.liked_count}
+                      liked={post.liked}
+                      loginUserName={userName}
+                    />
+                  ))}
+                </FlipMove>
+              </InfiniteScroll>
             </div>
           </Col>
         </Row>

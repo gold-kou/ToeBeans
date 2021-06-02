@@ -965,6 +965,8 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/responseGetPosting'
+      required:
+        - postings
     responseGetPosting:
       type: object
       properties:

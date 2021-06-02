@@ -251,14 +251,14 @@ func TestGetPostings(t *testing.T) {
 	}{
 		{
 			name:       "success",
-			args:       args{sinceAt: "2020-01-01T00:00:00Z", limit: "50"},
+			args:       args{sinceAt: "2100-01-01T00:00:00+09:00", limit: "50"},
 			method:     http.MethodGet,
 			want:       successRespGetPostings,
 			wantStatus: http.StatusOK,
 		},
 		{
 			name:       "success with user_name",
-			args:       args{sinceAt: "2020-01-01T00:00:00Z", limit: "50", userName: dummy.User1.Name},
+			args:       args{sinceAt: "2100-01-01T00:00:00+09:00", limit: "50", userName: dummy.User1.Name},
 			method:     http.MethodGet,
 			want:       successRespGetPostings,
 			wantStatus: http.StatusOK,
@@ -272,14 +272,14 @@ func TestGetPostings(t *testing.T) {
 		},
 		{
 			name:       "error empty limit",
-			args:       args{sinceAt: "2020-01-01T00:00:00Z"},
+			args:       args{sinceAt: "2020-01-01T00:00:00+09:00"},
 			method:     http.MethodGet,
 			want:       errRespGetPostingsWithoutLimit,
 			wantStatus: http.StatusBadRequest,
 		},
 		{
 			name:       "error not exists user_name",
-			args:       args{sinceAt: "2020-01-01T00:00:00Z", limit: "50", userName: dummy.User2.Name},
+			args:       args{sinceAt: "2020-01-01T00:00:00+09:00", limit: "50", userName: dummy.User2.Name},
 			method:     http.MethodGet,
 			want:       errRespGetPostingsNotExistsUserName,
 			wantStatus: http.StatusBadRequest,

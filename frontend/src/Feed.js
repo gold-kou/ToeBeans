@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useHistory } from "react-router-dom";
 import axios from "axios";
+import InfiniteScroll from "react-infinite-scroller";
 import FlipMove from "react-flip-move";
 import { Container, Row, Col, Alert } from "react-bootstrap";
 
@@ -16,9 +17,44 @@ function Feed() {
   const [userName, setUserName] = useState("");
   const [avator, setAvator] = useState("");
   const [posts, setPosts] = useState([]);
+  const [sinceAt, setSinceAt] = useState("2100-01-01T00:00:00+09:00");
+  const [hasMore, setHasMore] = useState(true); //再読み込み判定
   const [errMessage, setErrMessage] = useState("");
-
   const history = useHistory();
+
+  const getPosts = async () => {
+    await axios
+      .get(`/postings?since_at=${sinceAt}&limit=10`)
+      .then(response => {
+        //データ件数が0件の場合、これ以上は読み込みしない
+        if (response.data.postings == null) {
+          setHasMore(false);
+          return;
+        }
+
+        setPosts([...posts, ...response.data.postings]);
+
+        // 取得データのうち一番古い uploaded_at を次のリクエスト用に保持しておく
+        setSinceAt(
+          response.data.postings[response.data.postings.length - 1].uploaded_at
+        );
+      })
+      .catch(error => {
+        if (error.response.data.status === 401) {
+          localStorage.removeItem("isLoggedIn");
+          history.push({ pathname: "login" });
+        } else {
+          setErrMessage(error.response.data.message);
+        }
+      });
+  };
+
+  //ロード中に表示する項目
+  const loader = (
+    <div className="loader" key={0}>
+      Loading ...
+    </div>
+  );
 
   useEffect(() => {
     getMyProfile()
@@ -34,23 +70,6 @@ function Feed() {
           setErrMessage(error.response.data.message);
         }
       });
-
-    const getPosts = async () => {
-      await axios
-        .get("/postings?since_at=2100-01-01T00:00:00Z&limit=50")
-        .then(response => {
-          setPosts(response.data.postings);
-        })
-        .catch(error => {
-          if (error.response.data.status === 401) {
-            localStorage.removeItem("isLoggedIn");
-            history.push({ pathname: "login" });
-          } else {
-            setErrMessage(error.response.data.message);
-          }
-        });
-    };
-    getPosts();
   }, []);
 
   return (
@@ -70,21 +89,27 @@ function Feed() {
 
               <PostBox />
 
-              <FlipMove>
-                {posts.map(post => (
-                  <Post
-                    key={post.posting_id}
-                    postingID={post.posting_id}
-                    userName={post.user_name}
-                    title={post.title}
-                    imageURL={post.image_url}
-                    uploadedAt={post.uploaded_at}
-                    likedCount={post.liked_count}
-                    liked={post.liked}
-                    loginUserName={userName}
-                  />
-                ))}
-              </FlipMove>
+              <InfiniteScroll
+                loadMore={getPosts} //項目を読み込む際に処理するコールバック関数
+                hasMore={hasMore} //読み込みを行うかどうかの判定
+                loader={loader}
+              >
+                <FlipMove>
+                  {posts.map(post => (
+                    <Post
+                      key={post.posting_id}
+                      postingID={post.posting_id}
+                      userName={post.user_name}
+                      title={post.title}
+                      imageURL={post.image_url}
+                      uploadedAt={post.uploaded_at}
+                      likedCount={post.liked_count}
+                      liked={post.liked}
+                      loginUserName={userName}
+                    />
+                  ))}
+                </FlipMove>
+              </InfiniteScroll>
             </div>
           </Col>
         </Row>
