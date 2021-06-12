@@ -177,7 +177,7 @@ func registerPosting(r *http.Request) error {
 	u := usecase.NewRegisterPosting(r.Context(), tx, tokenUserName, reqRegisterPosting, userRepo, postingRepo)
 	if err = u.RegisterPostingUseCase(); err != nil {
 		log.Println(err)
-		if err == usecase.ErrDecodeImage {
+		if err == usecase.ErrDecodeImage || err == usecase.ErrNotCatImage {
 			return helper.NewBadRequestError(err.Error())
 		}
 		return helper.NewInternalServerError(err.Error())

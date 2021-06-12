@@ -28,3 +28,6 @@ frontend/.pnp
 .pnp.js
 # production
 frontend/build
+
+# Secret
+backend/secret/

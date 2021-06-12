@@ -3,8 +3,13 @@ package usecase
 import (
 	"context"
 	"encoding/base64"
+	"flag"
 	"os"
 	"strings"
+
+	"github.com/google/uuid"
+
+	"github.com/gold-kou/ToeBeans/backend/app/adapter/gcp"
 
 	"github.com/gold-kou/ToeBeans/backend/app/lib"
 
@@ -56,6 +61,43 @@ func (posting *RegisterPosting) RegisterPostingUseCase() error {
 		return ErrDecodeImage
 	}
 
+	// save decoded file
+	u, err := uuid.NewRandom()
+	if err != nil {
+		return err
+	}
+	file, err := os.Create("image" + u.String() + ".jpg")
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+	if _, err := file.Write(decodedImg); err != nil {
+		return err
+	}
+	if err := file.Sync(); err != nil {
+		return err
+	}
+	// delete file
+	defer func() {
+		_ = os.Remove("image" + u.String() + ".jpg")
+	}()
+
+	// check cat or not
+	if flag.Lookup("test.v") == nil {
+		labels, err := gcp.DetectLabels("image" + u.String() + ".jpg")
+		if err != nil {
+			return err
+		}
+		for i, l := range labels {
+			if l == "Cat" || strings.Contains(l, "cat") {
+				break
+			}
+			if i == len(labels)-1 {
+				return ErrNotCatImage
+			}
+		}
+	}
+
 	// put decoded file to s3
 	key := lib.NowFunc().Format(lib.DateTimeFormatNoSeparator) + "_" + posting.tokenUserName
 	o, err := aws.UploadObject(os.Getenv("S3_BUCKET_POSTINGS"), key, decodedImg)
@@ -75,7 +117,7 @@ func (posting *RegisterPosting) RegisterPostingUseCase() error {
 			Title:    posting.reqRegisterPosting.Title,
 			ImageURL: o.Location,
 		}
-		err := posting.postingRepo.Create(ctx, &u)
+		err = posting.postingRepo.Create(ctx, &u)
 		if err != nil {
 			return err
 		}

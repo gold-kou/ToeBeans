@@ -16,9 +16,10 @@ services:
       - DB_PASS=secret
       - DB_HOST=db
       - DB_PORT=3306
-      - AWS_ACCESS_KEY= # must not be real key
-      - AWS_SECRET_KEY= # must not be real key
-      - AWS_REGION=us-west-2
+      - GOOGLE_APPLICATION_CREDENTIALS=secret/service-account.json
+      - AWS_ACCESS_KEY=test_access_key # must not be real key
+      - AWS_SECRET_KEY=test_secret_key # must not be real key
+      - AWS_REGION=us-east-1
       - SYSTEM_EMAIL=no-reply@toebeans.tk
       - S3_BUCKET_POSTINGS=/postings
       - S3_BUCKET_ICONS=/icons
