@@ -74,3 +74,10 @@ This is written in Japanese.
   - Email確認
 - パスワードはハッシュ化して保存
 - HTTPS対応
+
+# Pricing memo
+## GCP
+- Cloud Vision API の　LABEL_DETECTION
+  - 1000リクエスト/月まで無料
+  - 500万リクエスト/月まで1.5$
+  - https://cloud.google.com/vision/pricing
