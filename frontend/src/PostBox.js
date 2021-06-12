@@ -27,16 +27,20 @@ function PostBox(onFileSelect) {
           title: title,
           image: result
         };
-        try {
-          axios.post("/posting", reqBody);
-          setSuccessMessage("success post");
-        } catch (error) {
-          setErrMessage(error.response.data.message);
-        }
+        axios
+          .post("/posting", reqBody)
+          .then(function () {
+            setSuccessMessage("success post");
+          })
+          .catch(function (error) {
+            setErrMessage(error.response.data.message);
+          })
+          .finally(function () {
+            setTitle("");
+            setImage("");
+          });
       });
     }
-    setTitle("");
-    setImage("");
   }
 
   function isValid() {
