@@ -17,7 +17,6 @@ import (
 	"github.com/gold-kou/ToeBeans/backend/app/lib"
 
 	"github.com/gold-kou/ToeBeans/backend/app/adapter/http/helper"
-	applicationLog "github.com/gold-kou/ToeBeans/backend/app/adapter/http/log"
 	"github.com/gold-kou/ToeBeans/backend/app/adapter/mysql"
 	"github.com/gold-kou/ToeBeans/backend/app/application/usecase"
 	modelHTTP "github.com/gold-kou/ToeBeans/backend/app/domain/model/http"
@@ -25,17 +24,11 @@ import (
 )
 
 func PostingController(w http.ResponseWriter, r *http.Request) {
-	l, err := applicationLog.NewLogger()
-	if err != nil {
-		log.Panic(err)
-	}
-	l.LogHTTPAccess(r)
-
 	switch {
 	case r.URL.Path == "/posting":
 		switch r.Method {
 		case http.MethodPost:
-			err = registerPosting(r)
+			err := registerPosting(r)
 			switch err := err.(type) {
 			case nil:
 				helper.ResponseSimpleSuccess(w)
@@ -101,7 +94,7 @@ func PostingController(w http.ResponseWriter, r *http.Request) {
 	case strings.HasPrefix(r.URL.Path, "/posting/"):
 		switch r.Method {
 		case http.MethodDelete:
-			err = deletePosting(r)
+			err := deletePosting(r)
 			switch err := err.(type) {
 			case nil:
 				helper.ResponseSimpleSuccess(w)

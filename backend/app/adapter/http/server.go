@@ -10,21 +10,32 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/gorilla/csrf"
-
 	"github.com/gold-kou/ToeBeans/backend/app/adapter/http/controller"
-	"github.com/gold-kou/ToeBeans/backend/app/adapter/http/helper"
+	applicationLog "github.com/gold-kou/ToeBeans/backend/app/adapter/http/log"
+	"github.com/gold-kou/ToeBeans/backend/app/adapter/http/middleware"
 
+	"github.com/gorilla/csrf"
 	"github.com/gorilla/mux"
 )
 
 func Serve() {
 	r := mux.NewRouter().StrictSlash(true)
 
-	r.Use(helper.CORSMiddleware)
+	// middleware
+	r.Use(middleware.CORSMiddleware)
+
 	csrfMiddleware := csrf.Protect([]byte(os.Getenv("CSRF_AUTH_KEY")))
 	r.Use(csrfMiddleware)
 
+	r.Use(middleware.CurrentTimeMiddleware)
+
+	l, err := applicationLog.NewLogger()
+	if err != nil {
+		log.Panic(err)
+	}
+	r.Use(middleware.NewLoggingMiddleware(l).Middleware)
+
+	// routing
 	r.HandleFunc("/health/liveness", controller.HealthController)
 	r.HandleFunc("/health/readiness", controller.HealthController)
 	r.HandleFunc("/csrf-token", controller.CSRFTokenController)
@@ -62,6 +73,7 @@ func Serve() {
 		close(idleConnsClosed)
 	}()
 
+	// launch
 	log.Println("Server started!")
 	if err := server.ListenAndServe(); err != http.ErrServerClosed {
 		log.Panic(err)

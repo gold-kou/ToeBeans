@@ -11,7 +11,6 @@ import (
 	"github.com/go-ozzo/ozzo-validation/is"
 
 	"github.com/gold-kou/ToeBeans/backend/app/adapter/http/helper"
-	applicationLog "github.com/gold-kou/ToeBeans/backend/app/adapter/http/log"
 	"github.com/gold-kou/ToeBeans/backend/app/adapter/mysql"
 	"github.com/gold-kou/ToeBeans/backend/app/application/usecase"
 	"github.com/gold-kou/ToeBeans/backend/app/domain/model"
@@ -20,12 +19,6 @@ import (
 )
 
 func NotificationsController(w http.ResponseWriter, r *http.Request) {
-	l, err := applicationLog.NewLogger()
-	if err != nil {
-		log.Panic(err)
-	}
-	l.LogHTTPAccess(r)
-
 	switch r.Method {
 	case http.MethodGet:
 		notifications, err := getNotifications(r)

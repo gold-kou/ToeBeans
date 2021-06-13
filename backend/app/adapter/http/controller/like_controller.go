@@ -12,7 +12,6 @@ import (
 	"github.com/gorilla/mux"
 
 	"github.com/gold-kou/ToeBeans/backend/app/adapter/http/helper"
-	applicationLog "github.com/gold-kou/ToeBeans/backend/app/adapter/http/log"
 	"github.com/gold-kou/ToeBeans/backend/app/adapter/mysql"
 	"github.com/gold-kou/ToeBeans/backend/app/application/usecase"
 	modelHTTP "github.com/gold-kou/ToeBeans/backend/app/domain/model/http"
@@ -20,17 +19,11 @@ import (
 )
 
 func LikeController(w http.ResponseWriter, r *http.Request) {
-	l, err := applicationLog.NewLogger()
-	if err != nil {
-		log.Panic(err)
-	}
-	l.LogHTTPAccess(r)
-
 	switch {
 	case r.URL.Path == "/like":
 		switch r.Method {
 		case http.MethodPost:
-			err = registerLike(r)
+			err := registerLike(r)
 			switch err := err.(type) {
 			case nil:
 				helper.ResponseSimpleSuccess(w)
@@ -50,7 +43,7 @@ func LikeController(w http.ResponseWriter, r *http.Request) {
 	case strings.HasPrefix(r.URL.Path, "/like/"):
 		switch r.Method {
 		case http.MethodDelete:
-			err = deleteLike(r)
+			err := deleteLike(r)
 			switch err := err.(type) {
 			case nil:
 				helper.ResponseSimpleSuccess(w)

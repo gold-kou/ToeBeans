@@ -12,7 +12,6 @@ import (
 	"github.com/gorilla/mux"
 
 	"github.com/gold-kou/ToeBeans/backend/app/adapter/http/helper"
-	applicationLog "github.com/gold-kou/ToeBeans/backend/app/adapter/http/log"
 	"github.com/gold-kou/ToeBeans/backend/app/adapter/mysql"
 	"github.com/gold-kou/ToeBeans/backend/app/application/usecase"
 	"github.com/gold-kou/ToeBeans/backend/app/domain/model"
@@ -22,17 +21,11 @@ import (
 )
 
 func UserController(w http.ResponseWriter, r *http.Request) {
-	l, err := applicationLog.NewLogger()
-	if err != nil {
-		log.Panic(err)
-	}
-	l.LogHTTPAccess(r)
-
 	switch {
 	case r.URL.Path == "/user":
 		switch r.Method {
 		case http.MethodPost:
-			err = registerUser(r)
+			err := registerUser(r)
 			switch err := err.(type) {
 			case nil:
 				helper.ResponseSimpleSuccess(w)
@@ -75,7 +68,7 @@ func UserController(w http.ResponseWriter, r *http.Request) {
 				helper.ResponseInternalServerError(w, err.Error())
 			}
 		case http.MethodPut:
-			err = updateUser(r)
+			err := updateUser(r)
 			switch err := err.(type) {
 			case nil:
 				helper.ResponseSimpleSuccess(w)
@@ -113,7 +106,7 @@ func UserController(w http.ResponseWriter, r *http.Request) {
 	case strings.HasPrefix(r.URL.Path, "/user-activation/"):
 		switch r.Method {
 		case http.MethodGet:
-			err = activateUser(r)
+			err := activateUser(r)
 			switch err := err.(type) {
 			case nil:
 				helper.ResponseSimpleSuccess(w)

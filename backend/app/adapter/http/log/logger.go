@@ -3,18 +3,18 @@ package log
 import (
 	"bufio"
 	"bytes"
-	"net/http"
 	"os"
 	"text/template"
+	"time"
 
-	"github.com/gold-kou/ToeBeans/backend/app/adapter/http/helper"
-	"gopkg.in/yaml.v3"
+	yaml "gopkg.in/yaml.v3"
 
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )
 
-type accessLog struct {
+type AccessLog struct {
+	Status        int
 	Method        string
 	Host          string
 	Path          string
@@ -22,15 +22,18 @@ type accessLog struct {
 	RequestSize   int64
 	RemoteAddr    string
 	XForwardedFor string
+	UserAgent     string
 	Referer       string
 	Protocol      string
+	Latency       time.Duration
 }
 
 type Logger struct {
 	*zap.Logger
 }
 
-func (a *accessLog) MarshalLogObject(enc zapcore.ObjectEncoder) error {
+func (a *AccessLog) MarshalLogObject(enc zapcore.ObjectEncoder) error {
+	enc.AddInt("status", a.Status)
 	enc.AddString("method", a.Method)
 	enc.AddString("host", a.Host)
 	enc.AddString("path", a.Path)
@@ -38,8 +41,10 @@ func (a *accessLog) MarshalLogObject(enc zapcore.ObjectEncoder) error {
 	enc.AddInt64("request_size", a.RequestSize)
 	enc.AddString("remote_address", a.RemoteAddr)
 	enc.AddString("x_forwarded_for", a.XForwardedFor)
+	enc.AddString("user_agent", a.UserAgent)
 	enc.AddString("referer", a.Referer)
 	enc.AddString("protocol", a.Protocol)
+	enc.AddDuration("latency", a.Latency)
 	return nil
 }
 
@@ -69,18 +74,6 @@ func NewLogger() (*Logger, error) {
 	return &Logger{logger}, nil
 }
 
-func (l *Logger) LogHTTPAccess(r *http.Request) {
-	accessLog := &accessLog{
-		Method:        r.Method,
-		Host:          r.Host,
-		Path:          r.URL.Path,
-		Query:         r.URL.RawQuery,
-		RequestSize:   r.ContentLength,
-		RemoteAddr:    r.RemoteAddr,
-		XForwardedFor: r.Header.Get(helper.HeaderKeyXForwardedFor),
-		Referer:       r.Referer(),
-		Protocol:      r.Proto,
-	}
-
+func (l *Logger) LogHTTPAccess(accessLog *AccessLog) {
 	l.Info("", zap.Object("http_request", accessLog))
 }
