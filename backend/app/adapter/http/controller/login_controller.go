@@ -16,17 +16,10 @@ import (
 
 	"github.com/gold-kou/ToeBeans/backend/app/adapter/http/helper"
 
-	applicationLog "github.com/gold-kou/ToeBeans/backend/app/adapter/http/log"
 	model "github.com/gold-kou/ToeBeans/backend/app/domain/model/http"
 )
 
 func LoginController(w http.ResponseWriter, r *http.Request) {
-	l, err := applicationLog.NewLogger()
-	if err != nil {
-		log.Panic(err)
-	}
-	l.LogHTTPAccess(r)
-
 	switch r.Method {
 	case http.MethodPost:
 		idToken, err := login(r)

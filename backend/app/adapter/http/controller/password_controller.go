@@ -7,7 +7,6 @@ import (
 	"net/http"
 
 	"github.com/gold-kou/ToeBeans/backend/app/adapter/http/helper"
-	applicationLog "github.com/gold-kou/ToeBeans/backend/app/adapter/http/log"
 	"github.com/gold-kou/ToeBeans/backend/app/adapter/mysql"
 	"github.com/gold-kou/ToeBeans/backend/app/application/usecase"
 	modelHTTP "github.com/gold-kou/ToeBeans/backend/app/domain/model/http"
@@ -16,17 +15,11 @@ import (
 )
 
 func PasswordController(w http.ResponseWriter, r *http.Request) {
-	l, err := applicationLog.NewLogger()
-	if err != nil {
-		log.Panic(err)
-	}
-	l.LogHTTPAccess(r)
-
 	switch r.URL.Path {
 	case "/password":
 		switch r.Method {
 		case http.MethodPut:
-			err = changePassword(r)
+			err := changePassword(r)
 			switch err := err.(type) {
 			case nil:
 				helper.ResponseSimpleSuccess(w)

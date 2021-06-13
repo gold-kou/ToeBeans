@@ -2,23 +2,14 @@ package controller
 
 import (
 	"fmt"
-	"log"
 	"net/http"
 
 	"github.com/gold-kou/ToeBeans/backend/app/adapter/mysql"
 
 	"github.com/gold-kou/ToeBeans/backend/app/adapter/http/helper"
-
-	applicationLog "github.com/gold-kou/ToeBeans/backend/app/adapter/http/log"
 )
 
 func HealthController(w http.ResponseWriter, r *http.Request) {
-	l, e := applicationLog.NewLogger()
-	if e != nil {
-		log.Panic(e)
-	}
-	l.LogHTTPAccess(r)
-
 	switch r.URL.Path {
 	case "/health/liveness":
 		switch r.Method {
