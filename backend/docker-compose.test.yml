@@ -16,7 +16,7 @@ services:
       - DB_PORT=3306
       - AWS_ACCESS_KEY=test_access_key # must not be real key
       - AWS_SECRET_KEY=test_secret_key # must not be real key
-      - AWS_REGION=us-east-1
+      - AWS_REGION=ap-​northeast-1
       - SYSTEM_EMAIL=no-reply@toebeans.tk
       - S3_BUCKET_POSTINGS=/postings
       - S3_BUCKET_ICONS=/icons
@@ -58,7 +58,7 @@ services:
     environment:
       MINIO_ACCESS_KEY: test_access_key
       MINIO_SECRET_KEY: test_secret_key
-      MINIO_REGION: us-east-1
+      MINIO_REGION: ap-​northeast-1
     entrypoint: sh
     command: -c 'mkdir -p /images/icons && mkdir -p /images/postings && /usr/bin/minio server /images'
     networks:
