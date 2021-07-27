@@ -1,3 +1,6 @@
+# はじめに
+自動化が難しいインフラ設定箇所の手順書です。
+
 # ドメイン取得とSES設定
 ## step1. freenomでドメイン取得
 適当に画面入力してドメインを取得。
@@ -43,3 +46,22 @@ Email Sending > Sending Statistics > Edit your account details
 Enable production access を Yes にして申請内容を適当に埋める。ユーザ登録機能にメール送信が必要なので、Sandoxから抜けたいです的なことを書きました。
 
 ref. https://docs.aws.amazon.com/ses/latest/DeveloperGuide/request-production-access.html
+
+# freenomとホストゾーン作成
+freenomの設定内容が上記のSES手順とコンフリクトするので、要調査。
+
+下記ブログ通りにやるだけ。
+https://blog.serverworks.co.jp/delegate-route53
+
+![](images/Route53_Console_top.png)
+![](images/Route53_Console_setting.png)
+
+# CodeStar接続
+接続の項目から対象のコネクションを選択します。
+![](images/AWS_Developer_Tools_1.png)
+
+「保留中の接続を更新」を押下します。
+![](images/AWS_Developer_Tools_2.png)
+
+GitHubアプリで自分のアカウントを選択し、接続を押下します。
+![](images/AWS_Developer_Tools_3.png)

@@ -17,12 +17,12 @@ services:
       - DB_HOST=db
       - DB_PORT=3306
       - GOOGLE_APPLICATION_CREDENTIALS=secret/service-account.json
-      - AWS_ACCESS_KEY=test_access_key # must not be real key
-      - AWS_SECRET_KEY=test_secret_key # must not be real key
-      - AWS_REGION=ap-​northeast-1
+      - AWS_ACCESS_KEY=test_access_key # for local
+      - AWS_SECRET_KEY=test_secret_key # for local
+      - AWS_REGION=ap-​northeast-1 # for local
       - SYSTEM_EMAIL=no-reply@toebeans.tk
       - S3_BUCKET_POSTINGS=/toebeans-postings
-      - S3_BUCKET_ICONS=//toebeans-icons
+      - S3_BUCKET_ICONS=/toebeans-icons
     volumes:
       - ./:/go/src/github.com/gold-kou/ToeBeans/backend:cached
       - /go/src/github.com/gold-kou/ToeBeans/backend/.git
