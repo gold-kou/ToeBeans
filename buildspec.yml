@@ -7,7 +7,7 @@ phases:
   pre_build:
     commands:
       - $(aws ecr get-login --region $AWS_DEFAULT_REGION --no-include-email)
-      - REPO=$(aws ecr describe-repositories --repository-names ToeBeans --output text --query "repositories[0].repositoryUri")
+      - REPO=$(aws ecr describe-repositories --repository-names toebeans --output text --query "repositories[0].repositoryUri")
       - IMAGE=$REPO:latest
   build:
     commands:
