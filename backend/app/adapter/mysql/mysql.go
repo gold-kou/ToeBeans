@@ -24,9 +24,9 @@ func init() {
 	if dbUser == "" {
 		panic(errors.New("DB_USER is unset"))
 	}
-	dbPassword = os.Getenv("DB_PASS")
+	dbPassword = os.Getenv("DB_PASSWORD")
 	if dbPassword == "" {
-		panic(errors.New("DB_PASS is unset"))
+		panic(errors.New("DB_PASSWORD is unset"))
 	}
 	dbHost = os.Getenv("DB_HOST")
 	if dbHost == "" {

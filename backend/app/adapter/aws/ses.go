@@ -1,6 +1,7 @@
 package aws
 
 import (
+	"flag"
 	"os"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -43,8 +44,11 @@ func SendEmail(to, title, body string) error {
 }
 
 func generateSESConfig() *aws.Config {
-	return &aws.Config{
-		Region:      aws.String(os.Getenv("AWS_REGION")),
-		Credentials: credentials.NewStaticCredentials(os.Getenv("AWS_ACCESS_KEY"), os.Getenv("AWS_SECRET_KEY"), ""),
+	if os.Getenv("APP_ENV") == "development" || flag.Lookup("test.v") != nil {
+		return &aws.Config{
+			Region:      aws.String(os.Getenv("AWS_REGION")),
+			Credentials: credentials.NewStaticCredentials(os.Getenv("AWS_ACCESS_KEY"), os.Getenv("AWS_SECRET_KEY"), ""),
+		}
 	}
+	return &aws.Config{}
 }
