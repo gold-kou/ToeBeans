@@ -14,6 +14,7 @@ phases:
       - cd backend
       - docker build -t $IMAGE .
       - docker push $IMAGE
+      - cd $CODEBUILD_SRC_DIR
   post_build:
     commands:
       - printf '[{"name":"toebeans","imageUri":"%s"}]' $IMAGE > imagedefinitions.json
