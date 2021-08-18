@@ -26,3 +26,25 @@ COPY . .
 # launch
 EXPOSE 8080
 CMD ["dockerize", "-wait", "tcp://db:3306", "-timeout", "60s", "realize", "start", "--run", "--no-config"]
+
+# 本番で使うバイナリのビルド用環境
+FROM golang:1.15.0-buster as builder
+RUN apt update && apt install -y --no-install-recommends git tzdata
+WORKDIR /go/src/github.com/gold-kou/ToeBeans/backend
+ENV CGO_ENABLED=0 GOOS=linux GOARCH=amd64
+COPY go.mod go.sum ./
+RUN GO111MODULE=on go mod download
+COPY . .
+RUN go build
+
+# 本番の実行環境
+FROM debian:10.9-slim as executor
+RUN apt update && apt upgrade -y --no-install-recommends liblz4-1 \
+  && rm -rf /var/lib/apt/lists/*
+COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
+WORKDIR /go/src/github.com/gold-kou/ToeBeans/backend
+COPY config/logger.yml.tpl config/logger.yml.tpl
+WORKDIR /
+COPY --from=builder /go/src/github.com/gold-kou/ToeBeans/backend /backend
+EXPOSE 8080
+CMD ["/backend"]
