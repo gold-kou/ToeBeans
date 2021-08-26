@@ -45,7 +45,7 @@ COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 WORKDIR /go/src/github.com/gold-kou/ToeBeans/backend
 COPY config/logger.yml.tpl config/logger.yml.tpl
 WORKDIR /
-COPY --from=builder /go/src/github.com/gold-kou/ToeBeans/backend /backend
+COPY --from=builder /go/src/github.com/gold-kou/ToeBeans/backend/backend /backend
 ENV TZ=Asia/Tokyo DB_NAME=toebeansdb DB_USER=toebeans DB_HOST=db DB_PORT=3306 GOOGLE_APPLICATION_CREDENTIALS=secret/service-account.json SYSTEM_EMAIL=no-reply@toebeans.tk S3_BUCKET_POSTINGS=/toebeans-postings S3_BUCKET_ICONS=/toebeans-icons
 EXPOSE 8080
 CMD ["/backend"]
