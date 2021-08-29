@@ -12,7 +12,7 @@ phases:
   build:
     commands:
       - cd backend
-      - docker build -t $IMAGE .
+      - docker build -t $IMAGE . --target executor
       - docker push $IMAGE
       - cd $CODEBUILD_SRC_DIR
   post_build:
