@@ -57,7 +57,7 @@ func Serve() {
 	r.HandleFunc("/follow/{followed_user_name}", controller.FollowController)
 
 	// graceful shutdown
-	server := &http.Server{Addr: fmt.Sprintf(":%v", 8080), Handler: r}
+	server := &http.Server{Addr: fmt.Sprintf(":%v", 80), Handler: r}
 	idleConnsClosed := make(chan struct{})
 	go func() {
 		sigCh := make(chan os.Signal, 1)

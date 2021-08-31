@@ -24,7 +24,7 @@ COPY go.mod go.sum ./
 RUN GO111MODULE=on go mod download
 COPY . .
 # launch
-EXPOSE 8080
+EXPOSE 80
 CMD ["dockerize", "-wait", "tcp://db:3306", "-timeout", "60s", "realize", "start", "--run", "--no-config"]
 
 # 本番で使うバイナリのビルド用環境
@@ -47,5 +47,5 @@ COPY config/logger.yml.tpl config/logger.yml.tpl
 WORKDIR /
 COPY --from=builder /go/src/github.com/gold-kou/ToeBeans/backend/backend /backend
 ENV TZ=Asia/Tokyo DB_NAME=toebeansdb DB_USER=toebeans DB_HOST=db DB_PORT=3306 GOOGLE_APPLICATION_CREDENTIALS=secret/service-account.json SYSTEM_EMAIL=no-reply@toebeans.tk S3_BUCKET_POSTINGS=/toebeans-postings S3_BUCKET_ICONS=/toebeans-icons APP_ENV=prd LOG_LEVEL=info JWT_SECRET_KEY=samplekey DB_PASSWORD=secret DB_HOST=db-test AWS_ACCESS_KEY=test_access_key AWS_SECRET_KEY=test_secret_key AWS_REGION=ap-​northeast-1
-EXPOSE 8080
+EXPOSE 80
 CMD ["/backend"]
