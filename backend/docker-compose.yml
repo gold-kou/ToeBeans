@@ -6,7 +6,7 @@ services:
       target: debugger
     environment:
       - APP_ENV=development
-      - DOMAIN=localhost:8080
+      - DOMAIN=localhost:80
       - TZ=Asia/Tokyo
       - LOG_LEVEL=debug
       - JWT_SECRET_KEY=samplekey
@@ -29,7 +29,7 @@ services:
     networks:
       - backend
     ports:
-      - 8080:8080
+      - 80:80
     depends_on:
       - db
       - minio
