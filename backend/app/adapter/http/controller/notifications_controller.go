@@ -5,7 +5,7 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/gold-kou/ToeBeans/backend/app/lib"
+	"github.com/gold-kou/ToeBeans/backend/app/adapter/http/context"
 
 	validation "github.com/go-ozzo/ozzo-validation"
 	"github.com/go-ozzo/ozzo-validation/is"
@@ -58,15 +58,10 @@ func NotificationsController(w http.ResponseWriter, r *http.Request) {
 }
 
 func getNotifications(r *http.Request) (notifications []model.Notification, err error) {
-	// authorization
-	cookie, err := r.Cookie(helper.CookieIDToken)
+	tokenUserName, err := context.GetTokenUserName(r.Context())
 	if err != nil {
 		log.Println(err)
-		return nil, helper.NewAuthorizationError(err.Error())
-	}
-	tokenUserName, err := lib.VerifyToken(cookie.Value)
-	if err != nil {
-		return nil, helper.NewAuthorizationError(err.Error())
+		return nil, helper.NewInternalServerError(err.Error())
 	}
 
 	// get request parameter

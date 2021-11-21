@@ -24,7 +24,7 @@ paths:
           $ref: '#/components/responses/internalServerError'
   /login:
     post:
-      description: login.
+      description: login
       operationId: login
       tags:
         - user

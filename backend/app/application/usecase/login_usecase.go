@@ -3,12 +3,11 @@ package usecase
 import (
 	"context"
 
-	"github.com/gold-kou/ToeBeans/backend/app/lib"
-	"golang.org/x/crypto/bcrypt"
-
 	"github.com/gold-kou/ToeBeans/backend/app/adapter/mysql"
 	modelHTTP "github.com/gold-kou/ToeBeans/backend/app/domain/model/http"
 	"github.com/gold-kou/ToeBeans/backend/app/domain/repository"
+	"github.com/gold-kou/ToeBeans/backend/app/lib"
+	"golang.org/x/crypto/bcrypt"
 )
 
 type LoginUseCaseInterface interface {

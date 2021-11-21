@@ -8,10 +8,12 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/gold-kou/ToeBeans/backend/app/lib"
+
+	"github.com/gold-kou/ToeBeans/backend/app/adapter/http/context"
+
 	"github.com/gold-kou/ToeBeans/backend/app/domain/model"
 	"github.com/gorilla/mux"
-
-	"github.com/gold-kou/ToeBeans/backend/app/lib"
 
 	"github.com/gold-kou/ToeBeans/backend/app/adapter/http/helper"
 	"github.com/gold-kou/ToeBeans/backend/app/adapter/mysql"
@@ -113,15 +115,11 @@ func CommentController(w http.ResponseWriter, r *http.Request) {
 }
 
 func registerComment(r *http.Request) error {
-	// authorization
-	cookie, err := r.Cookie(helper.CookieIDToken)
+	// not allowed to guest user
+	tokenUserName, err := context.GetTokenUserName(r.Context())
 	if err != nil {
 		log.Println(err)
-		return helper.NewAuthorizationError(err.Error())
-	}
-	tokenUserName, err := lib.VerifyToken(cookie.Value)
-	if err != nil {
-		return helper.NewAuthorizationError(err.Error())
+		return helper.NewInternalServerError(err.Error())
 	}
 	if tokenUserName == lib.GuestUserName {
 		log.Println(errMsgGuestUserForbidden)
@@ -179,17 +177,6 @@ func registerComment(r *http.Request) error {
 }
 
 func getComments(r *http.Request) (comments []model.Comment, err error) {
-	// authorization
-	cookie, err := r.Cookie(helper.CookieIDToken)
-	if err != nil {
-		log.Println(err)
-		return nil, helper.NewAuthorizationError(err.Error())
-	}
-	tokenUserName, err := lib.VerifyToken(cookie.Value)
-	if err != nil {
-		return nil, helper.NewAuthorizationError(err.Error())
-	}
-
 	// get request parameter
 	postingID := r.URL.Query().Get("posting_id")
 	if postingID == "" {
@@ -217,6 +204,11 @@ func getComments(r *http.Request) (comments []model.Comment, err error) {
 	commentRepo := repository.NewCommentRepository(db)
 
 	// UseCase
+	tokenUserName, e := context.GetTokenUserName(r.Context())
+	if e != nil {
+		log.Println(err)
+		return nil, helper.NewInternalServerError(err.Error())
+	}
 	u := usecase.NewGetComments(r.Context(), tx, tokenUserName, int64(id), userRepo, postingRepo, commentRepo)
 	if comments, err = u.GetCommentsUseCase(); err != nil {
 		log.Println(err)
@@ -229,15 +221,11 @@ func getComments(r *http.Request) (comments []model.Comment, err error) {
 }
 
 func deleteComment(r *http.Request) error {
-	// authorization
-	cookie, err := r.Cookie(helper.CookieIDToken)
+	// not allowed to guest user
+	tokenUserName, err := context.GetTokenUserName(r.Context())
 	if err != nil {
 		log.Println(err)
-		return helper.NewAuthorizationError(err.Error())
-	}
-	tokenUserName, err := lib.VerifyToken(cookie.Value)
-	if err != nil {
-		return helper.NewAuthorizationError(err.Error())
+		return helper.NewInternalServerError(err.Error())
 	}
 	if tokenUserName == lib.GuestUserName {
 		log.Println(errMsgGuestUserForbidden)

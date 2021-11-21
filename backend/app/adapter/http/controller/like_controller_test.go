@@ -10,11 +10,12 @@ import (
 	"strings"
 	"testing"
 
+	httpContext "github.com/gold-kou/ToeBeans/backend/app/adapter/http/context"
+
 	"github.com/gorilla/mux"
 
 	"github.com/gold-kou/ToeBeans/backend/app/domain/repository"
 
-	"github.com/gold-kou/ToeBeans/backend/app/adapter/http/helper"
 	"github.com/gold-kou/ToeBeans/backend/app/lib"
 	"github.com/gold-kou/ToeBeans/backend/testing/dummy"
 
@@ -131,14 +132,7 @@ func TestRegisterLike(t *testing.T) {
 			// http request
 			req, err := http.NewRequest(tt.method, "/like", strings.NewReader(tt.args.reqBody))
 			assert.NoError(t, err)
-			var token string
-			token, err = lib.GenerateToken(dummy.User1.Name)
-			assert.NoError(t, err)
-			cookie := &http.Cookie{
-				Name:  helper.CookieIDToken,
-				Value: token,
-			}
-			req.AddCookie(cookie)
+			req = req.WithContext(httpContext.SetTokenUserName(req.Context(), dummy.User1.Name))
 			resp := httptest.NewRecorder()
 
 			// test target
@@ -149,13 +143,7 @@ func TestRegisterLike(t *testing.T) {
 				// 2nd same request
 				req, err := http.NewRequest(tt.method, "/like", strings.NewReader(tt.args.reqBody))
 				assert.NoError(t, err)
-				token, err := lib.GenerateToken(dummy.User1.Name)
-				assert.NoError(t, err)
-				cookie := &http.Cookie{
-					Name:  helper.CookieIDToken,
-					Value: token,
-				}
-				req.AddCookie(cookie)
+				req = req.WithContext(httpContext.SetTokenUserName(req.Context(), dummy.User1.Name))
 				resp := httptest.NewRecorder()
 				LikeController(resp, req)
 				assert.NoError(t, err)
@@ -274,13 +262,7 @@ func TestDeleteLike(t *testing.T) {
 
 			req, err := http.NewRequest(http.MethodPost, "/like", strings.NewReader(successReqRegisterLike))
 			assert.NoError(t, err)
-			token, err := lib.GenerateToken(dummy.User1.Name)
-			assert.NoError(t, err)
-			cookie := &http.Cookie{
-				Name:  helper.CookieIDToken,
-				Value: token,
-			}
-			req.AddCookie(cookie)
+			req = req.WithContext(httpContext.SetTokenUserName(req.Context(), dummy.User1.Name))
 			resp := httptest.NewRecorder()
 			LikeController(resp, req)
 			assert.NoError(t, err)
@@ -290,13 +272,7 @@ func TestDeleteLike(t *testing.T) {
 			assert.NoError(t, err)
 			vars := map[string]string{"posting_id": strconv.Itoa(int(tt.args.postingID))}
 			req = mux.SetURLVars(req, vars)
-			token, err = lib.GenerateToken(dummy.User1.Name)
-			assert.NoError(t, err)
-			cookie = &http.Cookie{
-				Name:  helper.CookieIDToken,
-				Value: token,
-			}
-			req.AddCookie(cookie)
+			req = req.WithContext(httpContext.SetTokenUserName(req.Context(), dummy.User1.Name))
 			resp = httptest.NewRecorder()
 
 			// test target

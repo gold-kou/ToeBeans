@@ -70,8 +70,7 @@ This is written in Japanese.
   - トークンはCookieに保存
 - CSRF対策
   - CSRFトークン
-- オプトイン
-  - Email確認
+- Email本人確認によるオプトイン
 - パスワードはハッシュ化して保存
 - HTTPS対応
 

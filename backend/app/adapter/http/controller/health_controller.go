@@ -14,7 +14,6 @@ func HealthController(w http.ResponseWriter, r *http.Request) {
 	case "/health/liveness":
 		switch r.Method {
 		case http.MethodGet:
-
 			helper.ResponseSimpleSuccess(w)
 		default:
 			methods := []string{http.MethodGet}

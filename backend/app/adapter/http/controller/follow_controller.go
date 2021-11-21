@@ -7,6 +7,8 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/gold-kou/ToeBeans/backend/app/adapter/http/context"
+
 	"github.com/gold-kou/ToeBeans/backend/app/lib"
 	"github.com/gorilla/mux"
 
@@ -69,16 +71,8 @@ func FollowController(w http.ResponseWriter, r *http.Request) {
 }
 
 func registerFollow(r *http.Request) error {
-	// authorization
-	cookie, err := r.Cookie(helper.CookieIDToken)
-	if err != nil {
-		log.Println(err)
-		return helper.NewAuthorizationError(err.Error())
-	}
-	tokenUserName, err := lib.VerifyToken(cookie.Value)
-	if err != nil {
-		return helper.NewAuthorizationError(err.Error())
-	}
+	// not allowed to guest user
+	tokenUserName, err := context.GetTokenUserName(r.Context())
 	if tokenUserName == lib.GuestUserName {
 		log.Println(errMsgGuestUserForbidden)
 		return helper.NewForbiddenError(errMsgGuestUserForbidden)
@@ -131,13 +125,8 @@ func registerFollow(r *http.Request) error {
 }
 
 func deleteFollow(r *http.Request) error {
-	// authorization
-	cookie, err := r.Cookie(helper.CookieIDToken)
-	if err != nil {
-		log.Println(err)
-		return helper.NewAuthorizationError(err.Error())
-	}
-	tokenUserName, err := lib.VerifyToken(cookie.Value)
+	// not allowed to guest user
+	tokenUserName, err := context.GetTokenUserName(r.Context())
 	if err != nil {
 		return helper.NewAuthorizationError(err.Error())
 	}

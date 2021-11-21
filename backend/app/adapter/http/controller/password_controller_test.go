@@ -9,6 +9,8 @@ import (
 	"testing"
 	"time"
 
+	httpContext "github.com/gold-kou/ToeBeans/backend/app/adapter/http/context"
+
 	"github.com/gold-kou/ToeBeans/backend/app/lib"
 
 	"github.com/gold-kou/ToeBeans/backend/app/domain/repository"
@@ -143,18 +145,11 @@ func TestPasswordChange(t *testing.T) {
 			// http request
 			req, err := http.NewRequest(tt.method, "/password", strings.NewReader(tt.args.reqBody))
 			assert.NoError(t, err)
-			var token string
 			if tt.name == "error forbidden guest user" {
-				token, err = lib.GenerateToken(lib.GuestUserName)
+				req = req.WithContext(httpContext.SetTokenUserName(req.Context(), lib.GuestUserName))
 			} else {
-				token, err = lib.GenerateToken(dummy.User1.Name)
+				req = req.WithContext(httpContext.SetTokenUserName(req.Context(), dummy.User1.Name))
 			}
-			assert.NoError(t, err)
-			cookie := &http.Cookie{
-				Name:  helper.CookieIDToken,
-				Value: token,
-			}
-			req.AddCookie(cookie)
 			resp := httptest.NewRecorder()
 
 			// test target

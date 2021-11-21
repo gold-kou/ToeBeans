@@ -35,6 +35,8 @@ func Serve() {
 	}
 	r.Use(middleware.NewLoggingMiddleware(l).Middleware)
 
+	r.Use(middleware.AuthMiddleware)
+
 	// routing
 	r.HandleFunc("/health/liveness", controller.HealthController)
 	r.HandleFunc("/health/readiness", controller.HealthController)
