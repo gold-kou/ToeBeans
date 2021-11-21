@@ -1,0 +1,1 @@
+INSERT INTO users (name, email, password, activation_key, email_verified) VALUES('guest', 'guestUser@example.com' , 'guest1234', 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', true);

@@ -30,3 +30,7 @@ example
 ```json
 {"severity":"INFO","timestamp":"2021-06-13T12:06:35.760+0900","message":"","http_request":{"status":200,"method":"POST","host":"localhost:80","path":"/login","query":"","request_size":56,"remote_address":"172.22.0.1:35924","x_forwarded_for":"","user_agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.101 Safari/537.36","referer":"http://localhost:3000/","protocol":"HTTP/1.1","latency":"20.6025ms"}}
 ```
+
+## Be careful
+It is impossible to request APIs in local by curl or tools because of `Forbidden - CSRF token invalid` .
+Use frontend.

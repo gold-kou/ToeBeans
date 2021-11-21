@@ -11,7 +11,7 @@ services:
       - LOG_LEVEL=debug
       - JWT_SECRET_KEY=samplekey
       - CSRF_AUTH_KEY=abcdefghijklmnopqrstuvwxyz123456 # must be 32 length
-      - DB_NAME=toebeansdb
+      - DB_NAME=toebeans
       - DB_USER=toebeans
       - DB_PASSWORD=secret
       - DB_HOST=db
