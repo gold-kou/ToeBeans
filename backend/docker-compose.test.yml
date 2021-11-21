@@ -18,8 +18,8 @@ services:
       - AWS_SECRET_KEY=test_secret_key # must not be real key
       - AWS_REGION=ap-​northeast-1
       - SYSTEM_EMAIL=no-reply@toebeans.tk
-      - S3_BUCKET_POSTINGS=/postings
-      - S3_BUCKET_ICONS=/icons
+      - S3_BUCKET_POSTINGS=/toebeans-postings
+      - S3_BUCKET_ICONS=/toebeans-icons
     volumes:
       - ./:/go/src/github.com/gold-kou/ToeBeans/backend:cached
       - /go/src/github.com/gold-kou/ToeBeans/backend/.git
@@ -60,7 +60,7 @@ services:
       MINIO_SECRET_KEY: test_secret_key
       MINIO_REGION: ap-​northeast-1
     entrypoint: sh
-    command: -c 'mkdir -p /images/icons && mkdir -p /images/postings && /usr/bin/minio server /images'
+    command: -c 'mkdir -p /images/toebeans-icons && mkdir -p /images/toebeans-postings && /usr/bin/minio server /images'
     networks:
       - backend
     ports:

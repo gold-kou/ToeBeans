@@ -1,12 +1,8 @@
 package lib
 
 import (
-	"net/http"
 	"os"
-	"strings"
 	"time"
-
-	"github.com/gold-kou/ToeBeans/backend/app/adapter/http/helper"
 
 	jwt "github.com/dgrijalva/jwt-go"
 	"github.com/pkg/errors"
@@ -42,28 +38,6 @@ func GenerateToken(userName string) (tokenString string, err error) {
 	}
 
 	return tokenString, nil
-}
-
-func VerifyHeaderToken(r *http.Request) (userName string, err error) {
-	// get jwt from header
-	authHeader := r.Header.Get(helper.HeaderKeyAuthorization)
-	if authHeader == "" {
-		return "", ErrNotFoundAuthorizationHeader
-	}
-
-	// Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE1ODM3MjIwNTMsImlhdCI6IjIwMjAtMDMtMDhUMTE6NDc6MzMuMTc4NjU5MyswOTowMCIsIm5hbWUiOiJ0ZXN0In0.YIyT1RJGcYbdynx1V4-6MhiosmTlHmKiyiG_GjxQeuw
-	s := strings.Split(authHeader, "Bearer ")
-	if len(s) != 2 {
-		return "", ErrNotFoundBearerToken
-	}
-	bearerToken := s[1]
-
-	// verify jwt
-	userName, err = VerifyToken(bearerToken)
-	if err != nil {
-		return
-	}
-	return
 }
 
 func VerifyToken(tokenString string) (userName string, err error) {

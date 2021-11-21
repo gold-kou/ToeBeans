@@ -10,7 +10,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/gold-kou/ToeBeans/backend/app/adapter/http/helper"
+	httpContext "github.com/gold-kou/ToeBeans/backend/app/adapter/http/context"
 	"github.com/gold-kou/ToeBeans/backend/app/domain/repository"
 	"github.com/gold-kou/ToeBeans/backend/app/lib"
 	testingHelper "github.com/gold-kou/ToeBeans/backend/testing"
@@ -118,18 +118,11 @@ func TestRegisterComment(t *testing.T) {
 			// http request
 			req, err := http.NewRequest(tt.method, "/comment", strings.NewReader(tt.args.reqBody))
 			assert.NoError(t, err)
-			var token string
 			if tt.name == "error forbidden guest user" {
-				token, err = lib.GenerateToken(lib.GuestUserName)
+				req = req.WithContext(httpContext.SetTokenUserName(req.Context(), lib.GuestUserName))
 			} else {
-				token, err = lib.GenerateToken(dummy.User1.Name)
+				req = req.WithContext(httpContext.SetTokenUserName(req.Context(), dummy.User1.Name))
 			}
-			assert.NoError(t, err)
-			cookie := &http.Cookie{
-				Name:  helper.CookieIDToken,
-				Value: token,
-			}
-			req.AddCookie(cookie)
 			resp := httptest.NewRecorder()
 
 			// test target
@@ -249,14 +242,8 @@ func TestGetComments(t *testing.T) {
 			// http request
 			req, err := http.NewRequest(tt.method, fmt.Sprintf("/comments?posting_id=%v", tt.args.postingID), nil)
 			assert.NoError(t, err)
-			token, err := lib.GenerateToken(dummy.User1.Name)
-			assert.NoError(t, err)
-			cookie := &http.Cookie{
-				Name:  helper.CookieIDToken,
-				Value: token,
-			}
-			req.AddCookie(cookie)
 			resp := httptest.NewRecorder()
+			req = req.WithContext(httpContext.SetTokenUserName(req.Context(), dummy.User1.Name))
 
 			// test target
 			CommentController(resp, req)
@@ -340,18 +327,11 @@ func TestDeleteComment(t *testing.T) {
 			assert.NoError(t, err)
 			vars := map[string]string{"comment_id": strconv.Itoa(int(tt.args.commentID))}
 			req = mux.SetURLVars(req, vars)
-			var token string
 			if tt.name == "error forbidden guest user" {
-				token, err = lib.GenerateToken(lib.GuestUserName)
+				req = req.WithContext(httpContext.SetTokenUserName(req.Context(), lib.GuestUserName))
 			} else {
-				token, err = lib.GenerateToken(dummy.User1.Name)
+				req = req.WithContext(httpContext.SetTokenUserName(req.Context(), dummy.User1.Name))
 			}
-			assert.NoError(t, err)
-			cookie := &http.Cookie{
-				Name:  helper.CookieIDToken,
-				Value: token,
-			}
-			req.AddCookie(cookie)
 			resp := httptest.NewRecorder()
 
 			// test target

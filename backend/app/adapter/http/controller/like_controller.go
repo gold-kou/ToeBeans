@@ -8,7 +8,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/gold-kou/ToeBeans/backend/app/lib"
+	"github.com/gold-kou/ToeBeans/backend/app/adapter/http/context"
+
 	"github.com/gorilla/mux"
 
 	"github.com/gold-kou/ToeBeans/backend/app/adapter/http/helper"
@@ -66,15 +67,10 @@ func LikeController(w http.ResponseWriter, r *http.Request) {
 }
 
 func registerLike(r *http.Request) error {
-	// authorization
-	cookie, err := r.Cookie(helper.CookieIDToken)
+	tokenUserName, err := context.GetTokenUserName(r.Context())
 	if err != nil {
 		log.Println(err)
-		return helper.NewAuthorizationError(err.Error())
-	}
-	tokenUserName, err := lib.VerifyToken(cookie.Value)
-	if err != nil {
-		return helper.NewAuthorizationError(err.Error())
+		return helper.NewInternalServerError(err.Error())
 	}
 
 	// get request parameter
@@ -128,15 +124,10 @@ func registerLike(r *http.Request) error {
 }
 
 func deleteLike(r *http.Request) error {
-	// authorization
-	cookie, err := r.Cookie(helper.CookieIDToken)
+	tokenUserName, err := context.GetTokenUserName(r.Context())
 	if err != nil {
 		log.Println(err)
-		return helper.NewAuthorizationError(err.Error())
-	}
-	tokenUserName, err := lib.VerifyToken(cookie.Value)
-	if err != nil {
-		return helper.NewAuthorizationError(err.Error())
+		return helper.NewInternalServerError(err.Error())
 	}
 
 	// get request parameter

@@ -7,6 +7,8 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/gold-kou/ToeBeans/backend/app/adapter/http/context"
+
 	validation "github.com/go-ozzo/ozzo-validation"
 	"github.com/go-ozzo/ozzo-validation/is"
 	"github.com/gorilla/mux"
@@ -174,15 +176,10 @@ func registerUser(r *http.Request) error {
 }
 
 func getUser(r *http.Request) (user model.User, err error) {
-	// authorization
-	cookie, err := r.Cookie(helper.CookieIDToken)
+	tokenUserName, err := context.GetTokenUserName(r.Context())
 	if err != nil {
 		log.Println(err)
-		return user, helper.NewAuthorizationError(err.Error())
-	}
-	tokenUserName, err := lib.VerifyToken(cookie.Value)
-	if err != nil {
-		return user, helper.NewAuthorizationError(err.Error())
+		return model.User{}, helper.NewInternalServerError(err.Error())
 	}
 
 	// get request parameter
@@ -227,15 +224,11 @@ func getUser(r *http.Request) (user model.User, err error) {
 }
 
 func updateUser(r *http.Request) (err error) {
-	// authorization
-	cookie, err := r.Cookie(helper.CookieIDToken)
+	// not allowed to guest user
+	tokenUserName, err := context.GetTokenUserName(r.Context())
 	if err != nil {
 		log.Println(err)
-		return helper.NewAuthorizationError(err.Error())
-	}
-	tokenUserName, err := lib.VerifyToken(cookie.Value)
-	if err != nil {
-		return helper.NewAuthorizationError(err.Error())
+		return helper.NewInternalServerError(err.Error())
 	}
 	if tokenUserName == lib.GuestUserName {
 		log.Println(errMsgGuestUserForbidden)
@@ -297,15 +290,11 @@ func updateUser(r *http.Request) (err error) {
 }
 
 func deleteUser(r *http.Request) (err error) {
-	// authorization
-	cookie, err := r.Cookie(helper.CookieIDToken)
+	// not allowed to guest user
+	tokenUserName, err := context.GetTokenUserName(r.Context())
 	if err != nil {
 		log.Println(err)
-		return helper.NewAuthorizationError(err.Error())
-	}
-	tokenUserName, err := lib.VerifyToken(cookie.Value)
-	if err != nil {
-		return helper.NewAuthorizationError(err.Error())
+		return helper.NewInternalServerError(err.Error())
 	}
 	if tokenUserName == lib.GuestUserName {
 		log.Println(errMsgGuestUserForbidden)

@@ -6,6 +6,8 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/gold-kou/ToeBeans/backend/app/adapter/http/context"
+
 	"github.com/gold-kou/ToeBeans/backend/app/adapter/http/helper"
 	"github.com/gold-kou/ToeBeans/backend/app/adapter/mysql"
 	"github.com/gold-kou/ToeBeans/backend/app/application/usecase"
@@ -81,15 +83,11 @@ func PasswordController(w http.ResponseWriter, r *http.Request) {
 }
 
 func changePassword(r *http.Request) (err error) {
-	// authorization
-	cookie, err := r.Cookie(helper.CookieIDToken)
+	// not allowed to guest user
+	tokenUserName, err := context.GetTokenUserName(r.Context())
 	if err != nil {
 		log.Println(err)
-		return helper.NewAuthorizationError(err.Error())
-	}
-	tokenUserName, err := lib.VerifyToken(cookie.Value)
-	if err != nil {
-		return helper.NewAuthorizationError(err.Error())
+		return helper.NewInternalServerError(err.Error())
 	}
 	if tokenUserName == lib.GuestUserName {
 		log.Println(errMsgGuestUserForbidden)
