@@ -1,7 +1,6 @@
-import React, { useState, useEffect } from "react";
-import { Container, Row, Alert } from "react-bootstrap";
+import React, { useEffect } from "react";
 import { Link } from "react-router-dom";
-import { isLoggedIn, logout } from "./User";
+import { isLoggedIn } from "./User";
 
 const Logout = () => {
   useEffect(() => {

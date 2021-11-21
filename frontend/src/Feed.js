@@ -15,7 +15,7 @@ import "./common.css";
 
 function Feed() {
   const [userName, setUserName] = useState("");
-  const [avator, setAvator] = useState("");
+  // const [avator, setAvator] = useState("");
   const [posts, setPosts] = useState([]);
   const [sinceAt, setSinceAt] = useState("2100-01-01T00:00:00+09:00");
   const [hasMore, setHasMore] = useState(true); //再読み込み判定
@@ -60,7 +60,7 @@ function Feed() {
     getMyProfile()
       .then(response => {
         setUserName(response.data.user_name);
-        setAvator(response.data.icon);
+        // setAvator(response.data.icon);
       })
       .catch(error => {
         if (error.response.data.status === 401) {
@@ -70,7 +70,7 @@ function Feed() {
           setErrMessage(error.response.data.message);
         }
       });
-  }, []);
+  }, [history]);
 
   return (
     <div className="main">

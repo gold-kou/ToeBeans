@@ -9,14 +9,13 @@ import FlipMove from "react-flip-move";
 import Sidebar from "./Sidebar";
 import { getMyProfile, updateUser } from "./User";
 import Post from "./Post";
-import loader from "./Feed";
 
 import "./MyPage.css";
 import "./common.css";
 
 const MyPage = props => {
   const [userName, setUserName] = useState("");
-  const [avator, setAvator] = useState("");
+  // const [avator, setAvator] = useState("");
   const [selfIntroduction, setSelfIntroduction] = useState("");
   const [postingCount, setPostingCount] = useState(0);
   const [likeCount, setLikeCount] = useState(0);
@@ -79,7 +78,7 @@ const MyPage = props => {
     getMyProfile()
       .then(response => {
         setUserName(response.data.user_name);
-        setAvator(response.data.icon);
+        // setAvator(response.data.icon);
         setSelfIntroduction(response.data.self_introduction);
         setPostingCount(response.data.posting_count);
         setLikeCount(response.data.like_count);
@@ -96,7 +95,7 @@ const MyPage = props => {
           setErrMessage(error.response.data.message);
         }
       });
-  }, []);
+  }, [history]);
 
   return (
     <div className="main">
