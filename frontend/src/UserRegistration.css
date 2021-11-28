@@ -3,3 +3,7 @@
   font-weight: bold;
   cursor: pointer;
 }
+
+.center {
+  text-align: center;
+}
