@@ -55,7 +55,9 @@ const UserRegistration = props => {
       {errMessage && <Alert variant="danger">{errMessage}</Alert>}
 
       <p>
-        <b>User registration</b>
+        <div className="center">
+          <h2>User Registration</h2>
+        </div>
       </p>
 
       <form>
@@ -65,24 +67,20 @@ const UserRegistration = props => {
             type="text"
             className="form-control"
             id="userName"
-            aria-describedby="userNameHelp"
-            placeholder="Enter user name"
+            placeholder="User name"
             value={state.userName}
             onChange={handleChange}
           />
-          <small id="userNameHelp" className="form-text text-muted">
-            This is displayed name.
-          </small>
         </div>
 
         <div className="form-group text-left">
-          <label htmlFor="exampleInputEmail1">Email address</label>
+          <label htmlFor="exampleInputEmail1">Email</label>
           <input
             type="email"
             className="form-control"
             id="email"
             aria-describedby="emailHelp"
-            placeholder="Enter email"
+            placeholder="Email"
             value={state.email}
             onChange={handleChange}
           />

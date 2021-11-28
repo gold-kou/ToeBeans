@@ -40,8 +40,11 @@ const Login = props => {
     <Form className="registrationLoginForm">
       {errMessage && <Alert variant="danger">{errMessage}</Alert>}
       <p>
-        <b>Login</b>
+        <div className="center">
+          <h2>Login</h2>
+        </div>
       </p>
+
       <Form.Group controlId="email">
         <Form.Label>Email</Form.Label>
         <Form.Control
@@ -67,27 +70,41 @@ const Login = props => {
           value={password}
         />
       </Form.Group>
-      <Button
-        variant="primary"
-        type="button"
-        onClick={loginClick}
-        className="loginButton"
-      >
-        Login
-      </Button>
+
+      <div className="center">
+        <Button
+          variant="primary"
+          type="button"
+          onClick={loginClick}
+          className="loginButton"
+        >
+          Login
+        </Button>
+      </div>
+
       <br />
       <br />
       <br />
+
+      <div className="center">
+        <Button
+          variant="info"
+          type="button"
+          onClick={guestUserLoginClick}
+          className="loginButton"
+        >
+          Guest Login
+        </Button>
+      </div>
+      <div className="text-muted center">You can also login as a guest user.</div>
+
       <br />
-      <Button
-        variant="info"
-        type="button"
-        onClick={guestUserLoginClick}
-        className="loginButton"
-      >
-        Guest Login
-      </Button>
-      <div className="text-muted">You can also login as a guest user.</div>
+      <br />
+      <br />
+
+      <div className="center">
+        Sign up for <a href="/user-registration">Toe Beans</a>
+      </div>
     </Form>
   );
 };
