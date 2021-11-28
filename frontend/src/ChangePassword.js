@@ -8,7 +8,6 @@ import {
   Row,
   Col
 } from "react-bootstrap";
-import { useHistory } from "react-router-dom";
 
 import Sidebar from "./Sidebar";
 import { changePassword } from "./User";

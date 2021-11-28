@@ -1,4 +1,5 @@
 import React, { useState, forwardRef } from "react";
+import { useHistory } from "react-router-dom";
 import { Alert, Button } from "react-bootstrap";
 import { Avatar, IconButton } from "@material-ui/core";
 import FavoriteIcon from "@material-ui/icons/Favorite";
@@ -27,6 +28,7 @@ const Post = forwardRef(
     const [isLiked, toggleLiked] = useState(liked);
     const [successMessage, setSuccessMessage] = useState("");
     const [errMessage, setErrMessage] = useState("");
+    const history = useHistory();
 
     const deletePost = async () => {
       await axios
@@ -52,6 +54,8 @@ const Post = forwardRef(
           .catch(error => {
             if (error.response.data.status === 401) {
               localStorage.removeItem("isLoggedIn");
+              localStorage.removeItem("loginUserName");
+              history.push({ pathname: "login" });
             } else {
               setErrMessage(error.response.data.message);
             }
@@ -67,6 +71,8 @@ const Post = forwardRef(
           .catch(error => {
             if (error.response.data.status === 401) {
               localStorage.removeItem("isLoggedIn");
+              localStorage.removeItem("loginUserName");
+              history.push({ pathname: "login" });
             } else {
               setErrMessage(error.response.data.message);
             }

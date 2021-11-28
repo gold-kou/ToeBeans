@@ -4,19 +4,16 @@ import { Container, Row, Col, Alert, Form } from "react-bootstrap";
 import axios from "axios";
 import { useHistory } from "react-router-dom";
 import InfiniteScroll from "react-infinite-scroller";
-import FlipMove from "react-flip-move";
 
 import Sidebar from "./Sidebar";
 import { getMyProfile, updateUser } from "./User";
 import Post from "./Post";
-import loader from "./Feed";
 
 import "./MyPage.css";
 import "./common.css";
 
-const MyPage = props => {
-  const [userName, setUserName] = useState("");
-  const [avator, setAvator] = useState("");
+const MyPage = () => {
+  // const [avator, setAvator] = useState("");
   const [selfIntroduction, setSelfIntroduction] = useState("");
   const [postingCount, setPostingCount] = useState(0);
   const [likeCount, setLikeCount] = useState(0);
@@ -27,16 +24,39 @@ const MyPage = props => {
   const [posts, setPosts] = useState([]);
   const [sinceAt, setSinceAt] = useState("2100-01-01T00:00:00+09:00");
   const [hasMore, setHasMore] = useState(true);
-
   const [successMessage, setSuccessMessage] = useState("");
   const [errMessage, setErrMessage] = useState("");
-
   const history = useHistory();
+
+  useEffect(() => {
+    getMyProfile()
+      .then(response => {
+        // setAvator(response.data.icon);
+        setSelfIntroduction(response.data.self_introduction);
+        setPostingCount(response.data.posting_count);
+        setLikeCount(response.data.like_count);
+        setLikedCount(response.data.liked_count);
+        setFollowCount(response.data.follow_count);
+        setFollowedCount(response.data.followed_count);
+        setCreatedAt(response.data.created_at);
+      })
+      .catch(error => {
+        if (error.response.data.status === 401) {
+          localStorage.removeItem("isLoggedIn");
+          localStorage.removeItem("loginUserName");
+          history.push({ pathname: "login" });
+        } else {
+          setErrMessage(error.response.data.message);
+        }
+      });
+  }, [history]);
 
   const getUserPosts = async () => {
     await axios
-      .get(`/postings?since_at=${sinceAt}&limit=10&user_name=${userName}`)
+      .get(`/postings?since_at=${sinceAt}&limit=10&user_name=${localStorage.getItem("loginUserName")}`)
       .then(response => {
+        console.log("hatano2")
+        console.log(response.data.postings)
         if (response.data.postings == null) {
           setHasMore(false);
           return;
@@ -51,6 +71,7 @@ const MyPage = props => {
       .catch(error => {
         if (error.response.data.status === 401) {
           localStorage.removeItem("isLoggedIn");
+          localStorage.removeItem("loginUserName");
           history.push({ pathname: "login" });
         } else {
           setErrMessage(error.response.data.message);
@@ -74,30 +95,6 @@ const MyPage = props => {
       });
   }
 
-  // TODO 優先度低（アバターのアップロード表示機能）
-  useEffect(() => {
-    getMyProfile()
-      .then(response => {
-        setUserName(response.data.user_name);
-        setAvator(response.data.icon);
-        setSelfIntroduction(response.data.self_introduction);
-        setPostingCount(response.data.posting_count);
-        setLikeCount(response.data.like_count);
-        setLikedCount(response.data.liked_count);
-        setFollowCount(response.data.follow_count);
-        setFollowedCount(response.data.followed_count);
-        setCreatedAt(response.data.created_at);
-      })
-      .catch(error => {
-        if (error.response.data.status === 401) {
-          localStorage.removeItem("isLoggedIn");
-          history.push({ pathname: "login" });
-        } else {
-          setErrMessage(error.response.data.message);
-        }
-      });
-  }, []);
-
   return (
     <div className="main">
       <Container className="background">
@@ -118,7 +115,7 @@ const MyPage = props => {
 
               <Container className="mt-5 mb-5 ml-2">
                 {/* <img src={avator} alt="" /> */}
-                {userName}
+                {localStorage.getItem("loginUserName")}
                 <div className="mini-character">
                   since {createdAt.split("T")[0]}
                 </div>
@@ -198,21 +195,19 @@ const MyPage = props => {
                 hasMore={hasMore} //読み込みを行うかどうかの判定
                 loader={loader}
               >
-                <FlipMove>
-                  {posts.map(post => (
-                    <Post
-                      key={post.posting_id}
-                      postingID={post.posting_id}
-                      userName={post.user_name}
-                      title={post.title}
-                      imageURL={post.image_url}
-                      uploadedAt={post.uploaded_at}
-                      likedCount={post.liked_count}
-                      liked={post.liked}
-                      loginUserName={userName}
-                    />
-                  ))}
-                </FlipMove>
+                {posts.map(post => (
+                  <Post
+                    key={post.posting_id}
+                    postingID={post.posting_id}
+                    userName={post.user_name}
+                    title={post.title}
+                    imageURL={post.image_url}
+                    uploadedAt={post.uploaded_at}
+                    likedCount={post.liked_count}
+                    liked={post.liked}
+                    loginUserName={localStorage.getItem("loginUserName")}
+                  />
+                ))}
               </InfiniteScroll>
             </div>
           </Col>

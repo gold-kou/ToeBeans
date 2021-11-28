@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Form, Button, Container, Row, Alert } from "react-bootstrap";
+import { Form, Button, Alert } from "react-bootstrap";
 import { withRouter } from "react-router-dom";
 import { login } from "./User";
 
@@ -12,24 +12,26 @@ const Login = props => {
 
   async function loginClick() {
     login(email, password)
-      .then(response => {
+      .then(() => {
         localStorage.setItem("isLoggedIn", true);
         props.history.push({ pathname: "home" });
       })
       .catch(error => {
         localStorage.removeItem("isLoggedIn");
+        localStorage.removeItem("loginUserName");
         setErrMessage(error.data.message);
       });
   }
 
   async function guestUserLoginClick() {
     login("guestUser@example.com", "Guest1234")
-      .then(response => {
+      .then(() => {
         localStorage.setItem("isLoggedIn", true);
         props.history.push({ pathname: "home" });
       })
       .catch(error => {
         localStorage.removeItem("isLoggedIn");
+        localStorage.removeItem("loginUserName");
         setErrMessage(error.data.message);
       });
   }
