@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Alert, Form } from "react-bootstrap";
+import { useHistory } from "react-router-dom";
 import { Button } from "@material-ui/core";
 import axios from "axios";
 
@@ -13,6 +14,7 @@ function PostBox(onFileSelect) {
   const [image, setImage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
   const [errMessage, setErrMessage] = useState("");
+  const history = useHistory();
 
   function sendPost(e) {
     e.preventDefault();
@@ -32,8 +34,23 @@ function PostBox(onFileSelect) {
           .then(function () {
             setSuccessMessage("success post");
           })
-          .catch(function (error) {
-            setErrMessage(error.response.data.message);
+          .catch(error => {
+            if (error.response) {
+              if (error.response.data.status === 401) {
+                localStorage.removeItem("isLoggedIn");
+                localStorage.removeItem("loginUserName");
+                history.push({ pathname: "login" });
+              }
+              else {
+                setErrMessage(error.response.data.message);
+              }
+            }
+            else if (error.request) {
+              setErrMessage(error.request.data.message);
+            }
+            else {
+              console.log(error);
+            }
           })
           .finally(function () {
             setTitle("");

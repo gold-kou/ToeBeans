@@ -30,10 +30,18 @@ const UserRegistration = props => {
         );
         setTimeout(() => {
           redirectToLogin();
-        }, 1500);
+        }, 2000);
       })
       .catch(error => {
-        setErrMessage(error.data.message);
+        if (error.response) {
+          setErrMessage(error.response.data.message);
+        }
+        else if (error.request) {
+          setErrMessage(error.request.data.message);
+        }
+        else {
+          console.log(error);
+        }
       });
   }
 

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Form, Button, Alert } from "react-bootstrap";
-import { withRouter } from "react-router-dom";
+import { useHistory, withRouter } from "react-router-dom";
 import { login } from "./User";
 
 import "./Login.css";
@@ -9,6 +9,7 @@ const Login = props => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [errMessage, setErrMessage] = useState("");
+  const history = useHistory();
 
   async function loginClick() {
     login(email, password)
@@ -17,9 +18,22 @@ const Login = props => {
         props.history.push({ pathname: "home" });
       })
       .catch(error => {
-        localStorage.removeItem("isLoggedIn");
-        localStorage.removeItem("loginUserName");
-        setErrMessage(error.data.message);
+        if (error.response) {
+          if (error.response.data.status === 401) {
+            localStorage.removeItem("isLoggedIn");
+            localStorage.removeItem("loginUserName");
+            history.push({ pathname: "login" });
+          }
+          else {
+            setErrMessage(error.response.data.message);
+          }
+        }
+        else if (error.request) {
+          setErrMessage(error.request.data.message);
+        }
+        else {
+          console.log(error);
+        }
       });
   }
 
@@ -30,9 +44,22 @@ const Login = props => {
         props.history.push({ pathname: "home" });
       })
       .catch(error => {
-        localStorage.removeItem("isLoggedIn");
-        localStorage.removeItem("loginUserName");
-        setErrMessage(error.data.message);
+        if (error.response) {
+          if (error.response.data.status === 401) {
+            localStorage.removeItem("isLoggedIn");
+            localStorage.removeItem("loginUserName");
+            history.push({ pathname: "login" });
+          }
+          else {
+            setErrMessage(error.response.data.message);
+          }
+        }
+        else if (error.request) {
+          setErrMessage(error.request.data.message);
+        }
+        else {
+          console.log(error);
+        }
       });
   }
 

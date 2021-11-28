@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { useHistory, Link } from "react-router-dom";
 import { Button } from "@material-ui/core";
 import { Alert, Container, Row, Col } from "react-bootstrap";
 
@@ -10,10 +10,11 @@ import "./Settings.css";
 import "./common.css";
 
 const Settings = props => {
-  useEffect(() => {}, []);
+  useEffect(() => { }, []);
 
   const [successMessage, setSuccessMessage] = useState("");
   const [errMessage, setErrMessage] = useState("");
+  const history = useHistory();
 
   function refreshPage() {
     setTimeout(() => {
@@ -30,7 +31,22 @@ const Settings = props => {
         }, 1500);
       })
       .catch(error => {
-        setErrMessage(error.data.message);
+        if (error.response) {
+          if (error.response.data.status === 401) {
+            localStorage.removeItem("isLoggedIn");
+            localStorage.removeItem("loginUserName");
+            history.push({ pathname: "login" });
+          }
+          else {
+            setErrMessage(error.response.data.message);
+          }
+        }
+        else if (error.request) {
+          setErrMessage(error.request.data.message);
+        }
+        else {
+          console.log(error);
+        }
       });
   }
 
