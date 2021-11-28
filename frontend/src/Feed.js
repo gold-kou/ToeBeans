@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import { useHistory } from "react-router-dom";
 import axios from "axios";
 import InfiniteScroll from "react-infinite-scroller";
-import FlipMove from "react-flip-move";
 import { Container, Row, Col, Alert } from "react-bootstrap";
 
 import Sidebar from "./Sidebar";
@@ -14,13 +13,28 @@ import "./Feed.css";
 import "./common.css";
 
 function Feed() {
-  const [userName, setUserName] = useState("");
-  // const [avator, setAvator] = useState("");
   const [posts, setPosts] = useState([]);
   const [sinceAt, setSinceAt] = useState("2100-01-01T00:00:00+09:00");
   const [hasMore, setHasMore] = useState(true); //再読み込み判定
   const [errMessage, setErrMessage] = useState("");
   const history = useHistory();
+
+  useEffect(() => {
+    getMyProfile()
+      .then(response => {
+        localStorage.setItem("loginUserName", response.data.user_name);
+        // setAvator(response.data.icon);
+      })
+      .catch(error => {
+        if (error.response.data.status === 401) {
+          localStorage.removeItem("isLoggedIn");
+          localStorage.removeItem("loginUserName");
+          history.push({ pathname: "login" });
+        } else {
+          setErrMessage(error.response.data.message);
+        }
+      });
+  }, [history]);
 
   const getPosts = async () => {
     await axios
@@ -42,6 +56,7 @@ function Feed() {
       .catch(error => {
         if (error.response.data.status === 401) {
           localStorage.removeItem("isLoggedIn");
+          localStorage.removeItem("loginUserName");
           history.push({ pathname: "login" });
         } else {
           setErrMessage(error.response.data.message);
@@ -55,22 +70,6 @@ function Feed() {
       Loading ...
     </div>
   );
-
-  useEffect(() => {
-    getMyProfile()
-      .then(response => {
-        setUserName(response.data.user_name);
-        // setAvator(response.data.icon);
-      })
-      .catch(error => {
-        if (error.response.data.status === 401) {
-          localStorage.removeItem("isLoggedIn");
-          history.push({ pathname: "login" });
-        } else {
-          setErrMessage(error.response.data.message);
-        }
-      });
-  }, [history]);
 
   return (
     <div className="main">
@@ -94,21 +93,19 @@ function Feed() {
                 hasMore={hasMore} //読み込みを行うかどうかの判定
                 loader={loader}
               >
-                <FlipMove>
-                  {posts.map(post => (
-                    <Post
-                      key={post.posting_id}
-                      postingID={post.posting_id}
-                      userName={post.user_name}
-                      title={post.title}
-                      imageURL={post.image_url}
-                      uploadedAt={post.uploaded_at}
-                      likedCount={post.liked_count}
-                      liked={post.liked}
-                      loginUserName={userName}
-                    />
-                  ))}
-                </FlipMove>
+                {posts.map((post) => (
+                  <Post
+                    key={post.posting_id}
+                    postingID={post.posting_id}
+                    userName={post.user_name}
+                    title={post.title}
+                    imageURL={post.image_url}
+                    uploadedAt={post.uploaded_at}
+                    likedCount={post.liked_count}
+                    liked={post.liked}
+                    loginUserName={localStorage.getItem("loginUserName")}
+                  />
+                ))}
               </InfiniteScroll>
             </div>
           </Col>

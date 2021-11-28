@@ -6,6 +6,7 @@ const Logout = () => {
   useEffect(() => {
     if (isLoggedIn()) {
       localStorage.removeItem("isLoggedIn");
+      localStorage.removeItem("loginUserName");
     }
   }, []);
 
