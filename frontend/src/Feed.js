@@ -7,7 +7,7 @@ import { Container, Row, Col, Alert } from "react-bootstrap";
 import Sidebar from "./Sidebar";
 import PostBox from "./PostBox";
 import Post from "./Post";
-import { getMyProfile } from "./User";
+import { getMyUserInfo } from "./User";
 
 import "./Feed.css";
 import "./common.css";
@@ -20,18 +20,27 @@ function Feed() {
   const history = useHistory();
 
   useEffect(() => {
-    getMyProfile()
+    getMyUserInfo()
       .then(response => {
         localStorage.setItem("loginUserName", response.data.user_name);
         // setAvator(response.data.icon);
       })
       .catch(error => {
-        if (error.response.data.status === 401) {
-          localStorage.removeItem("isLoggedIn");
-          localStorage.removeItem("loginUserName");
-          history.push({ pathname: "login" });
-        } else {
-          setErrMessage(error.response.data.message);
+        if (error.response) {
+          if (error.response.data.status === 401) {
+            localStorage.removeItem("isLoggedIn");
+            localStorage.removeItem("loginUserName");
+            history.push({ pathname: "login" });
+          }
+          else {
+            setErrMessage(error.response.data.message);
+          }
+        }
+        else if (error.request) {
+          setErrMessage(error.request.data.message);
+        }
+        else {
+          console.log(error);
         }
       });
   }, [history]);
@@ -54,12 +63,21 @@ function Feed() {
         );
       })
       .catch(error => {
-        if (error.response.data.status === 401) {
-          localStorage.removeItem("isLoggedIn");
-          localStorage.removeItem("loginUserName");
-          history.push({ pathname: "login" });
-        } else {
-          setErrMessage(error.response.data.message);
+        if (error.response) {
+          if (error.response.data.status === 401) {
+            localStorage.removeItem("isLoggedIn");
+            localStorage.removeItem("loginUserName");
+            history.push({ pathname: "login" });
+          }
+          else {
+            setErrMessage(error.response.data.message);
+          }
+        }
+        else if (error.request) {
+          setErrMessage(error.request.data.message);
+        }
+        else {
+          console.log(error);
         }
       });
   };

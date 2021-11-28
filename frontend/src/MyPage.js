@@ -6,7 +6,7 @@ import { useHistory } from "react-router-dom";
 import InfiniteScroll from "react-infinite-scroller";
 
 import Sidebar from "./Sidebar";
-import { getMyProfile, updateUser } from "./User";
+import { getMyUserInfo, updateUser } from "./User";
 import Post from "./Post";
 
 import "./MyPage.css";
@@ -29,7 +29,7 @@ const MyPage = () => {
   const history = useHistory();
 
   useEffect(() => {
-    getMyProfile()
+    getMyUserInfo()
       .then(response => {
         // setAvator(response.data.icon);
         setSelfIntroduction(response.data.self_introduction);
@@ -41,12 +41,21 @@ const MyPage = () => {
         setCreatedAt(response.data.created_at);
       })
       .catch(error => {
-        if (error.response.data.status === 401) {
-          localStorage.removeItem("isLoggedIn");
-          localStorage.removeItem("loginUserName");
-          history.push({ pathname: "login" });
-        } else {
-          setErrMessage(error.response.data.message);
+        if (error.response) {
+          if (error.response.data.status === 401) {
+            localStorage.removeItem("isLoggedIn");
+            localStorage.removeItem("loginUserName");
+            history.push({ pathname: "login" });
+          }
+          else {
+            setErrMessage(error.response.data.message);
+          }
+        }
+        else if (error.request) {
+          setErrMessage(error.request.data.message);
+        }
+        else {
+          console.log(error);
         }
       });
   }, [history]);
@@ -69,12 +78,21 @@ const MyPage = () => {
         );
       })
       .catch(error => {
-        if (error.response.data.status === 401) {
-          localStorage.removeItem("isLoggedIn");
-          localStorage.removeItem("loginUserName");
-          history.push({ pathname: "login" });
-        } else {
-          setErrMessage(error.response.data.message);
+        if (error.response) {
+          if (error.response.data.status === 401) {
+            localStorage.removeItem("isLoggedIn");
+            localStorage.removeItem("loginUserName");
+            history.push({ pathname: "login" });
+          }
+          else {
+            setErrMessage(error.response.data.message);
+          }
+        }
+        else if (error.request) {
+          setErrMessage(error.request.data.message);
+        }
+        else {
+          console.log(error);
         }
       });
   };
@@ -91,7 +109,22 @@ const MyPage = () => {
         setSuccessMessage("update success");
       })
       .catch(error => {
-        setErrMessage(error.data.message);
+        if (error.response) {
+          if (error.response.data.status === 401) {
+            localStorage.removeItem("isLoggedIn");
+            localStorage.removeItem("loginUserName");
+            history.push({ pathname: "login" });
+          }
+          else {
+            setErrMessage(error.response.data.message);
+          }
+        }
+        else if (error.request) {
+          setErrMessage(error.request.data.message);
+        }
+        else {
+          console.log(error);
+        }
       });
   }
 

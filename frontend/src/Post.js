@@ -37,7 +37,22 @@ const Post = forwardRef(
           setSuccessMessage("success delete post");
         })
         .catch(error => {
-          setErrMessage(error.response.data.message);
+          if (error.response) {
+            if (error.response.data.status === 401) {
+              localStorage.removeItem("isLoggedIn");
+              localStorage.removeItem("loginUserName");
+              history.push({ pathname: "login" });
+            }
+            else {
+              setErrMessage(error.response.data.message);
+            }
+          }
+          else if (error.request) {
+            setErrMessage(error.request.data.message);
+          }
+          else {
+            console.log(error);
+          }
         });
     };
 
@@ -52,12 +67,21 @@ const Post = forwardRef(
             toggleLiked(!isLiked);
           })
           .catch(error => {
-            if (error.response.data.status === 401) {
-              localStorage.removeItem("isLoggedIn");
-              localStorage.removeItem("loginUserName");
-              history.push({ pathname: "login" });
-            } else {
-              setErrMessage(error.response.data.message);
+            if (error.response) {
+              if (error.response.data.status === 401) {
+                localStorage.removeItem("isLoggedIn");
+                localStorage.removeItem("loginUserName");
+                history.push({ pathname: "login" });
+              }
+              else {
+                setErrMessage(error.response.data.message);
+              }
+            }
+            else if (error.request) {
+              setErrMessage(error.request.data.message);
+            }
+            else {
+              console.log(error);
             }
           });
       } else {
@@ -69,12 +93,21 @@ const Post = forwardRef(
             toggleLiked(!isLiked);
           })
           .catch(error => {
-            if (error.response.data.status === 401) {
-              localStorage.removeItem("isLoggedIn");
-              localStorage.removeItem("loginUserName");
-              history.push({ pathname: "login" });
-            } else {
-              setErrMessage(error.response.data.message);
+            if (error.response) {
+              if (error.response.data.status === 401) {
+                localStorage.removeItem("isLoggedIn");
+                localStorage.removeItem("loginUserName");
+                history.push({ pathname: "login" });
+              }
+              else {
+                setErrMessage(error.response.data.message);
+              }
+            }
+            else if (error.request) {
+              setErrMessage(error.request.data.message);
+            }
+            else {
+              console.log(error);
             }
           });
       }

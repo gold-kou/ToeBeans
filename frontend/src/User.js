@@ -6,36 +6,20 @@ export function isLoggedIn() {
 
 export async function login(email, password) {
   const reqBody = { email: email, password: password };
-  try {
-    return await axios.post("/login", reqBody);
-  } catch (error) {
-    throw error.response;
-  }
+  return await axios.post("/login", reqBody);
 }
 
-export async function getMyProfile() {
-  try {
-    return await axios.get("/user");
-  } catch (error) {
-    throw error.response;
-  }
+export async function getMyUserInfo() {
+  return await axios.get("/user");
 }
 
 export async function registerUser(userName, email, password) {
   const reqBody = { user_name: userName, email: email, password: password };
-  try {
-    return await axios.post("/user", reqBody);
-  } catch (error) {
-    throw error.response;
-  }
+  return await axios.post("/user", reqBody);
 }
 
 export async function getUser(userName) {
-  try {
-    return await axios.get(`/user?${userName}`);
-  } catch (error) {
-    throw error.response;
-  }
+  return await axios.get(`/user?${userName}`);
 }
 
 export async function updateUser(newPassword, avator, selfIntroduction) {
@@ -44,19 +28,11 @@ export async function updateUser(newPassword, avator, selfIntroduction) {
     icon: avator,
     self_introduction: selfIntroduction
   };
-  try {
-    return await axios.put("/user", reqBody);
-  } catch (error) {
-    throw error.response;
-  }
+  return await axios.put("/user", reqBody);
 }
 
 export async function deleteUser() {
-  try {
-    return await axios.delete("/user");
-  } catch (error) {
-    throw error.response;
-  }
+  return await axios.delete("/user");
 }
 
 export async function changePassword(oldPassword, newPassword) {
@@ -64,9 +40,5 @@ export async function changePassword(oldPassword, newPassword) {
     old_password: oldPassword,
     new_password: newPassword
   };
-  try {
-    return await axios.put("/password", reqBody);
-  } catch (error) {
-    throw error.response;
-  }
+  return await axios.put("/password", reqBody);
 }
