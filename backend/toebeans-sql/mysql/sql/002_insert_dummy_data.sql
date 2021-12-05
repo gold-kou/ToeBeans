@@ -1,0 +1,2 @@
+INSERT INTO `users`(`name`, `email`, `password`, `activation_key`) VALUES("guest", "guestUser@example.com", "guest1234", "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa");
+INSERT INTO `users`(`name`, `email`, `password`, `activation_key`) VALUES("userA", "userA@example.com", "$2a$10$2KnKxo6xj92YdUM253Odr.WPSSK9wDPqhFLXqd.ushn.bGOUcrHLq", "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa");

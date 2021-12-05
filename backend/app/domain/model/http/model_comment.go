@@ -12,9 +12,6 @@ package http
 // Comment - posting comment
 type Comment struct {
 
-	// posting id
-	PostingId int64 `json:"posting_id"`
-
 	// comment
 	Comment string `json:"comment"`
 }

@@ -32,7 +32,7 @@ const Post = forwardRef(
 
     const deletePost = async () => {
       await axios
-        .delete(`/posting/${postingID}`)
+        .delete(`/postings/${postingID}`)
         .then(() => {
           setSuccessMessage("success delete post");
         })
@@ -59,9 +59,8 @@ const Post = forwardRef(
     const changeLiked = () => {
       if (isLiked === false) {
         // POST
-        const reqBody = { posting_id: postingID };
         axios
-          .post("/like", reqBody)
+          .post(`/likes/${postingID}`)
           .then(() => {
             setCount(count + 1);
             toggleLiked(!isLiked);
@@ -87,7 +86,7 @@ const Post = forwardRef(
       } else {
         // DELETE
         axios
-          .delete(`/like/${postingID}`)
+          .delete(`/likes/${postingID}`)
           .then(() => {
             setCount(count - 1);
             toggleLiked(!isLiked);

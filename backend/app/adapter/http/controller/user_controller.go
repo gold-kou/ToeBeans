@@ -24,20 +24,8 @@ import (
 
 func UserController(w http.ResponseWriter, r *http.Request) {
 	switch {
-	case r.URL.Path == "/user":
+	case r.URL.Path == "/users":
 		switch r.Method {
-		case http.MethodPost:
-			err := registerUser(r)
-			switch err := err.(type) {
-			case nil:
-				helper.ResponseSimpleSuccess(w)
-			case *helper.BadRequestError:
-				helper.ResponseBadRequest(w, err.Error())
-			case *helper.InternalServerError:
-				helper.ResponseInternalServerError(w, err.Error())
-			default:
-				helper.ResponseInternalServerError(w, err.Error())
-			}
 		case http.MethodGet:
 			user, err := getUser(r)
 			switch err := err.(type) {
@@ -69,6 +57,24 @@ func UserController(w http.ResponseWriter, r *http.Request) {
 			default:
 				helper.ResponseInternalServerError(w, err.Error())
 			}
+		default:
+			methods := []string{http.MethodGet}
+			helper.ResponseNotAllowedMethod(w, errMsgNotAllowedMethod, methods)
+		}
+	case strings.HasPrefix(r.URL.Path, "/users/"):
+		switch r.Method {
+		case http.MethodPost:
+			err := registerUser(r)
+			switch err := err.(type) {
+			case nil:
+				helper.ResponseSimpleSuccess(w)
+			case *helper.BadRequestError:
+				helper.ResponseBadRequest(w, err.Error())
+			case *helper.InternalServerError:
+				helper.ResponseInternalServerError(w, err.Error())
+			default:
+				helper.ResponseInternalServerError(w, err.Error())
+			}
 		case http.MethodPut:
 			err := updateUser(r)
 			switch err := err.(type) {
@@ -80,6 +86,8 @@ func UserController(w http.ResponseWriter, r *http.Request) {
 				helper.ResponseUnauthorized(w, err.Error())
 			case *helper.ForbiddenError:
 				helper.ResponseForbidden(w, err.Error())
+			case *helper.ConflictError:
+				helper.ResponseConflictError(w, err.Error())
 			case *helper.InternalServerError:
 				helper.ResponseInternalServerError(w, err.Error())
 			default:
@@ -96,13 +104,15 @@ func UserController(w http.ResponseWriter, r *http.Request) {
 				helper.ResponseUnauthorized(w, err.Error())
 			case *helper.ForbiddenError:
 				helper.ResponseForbidden(w, err.Error())
+			case *helper.ConflictError:
+				helper.ResponseConflictError(w, err.Error())
 			case *helper.InternalServerError:
 				helper.ResponseInternalServerError(w, err.Error())
 			default:
 				helper.ResponseInternalServerError(w, err.Error())
 			}
 		default:
-			methods := []string{http.MethodPost, http.MethodGet, http.MethodPut, http.MethodDelete}
+			methods := []string{http.MethodPost, http.MethodPut, http.MethodDelete}
 			helper.ResponseNotAllowedMethod(w, errMsgNotAllowedMethod, methods)
 		}
 	case strings.HasPrefix(r.URL.Path, "/user-activation/"):
@@ -132,6 +142,8 @@ func UserController(w http.ResponseWriter, r *http.Request) {
 
 func registerUser(r *http.Request) error {
 	// get request parameter
+	vars := mux.Vars(r)
+	userName, _ := vars["user_name"]
 	var reqRegisterUser *modelHTTP.RequestRegisterUser
 	b, err := ioutil.ReadAll(r.Body)
 	if err != nil {
@@ -145,6 +157,10 @@ func registerUser(r *http.Request) error {
 	}
 
 	// validation check
+	if err = validation.Validate(userName, validation.Required, validation.Length(modelHTTP.MinVarcharLength, modelHTTP.MaxVarcharLength), is.Alphanumeric); err != nil {
+		log.Println(err)
+		return helper.NewBadRequestError(err.Error())
+	}
 	err = reqRegisterUser.ValidateParam()
 	if err != nil {
 		log.Println(err)
@@ -164,7 +180,7 @@ func registerUser(r *http.Request) error {
 	userRepo := repository.NewUserRepository(db)
 
 	// UseCase
-	u := usecase.NewRegisterUser(r.Context(), tx, reqRegisterUser, userRepo)
+	u := usecase.NewRegisterUser(r.Context(), tx, userName, reqRegisterUser, userRepo)
 	if err = u.RegisterUserUseCase(); err != nil {
 		log.Println(err)
 		if err == repository.ErrDuplicateData {
@@ -236,6 +252,8 @@ func updateUser(r *http.Request) (err error) {
 	}
 
 	// get request parameter
+	vars := mux.Vars(r)
+	userName, _ := vars["user_name"]
 	var reqUpdateUser *modelHTTP.RequestUpdateUser
 	b, err := ioutil.ReadAll(r.Body)
 	if err != nil {
@@ -249,6 +267,10 @@ func updateUser(r *http.Request) (err error) {
 	}
 
 	// validation check
+	if err = validation.Validate(userName, validation.Required, validation.Length(modelHTTP.MinVarcharLength, modelHTTP.MaxVarcharLength), is.Alphanumeric); err != nil {
+		log.Println(err)
+		return helper.NewBadRequestError(err.Error())
+	}
 	if reqUpdateUser.Password != "" {
 		if err = validation.Validate(reqUpdateUser.Password, validation.By(modelHTTP.PasswordValidation)); err != nil {
 			log.Println(err)
@@ -275,14 +297,14 @@ func updateUser(r *http.Request) (err error) {
 	userRepo := repository.NewUserRepository(db)
 
 	// UseCase
-	u := usecase.NewUpdateUser(r.Context(), tx, tokenUserName, reqUpdateUser, userRepo)
+	u := usecase.NewUpdateUser(r.Context(), tx, userName, reqUpdateUser, userRepo)
 	if err = u.UpdateUserUseCase(); err != nil {
 		log.Println(err)
 		if err == repository.ErrNotExistsData || err == usecase.ErrDecodeImage {
 			return helper.NewBadRequestError(err.Error())
 		}
-		if err == lib.ErrTokenInvalidNotExistingUserName {
-			return helper.NewAuthorizationError(err.Error())
+		if err == usecase.ErrNotExitsUser {
+			return helper.NewConflictError(err.Error())
 		}
 		return helper.NewInternalServerError(err.Error())
 	}
@@ -299,6 +321,16 @@ func deleteUser(r *http.Request) (err error) {
 	if tokenUserName == lib.GuestUserName {
 		log.Println(errMsgGuestUserForbidden)
 		return helper.NewForbiddenError(errMsgGuestUserForbidden)
+	}
+
+	// get path parameter
+	vars := mux.Vars(r)
+	userName, _ := vars["user_name"]
+
+	// validation check
+	if err = validation.Validate(userName, validation.Required, validation.Length(modelHTTP.MinVarcharLength, modelHTTP.MaxVarcharLength), is.Alphanumeric); err != nil {
+		log.Println(err)
+		return helper.NewBadRequestError(err.Error())
 	}
 
 	// db connect
@@ -318,11 +350,11 @@ func deleteUser(r *http.Request) (err error) {
 	followRepo := repository.NewFollowRepository(db)
 
 	// UseCase
-	u := usecase.NewDeleteUser(r.Context(), tx, tokenUserName, userRepo, postingRepo, likeRepo, commentRepo, followRepo)
+	u := usecase.NewDeleteUser(r.Context(), tx, userName, userRepo, postingRepo, likeRepo, commentRepo, followRepo)
 	if err = u.DeleteUserUseCase(); err != nil {
 		log.Println(err)
-		if err == lib.ErrTokenInvalidNotExistingUserName {
-			return helper.NewAuthorizationError(err.Error())
+		if err == usecase.ErrNotExitsUser {
+			return helper.NewConflictError(err.Error())
 		}
 		return helper.NewInternalServerError(err.Error())
 	}
@@ -332,16 +364,8 @@ func deleteUser(r *http.Request) (err error) {
 func activateUser(r *http.Request) (err error) {
 	// get path parameter
 	vars := mux.Vars(r)
-	userName, ok := vars["user_name"]
-	if !ok || userName == "" {
-		log.Println(err)
-		return helper.NewBadRequestError("user_name cannot be blank")
-	}
-	activationKey, ok := vars["activation_key"]
-	if !ok || activationKey == "" {
-		log.Println(err)
-		return helper.NewBadRequestError("activation_key cannot be blank")
-	}
+	userName, _ := vars["user_name"]
+	activationKey, _ := vars["activation_key"]
 
 	// validation check
 	if err = validation.Validate(userName, validation.Required, validation.Length(modelHTTP.MinVarcharLength, modelHTTP.MaxVarcharLength), is.Alphanumeric); err != nil {

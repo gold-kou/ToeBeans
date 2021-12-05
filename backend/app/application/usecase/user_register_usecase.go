@@ -25,14 +25,16 @@ type RegisterUserUseCaseInterface interface {
 type RegisterUser struct {
 	ctx             context.Context
 	tx              mysql.DBTransaction
+	userName        string
 	reqRegisterUser *modelHTTP.RequestRegisterUser
 	userRepo        *repository.UserRepository
 }
 
-func NewRegisterUser(ctx context.Context, tx mysql.DBTransaction, reqRegisterUser *modelHTTP.RequestRegisterUser, userRepo *repository.UserRepository) *RegisterUser {
+func NewRegisterUser(ctx context.Context, tx mysql.DBTransaction, userName string, reqRegisterUser *modelHTTP.RequestRegisterUser, userRepo *repository.UserRepository) *RegisterUser {
 	return &RegisterUser{
 		ctx:             ctx,
 		tx:              tx,
+		userName:        userName,
 		reqRegisterUser: reqRegisterUser,
 		userRepo:        userRepo,
 	}
@@ -52,7 +54,7 @@ func (user *RegisterUser) RegisterUserUseCase() error {
 
 	err = user.tx.Do(user.ctx, func(ctx context.Context) error {
 		u := model.User{
-			Name:          user.reqRegisterUser.UserName,
+			Name:          user.userName,
 			Email:         user.reqRegisterUser.Email,
 			Password:      user.reqRegisterUser.Password,
 			ActivationKey: activationKey.String(),
@@ -71,9 +73,9 @@ func (user *RegisterUser) RegisterUserUseCase() error {
 				prefix = "https://" + os.Getenv("DOMAIN")
 			}
 			title := "Welcome to ToeBeans"
-			activateLink := fmt.Sprintf(prefix+"/user-activation/%s/%s", user.reqRegisterUser.UserName, activationKey.String())
+			activateLink := fmt.Sprintf(prefix+"/user-activation/%s/%s", user.userName, activationKey.String())
 			body := fmt.Sprintf("Hi " +
-				user.reqRegisterUser.UserName +
+				user.userName +
 				",\n" +
 				"\n" +
 				"You are just one step away from activating your account on the ToeBeans!" +

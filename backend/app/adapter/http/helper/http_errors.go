@@ -16,6 +16,10 @@ type ForbiddenError struct {
 	Message string
 }
 
+type ConflictError struct {
+	Message string
+}
+
 type InternalServerError struct {
 	Message string
 }
@@ -57,6 +61,16 @@ func NewNotFoundError(message string) *NotFoundError {
 }
 
 func (e *NotFoundError) Error() string {
+	return e.Message
+}
+
+func NewConflictError(message string) *ConflictError {
+	return &ConflictError{
+		Message: message,
+	}
+}
+
+func (e *ConflictError) Error() string {
 	return e.Message
 }
 

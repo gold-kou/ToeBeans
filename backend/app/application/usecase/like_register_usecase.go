@@ -7,7 +7,6 @@ import (
 
 	"github.com/gold-kou/ToeBeans/backend/app/adapter/mysql"
 	"github.com/gold-kou/ToeBeans/backend/app/domain/model"
-	modelHTTP "github.com/gold-kou/ToeBeans/backend/app/domain/model/http"
 	"github.com/gold-kou/ToeBeans/backend/app/domain/repository"
 )
 
@@ -19,19 +18,19 @@ type RegisterLike struct {
 	ctx              context.Context
 	tx               mysql.DBTransaction
 	tokenUserName    string
-	reqRegisterLike  *modelHTTP.Like
+	postingID        int
 	userRepo         *repository.UserRepository
 	postingRepo      *repository.PostingRepository
 	likeRepo         *repository.LikeRepository
 	notificationRepo *repository.NotificationRepository
 }
 
-func NewRegisterLike(ctx context.Context, tx mysql.DBTransaction, tokenUserName string, reqRegisterLike *modelHTTP.Like, userRepo *repository.UserRepository, postingRepo *repository.PostingRepository, likeRepo *repository.LikeRepository, notificationRepo *repository.NotificationRepository) *RegisterLike {
+func NewRegisterLike(ctx context.Context, tx mysql.DBTransaction, tokenUserName string, postingID int, userRepo *repository.UserRepository, postingRepo *repository.PostingRepository, likeRepo *repository.LikeRepository, notificationRepo *repository.NotificationRepository) *RegisterLike {
 	return &RegisterLike{
 		ctx:              ctx,
 		tx:               tx,
 		tokenUserName:    tokenUserName,
-		reqRegisterLike:  reqRegisterLike,
+		postingID:        postingID,
 		userRepo:         userRepo,
 		postingRepo:      postingRepo,
 		likeRepo:         likeRepo,
@@ -49,7 +48,7 @@ func (like *RegisterLike) RegisterLikeUseCase() error {
 		return err
 	}
 
-	p, err := like.postingRepo.GetWhereID(like.ctx, like.reqRegisterLike.PostingId)
+	p, err := like.postingRepo.GetWhereID(like.ctx, int64(like.postingID))
 	if err != nil {
 		return err
 	}
@@ -61,7 +60,7 @@ func (like *RegisterLike) RegisterLikeUseCase() error {
 	err = like.tx.Do(like.ctx, func(ctx context.Context) error {
 		l := model.Like{
 			UserName:  like.tokenUserName,
-			PostingID: like.reqRegisterLike.PostingId,
+			PostingID: int64(like.postingID),
 		}
 		if err := like.likeRepo.Create(ctx, &l); err != nil {
 			return err
@@ -71,10 +70,10 @@ func (like *RegisterLike) RegisterLikeUseCase() error {
 		if err := like.userRepo.UpdateLikeCount(ctx, like.tokenUserName, true); err != nil {
 			return err
 		}
-		if err := like.userRepo.UpdateLikedCount(ctx, like.reqRegisterLike.PostingId, true); err != nil {
+		if err := like.userRepo.UpdateLikedCount(ctx, int64(like.postingID), true); err != nil {
 			return err
 		}
-		if err := like.postingRepo.UpdateLikedCount(ctx, like.reqRegisterLike.PostingId, true); err != nil {
+		if err := like.postingRepo.UpdateLikedCount(ctx, int64(like.postingID), true); err != nil {
 			return err
 		}
 

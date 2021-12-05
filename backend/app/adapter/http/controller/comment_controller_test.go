@@ -21,27 +21,19 @@ import (
 
 var successReqRegisterComment = `
 {
-  "posting_id": 1,
-  "comment": "test comment"
-}
-`
-
-var errReqRegisterCommentWithoutPostingID = `
-{
   "comment": "test comment"
 }
 `
 
 var errReqRegisterCommentWithoutComment = `
 {
-  "posting_id": 1
 }
 `
 
 var errRespRegisterCommentWithoutPostingID = `
 {
   "status": 400,
-  "message": "posting_id: cannot be blank."
+  "message": "cannot be blank"
 }
 `
 
@@ -54,7 +46,8 @@ var errRespRegisterCommentWithoutComment = `
 
 func TestRegisterComment(t *testing.T) {
 	type args struct {
-		reqBody string
+		postingID int64
+		reqBody   string
 	}
 	tests := []struct {
 		name       string
@@ -65,28 +58,28 @@ func TestRegisterComment(t *testing.T) {
 	}{
 		{
 			name:       "success",
-			args:       args{reqBody: successReqRegisterComment},
+			args:       args{postingID: dummy.Posting1.ID, reqBody: successReqRegisterComment},
 			method:     http.MethodPost,
 			want:       testingHelper.RespSimpleSuccess,
 			wantStatus: http.StatusOK,
 		},
 		{
 			name:       "error empty posting_id",
-			args:       args{reqBody: errReqRegisterCommentWithoutPostingID},
+			args:       args{reqBody: successReqRegisterComment},
 			method:     http.MethodPost,
 			want:       errRespRegisterCommentWithoutPostingID,
 			wantStatus: http.StatusBadRequest,
 		},
 		{
 			name:       "error empty comment",
-			args:       args{reqBody: errReqRegisterCommentWithoutComment},
+			args:       args{postingID: dummy.Posting1.ID, reqBody: errReqRegisterCommentWithoutComment},
 			method:     http.MethodPost,
 			want:       errRespRegisterCommentWithoutComment,
 			wantStatus: http.StatusBadRequest,
 		},
 		{
 			name:       "error forbidden guest user",
-			args:       args{reqBody: successReqRegisterComment},
+			args:       args{postingID: dummy.Posting1.ID, reqBody: successReqRegisterComment},
 			method:     http.MethodPost,
 			want:       testingHelper.ErrForbidden,
 			wantStatus: http.StatusForbidden,
@@ -116,8 +109,10 @@ func TestRegisterComment(t *testing.T) {
 			assert.NoError(t, err)
 
 			// http request
-			req, err := http.NewRequest(tt.method, "/comment", strings.NewReader(tt.args.reqBody))
+			req, err := http.NewRequest(tt.method, fmt.Sprintf("/comments/%v", tt.args.postingID), strings.NewReader(tt.args.reqBody))
 			assert.NoError(t, err)
+			vars := map[string]string{"posting_id": strconv.Itoa(int(tt.args.postingID))}
+			req = mux.SetURLVars(req, vars)
 			if tt.name == "error forbidden guest user" {
 				req = req.WithContext(httpContext.SetTokenUserName(req.Context(), lib.GuestUserName))
 			} else {
@@ -127,7 +122,6 @@ func TestRegisterComment(t *testing.T) {
 
 			// test target
 			CommentController(resp, req)
-			assert.NoError(t, err)
 
 			// assert db
 			if tt.wantStatus == 200 {
@@ -262,7 +256,7 @@ func TestGetComments(t *testing.T) {
 var errRespDeleteCommentWithoutCommentID = `
 {
   "status": 400,
-  "message": "parameter comment_id is required"
+  "message": "cannot be blank"
 }
 `
 
@@ -323,7 +317,7 @@ func TestDeleteComment(t *testing.T) {
 			assert.NoError(t, err)
 
 			// http request
-			req, err := http.NewRequest(tt.method, fmt.Sprintf("/comment/%v", tt.args.commentID), nil)
+			req, err := http.NewRequest(tt.method, fmt.Sprintf("/comments/%v", tt.args.commentID), nil)
 			assert.NoError(t, err)
 			vars := map[string]string{"comment_id": strconv.Itoa(int(tt.args.commentID))}
 			req = mux.SetURLVars(req, vars)

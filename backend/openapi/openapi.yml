@@ -52,23 +52,7 @@ paths:
           $ref: '#/components/responses/notAllowedMethod'
         "500":
           $ref: '#/components/responses/internalServerError'
-  /user:
-    post:
-      description: register user info
-      operationId: registerUser
-      tags:
-        - user
-      requestBody:
-        $ref: '#/components/requestBodies/registerUser'
-      responses:
-        "200":
-          $ref: '#/components/responses/simpleSuccess'
-        "400":
-          $ref: '#/components/responses/badRequest'
-        "405":
-          $ref: '#/components/responses/notAllowedMethod'
-        "500":
-          $ref: '#/components/responses/internalServerError'
+  /users:
     get:
       description: get a user info
       operationId: getUser
@@ -79,7 +63,7 @@ paths:
       parameters:
         - name: user_name
           in: query
-          description: user name
+          description: if not specified, user name in token will be used
           schema:
             type: string
             example: user1
@@ -96,11 +80,44 @@ paths:
           $ref: '#/components/responses/notAllowedMethod'
         "500":
           $ref: '#/components/responses/internalServerError'
+  /users/{user_name}:
+    post:
+      description: register user info
+      operationId: registerUser
+      tags:
+        - user
+      parameters:
+        - name: user_name
+          schema:
+            type: string
+          in: path
+          required: true
+          description: user_name
+          example: user1
+      requestBody:
+        $ref: '#/components/requestBodies/registerUser'
+      responses:
+        "200":
+          $ref: '#/components/responses/simpleSuccess'
+        "400":
+          $ref: '#/components/responses/badRequest'
+        "405":
+          $ref: '#/components/responses/notAllowedMethod'
+        "500":
+          $ref: '#/components/responses/internalServerError'
     put:
       description: update user info. Not allowed to guest user.
       operationId: updateUser
       tags:
         - user
+      parameters:
+        - name: user_name
+          schema:
+            type: string
+          in: path
+          required: true
+          description: user_name
+          example: user1
       security:
         - cookieAuth: []
       requestBody:
@@ -116,6 +133,8 @@ paths:
           $ref: '#/components/responses/forbidden'
         "405":
           $ref: '#/components/responses/notAllowedMethod'
+        "409":
+          $ref: '#/components/responses/conflict'
         "500":
           $ref: '#/components/responses/internalServerError'
     delete:
@@ -125,6 +144,14 @@ paths:
         - user
       security:
         - cookieAuth: []
+      parameters:
+        - name: user_name
+          schema:
+            type: string
+          in: path
+          required: true
+          description: user_name
+          example: user1
       responses:
         "200":
           $ref: '#/components/responses/simpleSuccess'
@@ -134,6 +161,8 @@ paths:
           $ref: '#/components/responses/forbidden'
         "405":
           $ref: '#/components/responses/notAllowedMethod'
+        "409":
+          $ref: '#/components/responses/conflict'
         "500":
           $ref: '#/components/responses/internalServerError'
   /user-activation/{user_name}/{activation_key}:
@@ -222,7 +251,7 @@ paths:
           $ref: '#/components/responses/notAllowedMethod'
         "500":
           $ref: '#/components/responses/internalServerError'
-  /posting:
+  /postings:
     post:
       description: register posting
       operationId: registerPosting
@@ -245,7 +274,6 @@ paths:
           $ref: '#/components/responses/notAllowedMethod'
         "500":
           $ref: '#/components/responses/internalServerError'
-  /postings:
     get:
       description: get posting list
       operationId: getPostingList
@@ -293,7 +321,7 @@ paths:
           $ref: '#/components/responses/notAllowedMethod'
         "500":
           $ref: '#/components/responses/internalServerError'
-  /posting/{posting_id}:
+  /postings/{posting_id}:
     delete:
       description: delete posting.
       operationId: deletePosting
@@ -321,7 +349,7 @@ paths:
           $ref: '#/components/responses/notAllowedMethod'
         "500":
           $ref: '#/components/responses/internalServerError'
-  /like:
+  /likes/{posting_id}:
     post:
       description: register like
       operationId: registerLike
@@ -329,8 +357,13 @@ paths:
         - like
       security:
         - cookieAuth: []
-      requestBody:
-        $ref: '#/components/requestBodies/registerLike'
+      parameters:
+        - name: posting_id
+          schema:
+            type: integer
+            format: int64
+          in: path
+          required: true
       responses:
         "200":
           $ref: '#/components/responses/simpleSuccess'
@@ -344,7 +377,6 @@ paths:
           $ref: '#/components/responses/notAllowedMethod'
         "500":
           $ref: '#/components/responses/internalServerError'
-  /like/{posting_id}:
     delete:
       description: delete like
       operationId: deleteLike
@@ -372,7 +404,7 @@ paths:
           $ref: '#/components/responses/notAllowedMethod'
         "500":
           $ref: '#/components/responses/internalServerError'
-  /comment:
+  /comments/{posting_id}:
     post:
       description: register comment. Not allowed to guest user.
       operationId: registerComment
@@ -380,6 +412,13 @@ paths:
         - comment
       security:
         - cookieAuth: []
+      parameters:
+        - name: posting_id
+          schema:
+            type: integer
+            format: int64
+          in: path
+          required: true
       requestBody:
         $ref: '#/components/requestBodies/registerComment'
       responses:
@@ -422,7 +461,7 @@ paths:
           $ref: '#/components/responses/notAllowedMethod'
         "500":
           $ref: '#/components/responses/internalServerError'
-  /comment/{comment_id}:
+  /comments/{comment_id}:
     delete:
       description: delete comment. Not allowed to guest user.
       operationId: deleteComment
@@ -450,7 +489,7 @@ paths:
           $ref: '#/components/responses/notAllowedMethod'
         "500":
           $ref: '#/components/responses/internalServerError'
-  /follow:
+  /follows/{followed_user_name}:
     post:
       description: register follow. Not allowed to guest user.
       operationId: registerFollow
@@ -458,8 +497,13 @@ paths:
         - follow
       security:
         - cookieAuth: []
-      requestBody:
-        $ref: '#/components/requestBodies/registerFollow'
+      parameters:
+        - name: followed_user_name
+          schema:
+            type: string
+          in: path
+          required: true
+          example: user1
       responses:
         "200":
           $ref: '#/components/responses/simpleSuccess'
@@ -473,7 +517,6 @@ paths:
           $ref: '#/components/responses/notAllowedMethod'
         "500":
           $ref: '#/components/responses/internalServerError'
-  /follow/{followed_user_name}:
     delete:
       description: delete follow. Not allowed to guest user.
       operationId: deleteFollow
@@ -530,7 +573,7 @@ paths:
           $ref: '#/components/responses/notAllowedMethod'
         "500":
           $ref: '#/components/responses/internalServerError'
-  /notification/{user_name}:
+  /notifications/{user_name}:
     put:
       description: update notification as read
       operationId: updateNotification
@@ -636,18 +679,6 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/comment'
-    registerLike:
-      description: register like
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/like'
-    registerFollow:
-      description: register follow
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/follow'
   responses:
     getCSRFToken:
       description: get csrf token
@@ -721,6 +752,12 @@ components:
         'application/json':
           schema:
             $ref: '#/components/schemas/responseNotAllowedMethod'
+    conflict:
+      description: '409'
+      content:
+        'application/json':
+          schema:
+            $ref: '#/components/schemas/responseConflict'
     internalServerError:
       description: '500'
       content:
@@ -760,39 +797,12 @@ components:
       description: posting comment
       type: object
       properties:
-        posting_id:
-          description: posting id
-          type: integer
-          format: int64
-          example: 1
         comment:
           description: comment
           type: string
           example: 'this is a sample comment.'
       required:
-        - posting_id
         - comment
-    like:
-      description: like
-      type: object
-      properties:
-        posting_id:
-          description: posting id
-          type: integer
-          format: int64
-          example: 1
-      required:
-        - posting_id
-    follow:
-      description: follow
-      type: object
-      properties:
-        followed_user_name:
-          description: followed user name
-          type: string
-          example: user1
-      required:
-        - followed_user_name
     requestLogin:
       type: object
       properties:
@@ -814,10 +824,6 @@ components:
           type: string
           description: email
           example: user1@gmail.com
-        user_name:
-          type: string
-          description: user_name
-          example: user1
         password:
           type: string
           description: password
@@ -1188,6 +1194,22 @@ components:
           description: message
           type: string
           example: 'Not Allowed Method Error'
+      required:
+        - status
+        - message
+    responseConflict:
+      description: Conflict Error
+      type: object
+      properties:
+        status:
+          description: status
+          type: integer
+          format: int16
+          example: 409
+        message:
+          description: message
+          type: string
+          example: 'Conflict Error'
       required:
         - status
         - message

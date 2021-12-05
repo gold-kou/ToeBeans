@@ -104,7 +104,7 @@ const MyPage = () => {
   );
 
   async function updateSelfIntroduction() {
-    updateUser("", "", selfIntroduction)
+    updateUser("", "", selfIntroduction, localStorage.getItem("loginUserName"))
       .then(() => {
         setSuccessMessage("update success");
       })

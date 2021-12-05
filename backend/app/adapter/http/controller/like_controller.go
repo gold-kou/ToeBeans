@@ -1,12 +1,12 @@
 package controller
 
 import (
-	"encoding/json"
-	"io/ioutil"
 	"log"
 	"net/http"
 	"strconv"
 	"strings"
+
+	validation "github.com/go-ozzo/ozzo-validation"
 
 	"github.com/gold-kou/ToeBeans/backend/app/adapter/http/context"
 
@@ -15,13 +15,12 @@ import (
 	"github.com/gold-kou/ToeBeans/backend/app/adapter/http/helper"
 	"github.com/gold-kou/ToeBeans/backend/app/adapter/mysql"
 	"github.com/gold-kou/ToeBeans/backend/app/application/usecase"
-	modelHTTP "github.com/gold-kou/ToeBeans/backend/app/domain/model/http"
 	"github.com/gold-kou/ToeBeans/backend/app/domain/repository"
 )
 
 func LikeController(w http.ResponseWriter, r *http.Request) {
 	switch {
-	case r.URL.Path == "/like":
+	case strings.HasPrefix(r.URL.Path, "/likes/"):
 		switch r.Method {
 		case http.MethodPost:
 			err := registerLike(r)
@@ -37,12 +36,6 @@ func LikeController(w http.ResponseWriter, r *http.Request) {
 			default:
 				helper.ResponseInternalServerError(w, err.Error())
 			}
-		default:
-			methods := []string{http.MethodPost}
-			helper.ResponseNotAllowedMethod(w, errMsgNotAllowedMethod, methods)
-		}
-	case strings.HasPrefix(r.URL.Path, "/like/"):
-		switch r.Method {
 		case http.MethodDelete:
 			err := deleteLike(r)
 			switch err := err.(type) {
@@ -58,7 +51,7 @@ func LikeController(w http.ResponseWriter, r *http.Request) {
 				helper.ResponseInternalServerError(w, err.Error())
 			}
 		default:
-			methods := []string{http.MethodDelete}
+			methods := []string{http.MethodPost, http.MethodDelete}
 			helper.ResponseNotAllowedMethod(w, errMsgNotAllowedMethod, methods)
 		}
 	default:
@@ -74,21 +67,15 @@ func registerLike(r *http.Request) error {
 	}
 
 	// get request parameter
-	var reqRegisterLike *modelHTTP.Like
-	b, err := ioutil.ReadAll(r.Body)
+	vars := mux.Vars(r)
+	paramPostingID, _ := vars["posting_id"]
+	postingID, err := strconv.Atoi(paramPostingID)
 	if err != nil {
-		log.Println(err)
-		return helper.NewBadRequestError(err.Error())
-	}
-	defer r.Body.Close()
-	if err := json.Unmarshal(b, &reqRegisterLike); err != nil {
-		log.Println(err)
-		return helper.NewBadRequestError(err.Error())
+		return helper.NewInternalServerError(err.Error())
 	}
 
 	// validation check
-	err = reqRegisterLike.ValidateParam()
-	if err != nil {
+	if err = validation.Validate(postingID, validation.Required); err != nil {
 		log.Println(err)
 		return helper.NewBadRequestError(err.Error())
 	}
@@ -109,7 +96,7 @@ func registerLike(r *http.Request) error {
 	notificationRepo := repository.NewNotificationRepository(db)
 
 	// UseCase
-	u := usecase.NewRegisterLike(r.Context(), tx, tokenUserName, reqRegisterLike, userRepo, postingRepo, likeRepo, notificationRepo)
+	u := usecase.NewRegisterLike(r.Context(), tx, tokenUserName, postingID, userRepo, postingRepo, likeRepo, notificationRepo)
 	if err = u.RegisterLikeUseCase(); err != nil {
 		log.Println(err)
 		if err == repository.ErrDuplicateData {
@@ -132,14 +119,16 @@ func deleteLike(r *http.Request) error {
 
 	// get request parameter
 	vars := mux.Vars(r)
-	paramPostingID, ok := vars["posting_id"]
-	if !ok || paramPostingID == "0" {
-		log.Println(err)
-		return helper.NewBadRequestError("posting_id: cannot be blank")
-	}
+	paramPostingID, _ := vars["posting_id"]
 	postingID, err := strconv.Atoi(paramPostingID)
 	if err != nil {
 		return helper.NewInternalServerError(err.Error())
+	}
+
+	// validation check
+	if err = validation.Validate(postingID, validation.Required); err != nil {
+		log.Println(err)
+		return helper.NewBadRequestError(err.Error())
 	}
 
 	// db connect

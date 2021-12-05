@@ -37,6 +37,9 @@ HS256
 2. 有効期限を確認する。
 
 # Development tips
+## Login as a userA
+email/password: userA@example.com/Password1234
+
 ## Launch servers in local
 ```
 $ ./serverrun.sh

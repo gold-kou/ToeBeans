@@ -8,7 +8,7 @@ var Posting1 = model.Posting{
 	ID:         1,
 	UserName:   User1.Name,
 	Title:      "This is a sample posting.",
-	ImageURL:   "http://localhost:9000/postings/20200101000000_testUser1",
+	ImageURL:   "http://localhost:9000/toebeans-postings/20200101000000_testUser1",
 	LikedCount: 0,
 }
 

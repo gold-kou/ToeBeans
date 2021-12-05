@@ -19,6 +19,7 @@ type RegisterComment struct {
 	ctx                context.Context
 	tx                 mysql.DBTransaction
 	tokenUserName      string
+	postingID          int
 	reqRegisterComment *modelHTTP.Comment
 	userRepo           *repository.UserRepository
 	postingRepo        *repository.PostingRepository
@@ -26,11 +27,12 @@ type RegisterComment struct {
 	notificationRepo   *repository.NotificationRepository
 }
 
-func NewRegisterComment(ctx context.Context, tx mysql.DBTransaction, tokenUserName string, reqRegisterComment *modelHTTP.Comment, userRepo *repository.UserRepository, postingRepo *repository.PostingRepository, commentRepo *repository.CommentRepository, notificationRepo *repository.NotificationRepository) *RegisterComment {
+func NewRegisterComment(ctx context.Context, tx mysql.DBTransaction, tokenUserName string, postingID int, reqRegisterComment *modelHTTP.Comment, userRepo *repository.UserRepository, postingRepo *repository.PostingRepository, commentRepo *repository.CommentRepository, notificationRepo *repository.NotificationRepository) *RegisterComment {
 	return &RegisterComment{
 		ctx:                ctx,
 		tx:                 tx,
 		tokenUserName:      tokenUserName,
+		postingID:          postingID,
 		reqRegisterComment: reqRegisterComment,
 		userRepo:           userRepo,
 		postingRepo:        postingRepo,
@@ -49,14 +51,14 @@ func (comment *RegisterComment) RegisterCommentUseCase() error {
 		return err
 	}
 
-	_, err = comment.postingRepo.GetWhereID(comment.ctx, comment.reqRegisterComment.PostingId)
+	_, err = comment.postingRepo.GetWhereID(comment.ctx, int64(comment.postingID))
 	if err != nil {
 		return err
 	}
 	err = comment.tx.Do(comment.ctx, func(ctx context.Context) error {
 		c := model.Comment{
 			UserName:  comment.tokenUserName,
-			PostingID: comment.reqRegisterComment.PostingId,
+			PostingID: int64(comment.postingID),
 			Comment:   comment.reqRegisterComment.Comment,
 		}
 		err := comment.commentRepo.Create(ctx, &c)

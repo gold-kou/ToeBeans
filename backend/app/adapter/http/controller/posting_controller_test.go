@@ -166,7 +166,7 @@ func TestRegisterPosting(t *testing.T) {
 			assert.NoError(t, err)
 
 			// http request
-			req, err := http.NewRequest(tt.method, "/posting", strings.NewReader(tt.args.reqBody))
+			req, err := http.NewRequest(tt.method, "/postings", strings.NewReader(tt.args.reqBody))
 			assert.NoError(t, err)
 			req = req.WithContext(httpContext.SetTokenUserName(req.Context(), dummy.User1.Name))
 			resp := httptest.NewRecorder()
@@ -204,7 +204,7 @@ var successRespGetPostings = `
       "user_name": "testUser1",
       "uploaded_at": "2020-01-01T00:00:00+09:00",
       "title": "This is a sample posting.",
-      "image_url": "http://localhost:9000/postings/20200101000000_testUser1",
+      "image_url": "http://localhost:9000/toebeans-postings/20200101000000_testUser1",
       "liked_count": 0,
       "liked": false
     }
@@ -332,7 +332,7 @@ func TestGetPostings(t *testing.T) {
 var errRespDeletePostingWithoutPostingID = `
 {
   "status": 400,
-  "message": "posting_id: cannot be blank"
+  "message": "cannot be blank"
 }
 `
 var errRespDeletePostingNotExistingID = `
@@ -406,7 +406,7 @@ func TestDeletePosting(t *testing.T) {
 			assert.NoError(t, err)
 
 			// http request
-			req, err := http.NewRequest(tt.method, fmt.Sprintf("/posting/%v", tt.args.postingID), nil)
+			req, err := http.NewRequest(tt.method, fmt.Sprintf("/postings/%v", tt.args.postingID), nil)
 			assert.NoError(t, err)
 			vars := map[string]string{"posting_id": strconv.Itoa(int(tt.args.postingID))}
 			req = mux.SetURLVars(req, vars)

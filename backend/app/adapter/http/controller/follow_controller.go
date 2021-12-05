@@ -1,11 +1,14 @@
 package controller
 
 import (
-	"encoding/json"
-	"io/ioutil"
 	"log"
 	"net/http"
 	"strings"
+
+	validation "github.com/go-ozzo/ozzo-validation"
+	"github.com/go-ozzo/ozzo-validation/is"
+
+	modelHTTP "github.com/gold-kou/ToeBeans/backend/app/domain/model/http"
 
 	"github.com/gold-kou/ToeBeans/backend/app/adapter/http/context"
 
@@ -15,13 +18,12 @@ import (
 	"github.com/gold-kou/ToeBeans/backend/app/adapter/http/helper"
 	"github.com/gold-kou/ToeBeans/backend/app/adapter/mysql"
 	"github.com/gold-kou/ToeBeans/backend/app/application/usecase"
-	modelHTTP "github.com/gold-kou/ToeBeans/backend/app/domain/model/http"
 	"github.com/gold-kou/ToeBeans/backend/app/domain/repository"
 )
 
 func FollowController(w http.ResponseWriter, r *http.Request) {
 	switch {
-	case r.URL.Path == "/follow":
+	case strings.HasPrefix(r.URL.Path, "/follows/"):
 		switch r.Method {
 		case http.MethodPost:
 			err := registerFollow(r)
@@ -39,12 +41,6 @@ func FollowController(w http.ResponseWriter, r *http.Request) {
 			default:
 				helper.ResponseInternalServerError(w, err.Error())
 			}
-		default:
-			methods := []string{http.MethodPost}
-			helper.ResponseNotAllowedMethod(w, errMsgNotAllowedMethod, methods)
-		}
-	case strings.HasPrefix(r.URL.Path, "/follow/"):
-		switch r.Method {
 		case http.MethodDelete:
 			err := deleteFollow(r)
 			switch err := err.(type) {
@@ -62,7 +58,7 @@ func FollowController(w http.ResponseWriter, r *http.Request) {
 				helper.ResponseInternalServerError(w, err.Error())
 			}
 		default:
-			methods := []string{http.MethodDelete}
+			methods := []string{http.MethodPost, http.MethodDelete}
 			helper.ResponseNotAllowedMethod(w, errMsgNotAllowedMethod, methods)
 		}
 	default:
@@ -79,21 +75,11 @@ func registerFollow(r *http.Request) error {
 	}
 
 	// get request parameter
-	var reqRegisterFollow *modelHTTP.Follow
-	b, err := ioutil.ReadAll(r.Body)
-	if err != nil {
-		log.Println(err)
-		return helper.NewBadRequestError(err.Error())
-	}
-	defer r.Body.Close()
-	if err := json.Unmarshal(b, &reqRegisterFollow); err != nil {
-		log.Println(err)
-		return helper.NewBadRequestError(err.Error())
-	}
+	vars := mux.Vars(r)
+	followedUserName, _ := vars["followed_user_name"]
 
 	// validation check
-	err = reqRegisterFollow.ValidateParam()
-	if err != nil {
+	if err = validation.Validate(followedUserName, validation.Required, validation.Length(modelHTTP.MinVarcharLength, modelHTTP.MaxVarcharLength), is.Alphanumeric); err != nil {
 		log.Println(err)
 		return helper.NewBadRequestError(err.Error())
 	}
@@ -113,7 +99,7 @@ func registerFollow(r *http.Request) error {
 	notificationRepo := repository.NewNotificationRepository(db)
 
 	// UseCase
-	u := usecase.NewRegisterFollow(r.Context(), tx, tokenUserName, reqRegisterFollow, userRepo, followRepo, notificationRepo)
+	u := usecase.NewRegisterFollow(r.Context(), tx, tokenUserName, followedUserName, userRepo, followRepo, notificationRepo)
 	if err = u.RegisterFollowUseCase(); err != nil {
 		log.Println(err)
 		if err == repository.ErrDuplicateData {
@@ -137,10 +123,12 @@ func deleteFollow(r *http.Request) error {
 
 	// get request parameter
 	vars := mux.Vars(r)
-	followedUserName, ok := vars["followed_user_name"]
-	if !ok || followedUserName == "" {
+	followedUserName, _ := vars["followed_user_name"]
+
+	// validation check
+	if err = validation.Validate(followedUserName, validation.Required, validation.Length(modelHTTP.MinVarcharLength, modelHTTP.MaxVarcharLength), is.Alphanumeric); err != nil {
 		log.Println(err)
-		return helper.NewBadRequestError("followed_user_name: cannot be blank.")
+		return helper.NewBadRequestError(err.Error())
 	}
 
 	// db connect
