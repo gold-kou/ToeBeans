@@ -23,7 +23,7 @@ const Settings = props => {
   }
 
   async function deleteAccount() {
-    deleteUser()
+    deleteUser(localStorage.getItem("loginUserName"))
       .then(() => {
         setSuccessMessage("delete success");
         setTimeout(() => {

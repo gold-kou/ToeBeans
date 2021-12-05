@@ -8,6 +8,8 @@ import (
 	"strconv"
 	"strings"
 
+	validation "github.com/go-ozzo/ozzo-validation"
+
 	"github.com/gold-kou/ToeBeans/backend/app/lib"
 
 	"github.com/gold-kou/ToeBeans/backend/app/adapter/http/context"
@@ -24,28 +26,6 @@ import (
 
 func CommentController(w http.ResponseWriter, r *http.Request) {
 	switch {
-	case r.URL.Path == "/comment":
-		switch r.Method {
-		case http.MethodPost:
-			err := registerComment(r)
-			switch err := err.(type) {
-			case nil:
-				helper.ResponseSimpleSuccess(w)
-			case *helper.BadRequestError:
-				helper.ResponseBadRequest(w, err.Error())
-			case *helper.AuthorizationError:
-				helper.ResponseUnauthorized(w, err.Error())
-			case *helper.ForbiddenError:
-				helper.ResponseForbidden(w, err.Error())
-			case *helper.InternalServerError:
-				helper.ResponseInternalServerError(w, err.Error())
-			default:
-				helper.ResponseInternalServerError(w, err.Error())
-			}
-		default:
-			methods := []string{http.MethodPost}
-			helper.ResponseNotAllowedMethod(w, errMsgNotAllowedMethod, methods)
-		}
 	case r.URL.Path == "/comments":
 		switch r.Method {
 		case http.MethodGet:
@@ -87,8 +67,24 @@ func CommentController(w http.ResponseWriter, r *http.Request) {
 			methods := []string{http.MethodGet}
 			helper.ResponseNotAllowedMethod(w, errMsgNotAllowedMethod, methods)
 		}
-	case strings.HasPrefix(r.URL.Path, "/comment/"):
+	case strings.HasPrefix(r.URL.Path, "/comments/"):
 		switch r.Method {
+		case http.MethodPost:
+			err := registerComment(r)
+			switch err := err.(type) {
+			case nil:
+				helper.ResponseSimpleSuccess(w)
+			case *helper.BadRequestError:
+				helper.ResponseBadRequest(w, err.Error())
+			case *helper.AuthorizationError:
+				helper.ResponseUnauthorized(w, err.Error())
+			case *helper.ForbiddenError:
+				helper.ResponseForbidden(w, err.Error())
+			case *helper.InternalServerError:
+				helper.ResponseInternalServerError(w, err.Error())
+			default:
+				helper.ResponseInternalServerError(w, err.Error())
+			}
 		case http.MethodDelete:
 			err := deleteComment(r)
 			switch err := err.(type) {
@@ -106,7 +102,7 @@ func CommentController(w http.ResponseWriter, r *http.Request) {
 				helper.ResponseInternalServerError(w, err.Error())
 			}
 		default:
-			methods := []string{http.MethodDelete}
+			methods := []string{http.MethodPost, http.MethodDelete}
 			helper.ResponseNotAllowedMethod(w, errMsgNotAllowedMethod, methods)
 		}
 	default:
@@ -127,6 +123,13 @@ func registerComment(r *http.Request) error {
 	}
 
 	// get request parameter
+	vars := mux.Vars(r)
+	paramPostingID, _ := vars["posting_id"]
+	postingID, err := strconv.Atoi(paramPostingID)
+	if err != nil {
+		log.Println(err)
+		return helper.NewBadRequestError(err.Error())
+	}
 	var reqRegisterComment *modelHTTP.Comment
 	b, err := ioutil.ReadAll(r.Body)
 	if err != nil {
@@ -140,6 +143,10 @@ func registerComment(r *http.Request) error {
 	}
 
 	// validation check
+	if err = validation.Validate(postingID, validation.Required); err != nil {
+		log.Println(err)
+		return helper.NewBadRequestError(err.Error())
+	}
 	err = reqRegisterComment.ValidateParam()
 	if err != nil {
 		log.Println(err)
@@ -162,7 +169,7 @@ func registerComment(r *http.Request) error {
 	notificationRepo := repository.NewNotificationRepository(db)
 
 	// UseCase
-	u := usecase.NewRegisterComment(r.Context(), tx, tokenUserName, reqRegisterComment, userRepo, postingRepo, commentRepo, notificationRepo)
+	u := usecase.NewRegisterComment(r.Context(), tx, tokenUserName, postingID, reqRegisterComment, userRepo, postingRepo, commentRepo, notificationRepo)
 	if err = u.RegisterCommentUseCase(); err != nil {
 		log.Println(err)
 		if err == repository.ErrNotExistsData {
@@ -234,14 +241,16 @@ func deleteComment(r *http.Request) error {
 
 	// get request parameter
 	vars := mux.Vars(r)
-	commentID, ok := vars["comment_id"]
-	if !ok || commentID == "0" {
-		log.Println(err)
-		return helper.NewBadRequestError("parameter comment_id is required")
-	}
-	id, err := strconv.Atoi(commentID)
+	paramCommentID, _ := vars["comment_id"]
+	commentID, err := strconv.Atoi(paramCommentID)
 	if err != nil {
 		return helper.NewInternalServerError(err.Error())
+	}
+
+	// validation check
+	if err = validation.Validate(commentID, validation.Required); err != nil {
+		log.Println(err)
+		return helper.NewBadRequestError(err.Error())
 	}
 
 	// db connect
@@ -258,7 +267,7 @@ func deleteComment(r *http.Request) error {
 	commentRepo := repository.NewCommentRepository(db)
 
 	// UseCase
-	u := usecase.NewDeleteComment(r.Context(), tx, tokenUserName, int64(id), userRepo, commentRepo)
+	u := usecase.NewDeleteComment(r.Context(), tx, tokenUserName, int64(commentID), userRepo, commentRepo)
 	if err = u.DeleteCommentUseCase(); err != nil {
 		log.Println(err)
 		if err == repository.ErrNotExistsData {

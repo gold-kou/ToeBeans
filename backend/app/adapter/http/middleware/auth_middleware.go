@@ -20,7 +20,7 @@ func AuthMiddleware(next http.Handler) http.Handler {
 		var err error
 
 		// ignore patterns
-		ignoreReqs := map[string]string{"/csrf-token": http.MethodGet, "/user": http.MethodPost, "/login": http.MethodPost, "/user-activation/": http.MethodGet, "/password-reset-email": http.MethodPost, "/password-reset": http.MethodPost, "/health/liveness": http.MethodGet, "/health/readiness": http.MethodGet}
+		ignoreReqs := map[string]string{"/csrf-token": http.MethodGet, "/users": http.MethodPost, "/login": http.MethodPost, "/user-activation/": http.MethodGet, "/password-reset-email": http.MethodPost, "/password-reset": http.MethodPost, "/health/liveness": http.MethodGet, "/health/readiness": http.MethodGet}
 		for path, method := range ignoreReqs {
 			// MEMO: /user-activation/{user_name}/{activation_key} を考慮してHasPrefixを使う
 			if strings.HasPrefix(r.URL.Path, path) && r.Method == method {

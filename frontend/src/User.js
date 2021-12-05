@@ -10,29 +10,29 @@ export async function login(email, password) {
 }
 
 export async function getMyUserInfo() {
-  return await axios.get("/user");
+  return await axios.get("/users");
 }
 
 export async function registerUser(userName, email, password) {
-  const reqBody = { user_name: userName, email: email, password: password };
-  return await axios.post("/user", reqBody);
+  const reqBody = { email: email, password: password };
+  return await axios.post(`/users/${userName}`, reqBody);
 }
 
 export async function getUser(userName) {
-  return await axios.get(`/user?${userName}`);
+  return await axios.get(`/users?${userName}`);
 }
 
-export async function updateUser(newPassword, avator, selfIntroduction) {
+export async function updateUser(newPassword, avator, selfIntroduction, userName) {
   const reqBody = {
     password: newPassword,
     icon: avator,
     self_introduction: selfIntroduction
   };
-  return await axios.put("/user", reqBody);
+  return await axios.put(`/users/${userName}`, reqBody);
 }
 
-export async function deleteUser() {
-  return await axios.delete("/user");
+export async function deleteUser(userName) {
+  return await axios.delete(`/users/${userName}`);
 }
 
 export async function changePassword(oldPassword, newPassword) {

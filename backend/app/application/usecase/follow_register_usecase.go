@@ -7,7 +7,6 @@ import (
 
 	"github.com/gold-kou/ToeBeans/backend/app/adapter/mysql"
 	"github.com/gold-kou/ToeBeans/backend/app/domain/model"
-	modelHTTP "github.com/gold-kou/ToeBeans/backend/app/domain/model/http"
 	"github.com/gold-kou/ToeBeans/backend/app/domain/repository"
 )
 
@@ -16,24 +15,24 @@ type RegisterFollowUseCaseInterface interface {
 }
 
 type RegisterFollow struct {
-	ctx               context.Context
-	tx                mysql.DBTransaction
-	tokenUserName     string
-	reqRegisterFollow *modelHTTP.Follow
-	userRepo          *repository.UserRepository
-	followRepo        *repository.FollowRepository
-	notificationRepo  *repository.NotificationRepository
+	ctx              context.Context
+	tx               mysql.DBTransaction
+	tokenUserName    string
+	followedUserName string
+	userRepo         *repository.UserRepository
+	followRepo       *repository.FollowRepository
+	notificationRepo *repository.NotificationRepository
 }
 
-func NewRegisterFollow(ctx context.Context, tx mysql.DBTransaction, tokenUserName string, reqRegisterFollow *modelHTTP.Follow, userRepo *repository.UserRepository, followRepo *repository.FollowRepository, notificationRepo *repository.NotificationRepository) *RegisterFollow {
+func NewRegisterFollow(ctx context.Context, tx mysql.DBTransaction, tokenUserName string, followedUserName string, userRepo *repository.UserRepository, followRepo *repository.FollowRepository, notificationRepo *repository.NotificationRepository) *RegisterFollow {
 	return &RegisterFollow{
-		ctx:               ctx,
-		tx:                tx,
-		tokenUserName:     tokenUserName,
-		reqRegisterFollow: reqRegisterFollow,
-		userRepo:          userRepo,
-		followRepo:        followRepo,
-		notificationRepo:  notificationRepo,
+		ctx:              ctx,
+		tx:               tx,
+		tokenUserName:    tokenUserName,
+		followedUserName: followedUserName,
+		userRepo:         userRepo,
+		followRepo:       followRepo,
+		notificationRepo: notificationRepo,
 	}
 }
 
@@ -50,7 +49,7 @@ func (follow *RegisterFollow) RegisterFollowUseCase() error {
 	err = follow.tx.Do(follow.ctx, func(ctx context.Context) error {
 		u := model.Follow{
 			FollowingUserName: follow.tokenUserName,
-			FollowedUserName:  follow.reqRegisterFollow.FollowedUserName,
+			FollowedUserName:  follow.followedUserName,
 		}
 		err := follow.followRepo.Create(ctx, &u)
 		if err != nil {
@@ -62,7 +61,7 @@ func (follow *RegisterFollow) RegisterFollowUseCase() error {
 			return err
 		}
 
-		err = follow.userRepo.UpdateFollowedCount(ctx, follow.reqRegisterFollow.FollowedUserName, true)
+		err = follow.userRepo.UpdateFollowedCount(ctx, follow.followedUserName, true)
 		if err != nil {
 			return err
 		}

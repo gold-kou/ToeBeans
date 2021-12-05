@@ -30,7 +30,7 @@ function PostBox(onFileSelect) {
           image: result
         };
         axios
-          .post("/posting", reqBody)
+          .post("/postings", reqBody)
           .then(function () {
             setSuccessMessage("success post");
           })

@@ -27,7 +27,7 @@ import (
 
 func PostingController(w http.ResponseWriter, r *http.Request) {
 	switch {
-	case r.URL.Path == "/posting":
+	case r.URL.Path == "/postings":
 		switch r.Method {
 		case http.MethodPost:
 			err := registerPosting(r)
@@ -43,12 +43,6 @@ func PostingController(w http.ResponseWriter, r *http.Request) {
 			default:
 				helper.ResponseInternalServerError(w, err.Error())
 			}
-		default:
-			methods := []string{http.MethodPost}
-			helper.ResponseNotAllowedMethod(w, errMsgNotAllowedMethod, methods)
-		}
-	case r.URL.Path == "/postings":
-		switch r.Method {
 		case http.MethodGet:
 			postings, likes, err := getPostings(r)
 			switch err := err.(type) {
@@ -90,10 +84,10 @@ func PostingController(w http.ResponseWriter, r *http.Request) {
 				helper.ResponseInternalServerError(w, err.Error())
 			}
 		default:
-			methods := []string{http.MethodGet}
+			methods := []string{http.MethodPost, http.MethodGet}
 			helper.ResponseNotAllowedMethod(w, errMsgNotAllowedMethod, methods)
 		}
-	case strings.HasPrefix(r.URL.Path, "/posting/"):
+	case strings.HasPrefix(r.URL.Path, "/postings/"):
 		switch r.Method {
 		case http.MethodDelete:
 			err := deletePosting(r)
@@ -258,14 +252,16 @@ func deletePosting(r *http.Request) error {
 
 	// get request parameter
 	vars := mux.Vars(r)
-	postingID, ok := vars["posting_id"]
-	if !ok || postingID == "0" {
-		log.Println(err)
-		return helper.NewBadRequestError("posting_id: cannot be blank")
-	}
-	id, err := strconv.Atoi(postingID)
+	paramPostingID, _ := vars["posting_id"]
+	postingID, err := strconv.Atoi(paramPostingID)
 	if err != nil {
 		return helper.NewInternalServerError(err.Error())
+	}
+
+	// validation check
+	if err = validation.Validate(postingID, validation.Required); err != nil {
+		log.Println(err)
+		return helper.NewBadRequestError(err.Error())
 	}
 
 	// db connect
@@ -282,7 +278,7 @@ func deletePosting(r *http.Request) error {
 	postingRepo := repository.NewPostingRepository(db)
 
 	// UseCase
-	u := usecase.NewDeletePosting(r.Context(), tx, int64(id), tokenUserName, userRepo, postingRepo)
+	u := usecase.NewDeletePosting(r.Context(), tx, int64(postingID), tokenUserName, userRepo, postingRepo)
 	if err = u.DeletePostingUseCase(); err != nil {
 		log.Println(err)
 		if err == repository.ErrNotExistsData {

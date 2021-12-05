@@ -27,28 +27,20 @@ import (
 
 var successRegisterUserReq = `
 {
-  "user_name": "testUser1",
   "email": "testUser1@example.com",
   "password": "Password1234"
 }
 `
 
-var errorRegisterUserReqWithoutUserName = `
-{
-  "email": "testUser1@example.com",
-  "password": "Password1234"
-}
-`
 var errorRespWithoutUserName = `
 {
   "status": 400,
-  "message": "user_name: cannot be blank."
+  "message": "cannot be blank"
 }
 `
 
 var errorRegisterUserReqWithoutEmail = `
 {
-  "user_name": "testUser1",
   "password": "Password1234"
 }
 `
@@ -61,7 +53,6 @@ var errorRegisterUserRespWithoutEmail = `
 
 var errorRegisterUserReqWithoutPassword = `
 {
-  "user_name": "testUser1",
   "email": "testUser1@example.com"
 }
 `
@@ -74,7 +65,6 @@ var errorRegisterUserRespWithoutPassword = `
 
 var errorRegisterUserReqNotEmailFormat = `
 {
-  "user_name": "testUser1",
   "email": "hoge",
   "password": "Password1234"
 }
@@ -88,7 +78,6 @@ var errorRegisterUserRespNotEmailFormat = `
 
 var errorRegisterUserUserNameShort = `
 {
-  "user_name": "1",
   "email": "testUser1@example.com",
   "password": "Password1234"
 }
@@ -96,13 +85,12 @@ var errorRegisterUserUserNameShort = `
 var errorRespUserNameShort = `
 {
   "status": 400,
-  "message": "user_name: the length must be between 2 and 255."
+  "message": "the length must be between 2 and 255"
 }
 `
 
 var errReqRegisterUserNameNotAlphanumeric = `
 {
-  "user_name": "test_1",
   "email": "testUser1@example.com",
   "password": "Password1234"
 }
@@ -111,13 +99,12 @@ var errReqRegisterUserNameNotAlphanumeric = `
 var errRespUserNameNotAlphanumeric = `
 {
   "status": 400,
-  "message": "user_name: must contain English letters and digits only."
+  "message": "must contain English letters and digits only"
 }
 `
 
 var errorRegisterUserPasswordShort = `
 {
-  "user_name": "testUser1",
   "email": "testUser1@example.com",
   "password": "12345"
 }
@@ -131,7 +118,8 @@ var errorRespPassword = `
 
 func TestRegisterUser(t *testing.T) {
 	type args struct {
-		reqBody string
+		userName string
+		reqBody  string
 	}
 	tests := []struct {
 		name       string
@@ -142,63 +130,63 @@ func TestRegisterUser(t *testing.T) {
 	}{
 		{
 			name:       "success",
-			args:       args{reqBody: successRegisterUserReq},
+			args:       args{userName: dummy.User1.Name, reqBody: successRegisterUserReq},
 			method:     http.MethodPost,
 			want:       testingHelper.RespSimpleSuccess,
 			wantStatus: http.StatusOK,
 		},
 		{
-			name:       "error request body without user_name",
-			args:       args{reqBody: errorRegisterUserReqWithoutUserName},
+			name:       "error path parameter without user_name",
+			args:       args{reqBody: successRegisterUserReq},
 			method:     http.MethodPost,
 			want:       errorRespWithoutUserName,
 			wantStatus: http.StatusBadRequest,
 		},
 		{
 			name:       "error request body without email",
-			args:       args{reqBody: errorRegisterUserReqWithoutEmail},
+			args:       args{userName: dummy.User1.Name, reqBody: errorRegisterUserReqWithoutEmail},
 			method:     http.MethodPost,
 			want:       errorRegisterUserRespWithoutEmail,
 			wantStatus: http.StatusBadRequest,
 		},
 		{
 			name:       "error request body without password",
-			args:       args{reqBody: errorRegisterUserReqWithoutPassword},
+			args:       args{userName: dummy.User1.Name, reqBody: errorRegisterUserReqWithoutPassword},
 			method:     http.MethodPost,
 			want:       errorRegisterUserRespWithoutPassword,
 			wantStatus: http.StatusBadRequest,
 		},
 		{
 			name:       "error request body not email format",
-			args:       args{reqBody: errorRegisterUserReqNotEmailFormat},
+			args:       args{userName: dummy.User1.Name, reqBody: errorRegisterUserReqNotEmailFormat},
 			method:     http.MethodPost,
 			want:       errorRegisterUserRespNotEmailFormat,
 			wantStatus: http.StatusBadRequest,
 		},
 		{
-			name:       "error request body user_name short",
-			args:       args{reqBody: errorRegisterUserUserNameShort},
+			name:       "error path parameter user_name short",
+			args:       args{userName: "1", reqBody: errorRegisterUserUserNameShort},
 			method:     http.MethodPost,
 			want:       errorRespUserNameShort,
 			wantStatus: http.StatusBadRequest,
 		},
 		{
 			name:       "error request body user_name is not alphanumeric",
-			args:       args{reqBody: errReqRegisterUserNameNotAlphanumeric},
+			args:       args{userName: "test_1", reqBody: errReqRegisterUserNameNotAlphanumeric},
 			method:     http.MethodPost,
 			want:       errRespUserNameNotAlphanumeric,
 			wantStatus: http.StatusBadRequest,
 		},
 		{
 			name:       "error request body password short",
-			args:       args{reqBody: errorRegisterUserPasswordShort},
+			args:       args{userName: dummy.User1.Name, reqBody: errorRegisterUserPasswordShort},
 			method:     http.MethodPost,
 			want:       errorRespPassword,
 			wantStatus: http.StatusBadRequest,
 		},
 		{
 			name:       "not allowed method",
-			args:       args{reqBody: errorRegisterUserPasswordShort},
+			args:       args{userName: dummy.User1.Name, reqBody: errorRegisterUserPasswordShort},
 			method:     http.MethodHead,
 			want:       testingHelper.ErrNotAllowedMethod,
 			wantStatus: http.StatusMethodNotAllowed,
@@ -213,8 +201,10 @@ func TestRegisterUser(t *testing.T) {
 			defer testingHelper.ResetTime()
 
 			// http request
-			req, err := http.NewRequest(tt.method, "/user", strings.NewReader(tt.args.reqBody))
+			req, err := http.NewRequest(tt.method, fmt.Sprintf("/users/%s", tt.args.userName), strings.NewReader(tt.args.reqBody))
 			assert.NoError(t, err)
+			vars := map[string]string{"user_name": tt.args.userName}
+			req = mux.SetURLVars(req, vars)
 			req.Header.Add(helper.HeaderKeyContentType, "application/json")
 			resp := httptest.NewRecorder()
 
@@ -330,7 +320,7 @@ func TestGetUser(t *testing.T) {
 			assert.NoError(t, err)
 
 			// http request
-			req, err := http.NewRequest(tt.method, fmt.Sprintf("/user?user_name=%s", tt.args.userName), nil)
+			req, err := http.NewRequest(tt.method, fmt.Sprintf("/users?user_name=%s", tt.args.userName), nil)
 			assert.NoError(t, err)
 			req = req.WithContext(httpContext.SetTokenUserName(req.Context(), dummy.User1.Name))
 			resp := httptest.NewRecorder()
@@ -404,7 +394,8 @@ var errRespUpdateUserDecodeFailure = `
 
 func TestUpdateUser(t *testing.T) {
 	type args struct {
-		reqBody string
+		userName string
+		reqBody  string
 	}
 	tests := []struct {
 		name       string
@@ -415,35 +406,35 @@ func TestUpdateUser(t *testing.T) {
 	}{
 		{
 			name:       "success",
-			args:       args{reqBody: successReqUpdateUser},
+			args:       args{userName: dummy.User1.Name, reqBody: successReqUpdateUser},
 			method:     http.MethodPut,
 			want:       testingHelper.RespSimpleSuccess,
 			wantStatus: http.StatusOK,
 		},
 		{
 			name:       "error password validation error",
-			args:       args{reqBody: errReqUpdateUserInvalidPassword},
+			args:       args{userName: dummy.User1.Name, reqBody: errReqUpdateUserInvalidPassword},
 			method:     http.MethodPut,
 			want:       errRespUpdateUserInvalidPassword,
 			wantStatus: http.StatusBadRequest,
 		},
 		{
 			name:       "error self-introduction short",
-			args:       args{reqBody: errReqUpdateUserShortSelfIntroduction},
+			args:       args{userName: dummy.User1.Name, reqBody: errReqUpdateUserShortSelfIntroduction},
 			method:     http.MethodPut,
 			want:       errRespUpdateUserSelfIntroductionShort,
 			wantStatus: http.StatusBadRequest,
 		},
 		{
 			name:       "error icon decode failure",
-			args:       args{reqBody: errReqUpdateUserIconDecodeFail},
+			args:       args{userName: dummy.User1.Name, reqBody: errReqUpdateUserIconDecodeFail},
 			method:     http.MethodPut,
 			want:       errRespUpdateUserDecodeFailure,
 			wantStatus: http.StatusBadRequest,
 		},
 		{
 			name:       "error forbidden guest user",
-			args:       args{reqBody: successReqUpdateUser},
+			args:       args{userName: lib.GuestUserName, reqBody: successReqUpdateUser},
 			method:     http.MethodPut,
 			want:       testingHelper.ErrForbidden,
 			wantStatus: http.StatusForbidden,
@@ -463,8 +454,10 @@ func TestUpdateUser(t *testing.T) {
 			assert.NoError(t, err)
 
 			// http request
-			req, err := http.NewRequest(tt.method, "/user", strings.NewReader(tt.args.reqBody))
+			req, err := http.NewRequest(tt.method, fmt.Sprintf("/users/%s", tt.args.userName), strings.NewReader(tt.args.reqBody))
 			assert.NoError(t, err)
+			vars := map[string]string{"user_name": tt.args.userName}
+			req = mux.SetURLVars(req, vars)
 			if tt.name == "error forbidden guest user" {
 				req = req.WithContext(httpContext.SetTokenUserName(req.Context(), lib.GuestUserName))
 			} else {
@@ -479,7 +472,7 @@ func TestUpdateUser(t *testing.T) {
 			if tt.wantStatus == 200 {
 				users, err := testingHelper.FindAllUsers(context.Background(), db)
 				assert.NoError(t, err)
-				assert.Equal(t, "http://localhost:9000/icons/testUser1", users[0].Icon)
+				assert.Equal(t, "http://localhost:9000/toebeans-icons/testUser1", users[0].Icon)
 				assert.Equal(t, "Hello!", users[0].SelfIntroduction)
 			}
 
@@ -493,10 +486,10 @@ func TestUpdateUser(t *testing.T) {
 	}
 }
 
-var errRespDeleteUserInvalidToken = `
+var errRespDeleteUserNotExistsUserNameSpecified = `
 {
-  "message":"the user name contained in token doesn't exist",
-  "status":401
+  "message":"the user doesn't exist",
+  "status":409
 }
 `
 
@@ -519,11 +512,11 @@ func TestDeleteUser(t *testing.T) {
 			wantStatus: http.StatusOK,
 		},
 		{
-			name:       "error token invalid not existing user",
+			name:       "error not existing user is specified",
 			args:       args{userName: dummy.User2.Name},
 			method:     http.MethodDelete,
-			want:       errRespDeleteUserInvalidToken,
-			wantStatus: http.StatusUnauthorized,
+			want:       errRespDeleteUserNotExistsUserNameSpecified,
+			wantStatus: http.StatusConflict,
 		},
 		{
 			name:       "error forbidden guest user",
@@ -547,8 +540,10 @@ func TestDeleteUser(t *testing.T) {
 			assert.NoError(t, err)
 
 			// http request
-			req, err := http.NewRequest(tt.method, "/user", nil)
+			req, err := http.NewRequest(tt.method, fmt.Sprintf("/users/%s", tt.args.userName), nil)
 			assert.NoError(t, err)
+			vars := map[string]string{"user_name": tt.args.userName}
+			req = mux.SetURLVars(req, vars)
 			if tt.name == "error forbidden guest user" {
 				req = req.WithContext(httpContext.SetTokenUserName(req.Context(), lib.GuestUserName))
 			} else {
@@ -580,13 +575,13 @@ func TestDeleteUser(t *testing.T) {
 var errRespUserActivationWithoutUserName = `
 {
   "status": 400,
-  "message": "user_name cannot be blank"
+  "message": "cannot be blank"
 }
 `
 var errRespUserActivationWithoutActivationKey = `
 {
   "status": 400,
-  "message": "activation_key cannot be blank"
+  "message": "cannot be blank"
 }
 `
 var errRespUserActivationNameShort = `

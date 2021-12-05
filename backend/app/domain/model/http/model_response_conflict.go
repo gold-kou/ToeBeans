@@ -9,9 +9,12 @@
 
 package http
 
-// Follow - follow
-type Follow struct {
+// ResponseConflict - Conflict Error
+type ResponseConflict struct {
 
-	// followed user name
-	FollowedUserName string `json:"followed_user_name"`
+	// status
+	Status int32 `json:"status"`
+
+	// message
+	Message string `json:"message"`
 }

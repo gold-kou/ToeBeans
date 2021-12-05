@@ -87,6 +87,19 @@ func ResponseNotAllowedMethod(w http.ResponseWriter, message string, methods []s
 	}
 }
 
+func ResponseConflictError(w http.ResponseWriter, message string) {
+	resp := model.ResponseConflict{
+		Status:  http.StatusConflict,
+		Message: message,
+	}
+	w.Header().Set(HeaderKeyContentType, HeaderValueApplicationJSON)
+	w.Header().Set(HeaderKeyCacheControl, HeaderValueNoStore)
+	w.WriteHeader(http.StatusConflict)
+	if err := json.NewEncoder(w).Encode(resp); err != nil {
+		panic(err.Error())
+	}
+}
+
 func ResponseInternalServerError(w http.ResponseWriter, message string) {
 	resp := model.ResponseInternalServerError{
 		Status:  http.StatusInternalServerError,

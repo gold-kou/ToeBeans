@@ -7,7 +7,6 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"strconv"
-	"strings"
 	"testing"
 
 	httpContext "github.com/gold-kou/ToeBeans/backend/app/adapter/http/context"
@@ -23,25 +22,10 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-var successReqRegisterLike = `
-{
-  "posting_id": 2
-}
-`
-var errReqRegisterLikeWithoutPostingID = `
-{
-}
-`
-var successReqRegisterLikeYourself = `
-{
-  "posting_id": 1
-}
-`
-
 var errRespRegisterLikeWithoutPostingID = `
 {
   "status": 400,
-  "message": "posting_id: cannot be blank."
+  "message": "cannot be blank"
 }
 `
 
@@ -61,7 +45,7 @@ var errRespRegisterLikeYourself = `
 
 func TestRegisterLike(t *testing.T) {
 	type args struct {
-		reqBody string
+		postingID int64
 	}
 	tests := []struct {
 		name         string
@@ -73,21 +57,21 @@ func TestRegisterLike(t *testing.T) {
 	}{
 		{
 			name:       "success",
-			args:       args{reqBody: successReqRegisterLike},
+			args:       args{postingID: dummy.Posting2.ID},
 			method:     http.MethodPost,
 			want:       testingHelper.RespSimpleSuccess,
 			wantStatus: http.StatusOK,
 		},
 		{
 			name:       "error empty posting_id",
-			args:       args{reqBody: errReqRegisterLikeWithoutPostingID},
+			args:       args{},
 			method:     http.MethodPost,
 			want:       errRespRegisterLikeWithoutPostingID,
 			wantStatus: http.StatusBadRequest,
 		},
 		{
 			name:         "error duplicate like",
-			args:         args{reqBody: successReqRegisterLike},
+			args:         args{postingID: dummy.Posting2.ID},
 			duplicateErr: true,
 			method:       http.MethodPost,
 			want:         errRespRegisterLikeDuplicate,
@@ -95,7 +79,7 @@ func TestRegisterLike(t *testing.T) {
 		},
 		{
 			name:         "error like yourself",
-			args:         args{reqBody: successReqRegisterLikeYourself},
+			args:         args{postingID: dummy.Posting1.ID},
 			duplicateErr: true,
 			method:       http.MethodPost,
 			want:         errRespRegisterLikeYourself,
@@ -130,8 +114,10 @@ func TestRegisterLike(t *testing.T) {
 			assert.NoError(t, err)
 
 			// http request
-			req, err := http.NewRequest(tt.method, "/like", strings.NewReader(tt.args.reqBody))
+			req, err := http.NewRequest(tt.method, fmt.Sprintf("/likes/%v", tt.args.postingID), nil)
 			assert.NoError(t, err)
+			vars := map[string]string{"posting_id": strconv.Itoa(int(tt.args.postingID))}
+			req = mux.SetURLVars(req, vars)
 			req = req.WithContext(httpContext.SetTokenUserName(req.Context(), dummy.User1.Name))
 			resp := httptest.NewRecorder()
 
@@ -141,8 +127,10 @@ func TestRegisterLike(t *testing.T) {
 
 			if tt.duplicateErr {
 				// 2nd same request
-				req, err := http.NewRequest(tt.method, "/like", strings.NewReader(tt.args.reqBody))
+				req, err := http.NewRequest(tt.method, fmt.Sprintf("/likes/%v", tt.args.postingID), nil)
 				assert.NoError(t, err)
+				vars := map[string]string{"posting_id": strconv.Itoa(int(tt.args.postingID))}
+				req = mux.SetURLVars(req, vars)
 				req = req.WithContext(httpContext.SetTokenUserName(req.Context(), dummy.User1.Name))
 				resp := httptest.NewRecorder()
 				LikeController(resp, req)
@@ -190,7 +178,7 @@ func TestRegisterLike(t *testing.T) {
 var errRespDeleteLikeWithoutPostingID = `
 {
   "status": 400,
-  "message": "posting_id: cannot be blank"
+  "message": "cannot be blank"
 }
 `
 var errRespDeleteLikeNotExistingPostingID = `
@@ -260,17 +248,19 @@ func TestDeleteLike(t *testing.T) {
 			err = postingRepo.Create(context.Background(), &dummy.Posting2)
 			assert.NoError(t, err)
 
-			req, err := http.NewRequest(http.MethodPost, "/like", strings.NewReader(successReqRegisterLike))
+			req, err := http.NewRequest(http.MethodPost, fmt.Sprintf("/likes/%v", tt.args.postingID), nil)
 			assert.NoError(t, err)
+			vars := map[string]string{"posting_id": strconv.Itoa(int(tt.args.postingID))}
+			req = mux.SetURLVars(req, vars)
 			req = req.WithContext(httpContext.SetTokenUserName(req.Context(), dummy.User1.Name))
 			resp := httptest.NewRecorder()
 			LikeController(resp, req)
 			assert.NoError(t, err)
 
 			// http request
-			req, err = http.NewRequest(tt.method, fmt.Sprintf("/like/%v", tt.args.postingID), nil)
+			req, err = http.NewRequest(tt.method, fmt.Sprintf("/likes/%v", tt.args.postingID), nil)
 			assert.NoError(t, err)
-			vars := map[string]string{"posting_id": strconv.Itoa(int(tt.args.postingID))}
+			vars = map[string]string{"posting_id": strconv.Itoa(int(tt.args.postingID))}
 			req = mux.SetURLVars(req, vars)
 			req = req.WithContext(httpContext.SetTokenUserName(req.Context(), dummy.User1.Name))
 			resp = httptest.NewRecorder()

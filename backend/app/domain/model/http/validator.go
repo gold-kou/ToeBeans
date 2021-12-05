@@ -2,6 +2,7 @@ package http
 
 import (
 	"fmt"
+	"regexp"
 	"unicode"
 
 	validation "github.com/go-ozzo/ozzo-validation"
@@ -18,10 +19,11 @@ const (
 	errMsgPasswordValidation = "Your password must be at least 8 characters long, contain at least one number and have a mixture of uppercase and lowercase letters"
 )
 
+var IsAlphanumeric = regexp.MustCompile(`^[a-zA-Z0-9]+$`).MatchString
+
 func (req *RequestRegisterUser) ValidateParam() error {
 	var fieldRules []*validation.FieldRules
-	fieldRules = append(fieldRules, validation.Field(&req.UserName, validation.Required, validation.Length(MinVarcharLength, MaxVarcharLength), is.Alphanumeric),
-		validation.Field(&req.Email, validation.Required, is.Email, validation.Length(MinVarcharLength, MaxVarcharLength)),
+	fieldRules = append(fieldRules, validation.Field(&req.Email, validation.Required, is.Email, validation.Length(MinVarcharLength, MaxVarcharLength)),
 		validation.Field(&req.Password, validation.Required, validation.By(PasswordValidation)))
 	return validation.ValidateStruct(req, fieldRules...)
 }
@@ -61,23 +63,10 @@ func (e *Email) ValidateParam() error {
 	return validation.ValidateStruct(e, fieldRules...)
 }
 
-func (l *Like) ValidateParam() error {
-	var fieldRules []*validation.FieldRules
-	fieldRules = append(fieldRules, validation.Field(&l.PostingId, validation.Required))
-	return validation.ValidateStruct(l, fieldRules...)
-}
-
 func (c *Comment) ValidateParam() error {
 	var fieldRules []*validation.FieldRules
-	fieldRules = append(fieldRules, validation.Field(&c.PostingId, validation.Required),
-		validation.Field(&c.Comment, validation.Required, validation.Length(MinVarcharLength, MaxVarcharLength)))
+	fieldRules = append(fieldRules, validation.Field(&c.Comment, validation.Required, validation.Length(MinVarcharLength, MaxVarcharLength)))
 	return validation.ValidateStruct(c, fieldRules...)
-}
-
-func (f *Follow) ValidateParam() error {
-	var fieldRules []*validation.FieldRules
-	fieldRules = append(fieldRules, validation.Field(&f.FollowedUserName, validation.Required, validation.Length(MinVarcharLength, MaxVarcharLength), is.Alphanumeric))
-	return validation.ValidateStruct(f, fieldRules...)
 }
 
 // custom password validation

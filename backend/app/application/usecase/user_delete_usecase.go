@@ -3,8 +3,6 @@ package usecase
 import (
 	"context"
 
-	"github.com/gold-kou/ToeBeans/backend/app/lib"
-
 	"github.com/gold-kou/ToeBeans/backend/app/domain/model"
 
 	"github.com/gold-kou/ToeBeans/backend/app/adapter/mysql"
@@ -40,11 +38,11 @@ func NewDeleteUser(ctx context.Context, tx mysql.DBTransaction, userName string,
 }
 
 func (user *DeleteUser) DeleteUserUseCase() error {
-	// check userName in token exists
+	// check user exists
 	_, err := user.userRepo.GetUserWhereName(user.ctx, user.userName)
 	if err != nil {
 		if err == repository.ErrNotExistsData {
-			return lib.ErrTokenInvalidNotExistingUserName
+			return ErrNotExitsUser
 		}
 		return err
 	}

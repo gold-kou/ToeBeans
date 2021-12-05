@@ -2,6 +2,7 @@ package usecase
 
 import "github.com/pkg/errors"
 
+var ErrNotExitsUser = errors.New("the user doesn't exist")
 var ErrNotVerifiedUser = errors.New("not email verified user")
 var ErrNotCorrectPassword = errors.New("not correct password")
 var ErrDecodeImage = errors.New("image decode failure")

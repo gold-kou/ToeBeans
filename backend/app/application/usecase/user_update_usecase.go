@@ -6,8 +6,6 @@ import (
 	"os"
 	"strings"
 
-	"github.com/gold-kou/ToeBeans/backend/app/lib"
-
 	"github.com/gold-kou/ToeBeans/backend/app/adapter/aws"
 
 	"github.com/gold-kou/ToeBeans/backend/app/domain/model"
@@ -42,11 +40,11 @@ func NewUpdateUser(ctx context.Context, tx mysql.DBTransaction, userName string,
 }
 
 func (user *UpdateUser) UpdateUserUseCase() error {
-	// check userName in token exists
+	// check user exists
 	_, err := user.userRepo.GetUserWhereName(user.ctx, user.userName)
 	if err != nil {
 		if err == repository.ErrNotExistsData {
-			return lib.ErrTokenInvalidNotExistingUserName
+			return ErrNotExitsUser
 		}
 		return err
 	}
