@@ -31,14 +31,14 @@ var errRespRegisterLikeWithoutPostingID = `
 
 var errRespRegisterLikeDuplicate = `
 {
-  "status": 400,
+  "status": 409,
   "message": "Whoops, you already liked the posting"
 }
 `
 
 var errRespRegisterLikeYourself = `
 {
-  "status": 400,
+  "status": 409,
   "message": "you can't like your posting"
 }
 `
@@ -75,7 +75,7 @@ func TestRegisterLike(t *testing.T) {
 			duplicateErr: true,
 			method:       http.MethodPost,
 			want:         errRespRegisterLikeDuplicate,
-			wantStatus:   http.StatusBadRequest,
+			wantStatus:   http.StatusConflict,
 		},
 		{
 			name:         "error like yourself",
@@ -83,7 +83,7 @@ func TestRegisterLike(t *testing.T) {
 			duplicateErr: true,
 			method:       http.MethodPost,
 			want:         errRespRegisterLikeYourself,
-			wantStatus:   http.StatusBadRequest,
+			wantStatus:   http.StatusConflict,
 		},
 		{
 			name:       "not allowed method",
@@ -183,8 +183,8 @@ var errRespDeleteLikeWithoutPostingID = `
 `
 var errRespDeleteLikeNotExistingPostingID = `
 {
-  "status": 400,
-  "message": "not exists data error"
+  "status": 409,
+  "message": "can't delete not existing like"
 }
 `
 
@@ -218,7 +218,7 @@ func TestDeleteLike(t *testing.T) {
 			args:       args{postingID: 99999},
 			method:     http.MethodDelete,
 			want:       errRespDeleteLikeNotExistingPostingID,
-			wantStatus: http.StatusBadRequest,
+			wantStatus: http.StatusConflict,
 		},
 		{
 			name:       "not allowed method",

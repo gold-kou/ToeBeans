@@ -37,7 +37,7 @@ var errRespRegisterFollowUserNameNotAlphanumeric = `
 
 var errRespRegisterFollowDuplicate = `
 {
-  "status": 400,
+  "status": 409,
   "message": "Whoops, you already followed the user"
 }
 `
@@ -76,19 +76,19 @@ func TestRegisterFollow(t *testing.T) {
 			wantStatus: http.StatusBadRequest,
 		},
 		{
-			name:         "error duplicate follow",
-			args:         args{followedUserName: dummy.User2.Name},
-			duplicateErr: true,
-			method:       http.MethodPost,
-			want:         errRespRegisterFollowDuplicate,
-			wantStatus:   http.StatusBadRequest,
-		},
-		{
 			name:       "error forbidden guest user",
 			args:       args{followedUserName: dummy.User2.Name},
 			method:     http.MethodPost,
 			want:       testingHelper.ErrForbidden,
 			wantStatus: http.StatusForbidden,
+		},
+		{
+			name:         "error duplicate follow",
+			args:         args{followedUserName: dummy.User2.Name},
+			duplicateErr: true,
+			method:       http.MethodPost,
+			want:         errRespRegisterFollowDuplicate,
+			wantStatus:   http.StatusConflict,
 		},
 		{
 			name:       "not allowed method",
@@ -176,6 +176,18 @@ var errRespDeleteFollowWithoutUserName = `
   "message": "cannot be blank"
 }
 `
+var errRespDeleteNotExistingFollowedUserName = `
+{
+  "status": 409,
+  "message": "the user doesn't exist"
+}
+`
+var errRespDeleteNotExistingFollow = `
+{
+  "status": 409,
+  "message": "can't delete not existing follow"
+}
+`
 
 func TestDeleteFollow(t *testing.T) {
 	type args struct {
@@ -210,6 +222,20 @@ func TestDeleteFollow(t *testing.T) {
 			wantStatus: http.StatusForbidden,
 		},
 		{
+			name:       "error not existing followed user name",
+			args:       args{followedUserName: "notExisitngUser"},
+			method:     http.MethodDelete,
+			want:       errRespDeleteNotExistingFollowedUserName,
+			wantStatus: http.StatusConflict,
+		},
+		{
+			name:       "error not existing follow",
+			args:       args{followedUserName: dummy.User3.Name},
+			method:     http.MethodDelete,
+			want:       errRespDeleteNotExistingFollow,
+			wantStatus: http.StatusConflict,
+		},
+		{
 			name:       "not allowed method",
 			args:       args{},
 			method:     http.MethodHead,
@@ -231,27 +257,27 @@ func TestDeleteFollow(t *testing.T) {
 			assert.NoError(t, err)
 			err = userRepo.Create(context.Background(), &dummy.User2)
 			assert.NoError(t, err)
-
-			req, err := http.NewRequest(http.MethodPost, fmt.Sprintf("/follows/%s", tt.args.followedUserName), nil)
+			err = userRepo.Create(context.Background(), &dummy.User3)
 			assert.NoError(t, err)
-			vars := map[string]string{"followed_user_name": tt.args.followedUserName}
-			req = mux.SetURLVars(req, vars)
-			req = req.WithContext(httpContext.SetTokenUserName(req.Context(), dummy.User1.Name))
-			resp := httptest.NewRecorder()
-			FollowController(resp, req)
+			followRepo := repository.NewFollowRepository(db)
+			err = followRepo.Create(context.Background(), &dummy.Follow1)
+			assert.NoError(t, err)
+			err = userRepo.UpdateFollowCount(context.Background(), dummy.User1.Name, true)
+			assert.NoError(t, err)
+			err = userRepo.UpdateFollowedCount(context.Background(), dummy.User2.Name, true)
 			assert.NoError(t, err)
 
 			// http request
-			req, err = http.NewRequest(tt.method, fmt.Sprintf("/follows/%s", tt.args.followedUserName), nil)
+			req, err := http.NewRequest(tt.method, fmt.Sprintf("/follows/%s", tt.args.followedUserName), nil)
 			assert.NoError(t, err)
-			vars = map[string]string{"followed_user_name": tt.args.followedUserName}
+			vars := map[string]string{"followed_user_name": tt.args.followedUserName}
 			req = mux.SetURLVars(req, vars)
 			if tt.name == "error forbidden guest user" {
 				req = req.WithContext(httpContext.SetTokenUserName(req.Context(), lib.GuestUserName))
 			} else {
 				req = req.WithContext(httpContext.SetTokenUserName(req.Context(), dummy.User1.Name))
 			}
-			resp = httptest.NewRecorder()
+			resp := httptest.NewRecorder()
 
 			// test target
 			FollowController(resp, req)

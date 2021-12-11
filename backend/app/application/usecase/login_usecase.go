@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"context"
+	"errors"
 
 	"github.com/gold-kou/ToeBeans/backend/app/adapter/mysql"
 	modelHTTP "github.com/gold-kou/ToeBeans/backend/app/domain/model/http"
@@ -9,6 +10,8 @@ import (
 	"github.com/gold-kou/ToeBeans/backend/app/lib"
 	"golang.org/x/crypto/bcrypt"
 )
+
+var ErrNotVerifiedUser = errors.New("not email verified user")
 
 type LoginUseCaseInterface interface {
 	LoginUseCase() (string, error)

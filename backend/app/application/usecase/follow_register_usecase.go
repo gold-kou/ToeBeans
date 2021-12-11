@@ -4,11 +4,14 @@ import (
 	"context"
 
 	"github.com/gold-kou/ToeBeans/backend/app/lib"
+	"github.com/pkg/errors"
 
 	"github.com/gold-kou/ToeBeans/backend/app/adapter/mysql"
 	"github.com/gold-kou/ToeBeans/backend/app/domain/model"
 	"github.com/gold-kou/ToeBeans/backend/app/domain/repository"
 )
+
+var ErrAlreadyFollowed = errors.New("the user is already followed by you")
 
 type RegisterFollowUseCaseInterface interface {
 	RegisterFollowUseCase() (*model.Follow, error)
@@ -53,6 +56,9 @@ func (follow *RegisterFollow) RegisterFollowUseCase() error {
 		}
 		err := follow.followRepo.Create(ctx, &u)
 		if err != nil {
+			if err == repository.ErrDuplicateData {
+				return ErrAlreadyFollowed
+			}
 			return err
 		}
 

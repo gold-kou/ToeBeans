@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"context"
+	"errors"
 
 	"github.com/gold-kou/ToeBeans/backend/app/lib"
 
@@ -9,6 +10,9 @@ import (
 	"github.com/gold-kou/ToeBeans/backend/app/domain/model"
 	"github.com/gold-kou/ToeBeans/backend/app/domain/repository"
 )
+
+var ErrLikeYourPosting = errors.New("you can't like your posting")
+var ErrAlreadyLiked = errors.New("Whoops, you already liked the posting")
 
 type RegisterLikeUseCaseInterface interface {
 	RegisterLikeUseCase() (*model.Like, error)
@@ -54,7 +58,7 @@ func (like *RegisterLike) RegisterLikeUseCase() error {
 	}
 
 	if like.tokenUserName == p.UserName {
-		return ErrLikeYourSelf
+		return ErrLikeYourPosting
 	}
 
 	err = like.tx.Do(like.ctx, func(ctx context.Context) error {
@@ -63,6 +67,9 @@ func (like *RegisterLike) RegisterLikeUseCase() error {
 			PostingID: int64(like.postingID),
 		}
 		if err := like.likeRepo.Create(ctx, &l); err != nil {
+			if err == repository.ErrDuplicateData {
+				return ErrAlreadyLiked
+			}
 			return err
 		}
 

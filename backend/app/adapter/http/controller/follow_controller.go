@@ -36,6 +36,8 @@ func FollowController(w http.ResponseWriter, r *http.Request) {
 				helper.ResponseUnauthorized(w, err.Error())
 			case *helper.ForbiddenError:
 				helper.ResponseForbidden(w, err.Error())
+			case *helper.ConflictError:
+				helper.ResponseConflictError(w, err.Error())
 			case *helper.InternalServerError:
 				helper.ResponseInternalServerError(w, err.Error())
 			default:
@@ -52,6 +54,8 @@ func FollowController(w http.ResponseWriter, r *http.Request) {
 				helper.ResponseUnauthorized(w, err.Error())
 			case *helper.ForbiddenError:
 				helper.ResponseForbidden(w, err.Error())
+			case *helper.ConflictError:
+				helper.ResponseConflictError(w, err.Error())
 			case *helper.InternalServerError:
 				helper.ResponseInternalServerError(w, err.Error())
 			default:
@@ -102,8 +106,8 @@ func registerFollow(r *http.Request) error {
 	u := usecase.NewRegisterFollow(r.Context(), tx, tokenUserName, followedUserName, userRepo, followRepo, notificationRepo)
 	if err = u.RegisterFollowUseCase(); err != nil {
 		log.Println(err)
-		if err == repository.ErrDuplicateData {
-			return helper.NewBadRequestError("Whoops, you already followed the user")
+		if err == usecase.ErrAlreadyFollowed {
+			return helper.NewConflictError("Whoops, you already followed the user")
 		}
 		return helper.NewInternalServerError(err.Error())
 	}
@@ -148,8 +152,10 @@ func deleteFollow(r *http.Request) error {
 	u := usecase.NewDeleteFollow(r.Context(), tx, tokenUserName, followedUserName, userRepo, followRepo)
 	if err = u.DeleteFollowUseCase(); err != nil {
 		log.Println(err)
-		if err == repository.ErrNotExistsData {
-			return helper.NewBadRequestError(err.Error())
+		if err == usecase.ErrNotExitsUser {
+			return helper.NewConflictError(err.Error())
+		} else if err == usecase.ErrDeleteNotExistsFollow {
+			return helper.NewConflictError(err.Error())
 		}
 		return helper.NewInternalServerError(err.Error())
 	}
