@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"context"
+	"errors"
 
 	"github.com/gold-kou/ToeBeans/backend/app/lib"
 
@@ -9,6 +10,8 @@ import (
 	"github.com/gold-kou/ToeBeans/backend/app/domain/model"
 	"github.com/gold-kou/ToeBeans/backend/app/domain/repository"
 )
+
+var ErrDeleteNotExistsLike = errors.New("can't delete not existing like")
 
 type DeleteLikeUseCaseInterface interface {
 	DeleteLikeUseCase() (*model.Like, error)
@@ -48,6 +51,9 @@ func (like *DeleteLike) DeleteLikeUseCase() error {
 
 	l, err := like.likeRepo.GetWhereUserNamePostingID(like.ctx, like.tokenUserName, like.postingID)
 	if err != nil {
+		if err == repository.ErrNotExistsData {
+			return ErrDeleteNotExistsLike
+		}
 		return err
 	}
 

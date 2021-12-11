@@ -31,6 +31,8 @@ func LikeController(w http.ResponseWriter, r *http.Request) {
 				helper.ResponseBadRequest(w, err.Error())
 			case *helper.AuthorizationError:
 				helper.ResponseUnauthorized(w, err.Error())
+			case *helper.ConflictError:
+				helper.ResponseConflictError(w, err.Error())
 			case *helper.InternalServerError:
 				helper.ResponseInternalServerError(w, err.Error())
 			default:
@@ -45,6 +47,8 @@ func LikeController(w http.ResponseWriter, r *http.Request) {
 				helper.ResponseBadRequest(w, err.Error())
 			case *helper.AuthorizationError:
 				helper.ResponseUnauthorized(w, err.Error())
+			case *helper.ConflictError:
+				helper.ResponseConflictError(w, err.Error())
 			case *helper.InternalServerError:
 				helper.ResponseInternalServerError(w, err.Error())
 			default:
@@ -99,11 +103,10 @@ func registerLike(r *http.Request) error {
 	u := usecase.NewRegisterLike(r.Context(), tx, tokenUserName, postingID, userRepo, postingRepo, likeRepo, notificationRepo)
 	if err = u.RegisterLikeUseCase(); err != nil {
 		log.Println(err)
-		if err == repository.ErrDuplicateData {
-			return helper.NewBadRequestError("Whoops, you already liked the posting")
-		}
-		if err == usecase.ErrLikeYourSelf {
-			return helper.NewBadRequestError(err.Error())
+		if err == usecase.ErrLikeYourPosting {
+			return helper.NewConflictError(err.Error())
+		} else if err == usecase.ErrAlreadyLiked {
+			return helper.NewConflictError(err.Error())
 		}
 		return helper.NewInternalServerError(err.Error())
 	}
@@ -149,8 +152,8 @@ func deleteLike(r *http.Request) error {
 	u := usecase.NewDeleteLike(r.Context(), tx, tokenUserName, int64(postingID), userRepo, postingRepo, likeRepo)
 	if err = u.DeleteLikeUseCase(); err != nil {
 		log.Println(err)
-		if err == repository.ErrNotExistsData {
-			return helper.NewBadRequestError(err.Error())
+		if err == usecase.ErrDeleteNotExistsLike {
+			return helper.NewConflictError(err.Error())
 		}
 		return helper.NewInternalServerError(err.Error())
 	}

@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"context"
+	"errors"
 
 	"github.com/gold-kou/ToeBeans/backend/app/lib"
 
@@ -9,6 +10,8 @@ import (
 	"github.com/gold-kou/ToeBeans/backend/app/domain/model"
 	"github.com/gold-kou/ToeBeans/backend/app/domain/repository"
 )
+
+var ErrDeleteNotExistsFollow = errors.New("can't delete not existing follow")
 
 type DeleteFollowUseCaseInterface interface {
 	DeleteFollowUseCase() (*model.Follow, error)
@@ -44,9 +47,21 @@ func (follow *DeleteFollow) DeleteFollowUseCase() error {
 		return err
 	}
 
-	// check userName exists
+	// 存在しないユーザのフォロー削除はConflictエラー
 	_, err = follow.userRepo.GetUserWhereName(follow.ctx, follow.followedUserName)
 	if err != nil {
+		if err == repository.ErrNotExistsData {
+			return ErrNotExitsUser
+		}
+		return err
+	}
+
+	// 存在しないフォローの削除はConflictエラー
+	_, err = follow.followRepo.GetWhereBothUserNames(follow.ctx, follow.followUserName, follow.followedUserName)
+	if err != nil {
+		if err == repository.ErrNotExistsData {
+			return ErrDeleteNotExistsFollow
+		}
 		return err
 	}
 

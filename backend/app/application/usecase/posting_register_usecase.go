@@ -3,6 +3,7 @@ package usecase
 import (
 	"context"
 	"encoding/base64"
+	"errors"
 	"flag"
 	"os"
 	"strings"
@@ -20,6 +21,8 @@ import (
 	modelHTTP "github.com/gold-kou/ToeBeans/backend/app/domain/model/http"
 	"github.com/gold-kou/ToeBeans/backend/app/domain/repository"
 )
+
+var ErrNotCatImage = errors.New("you can post only a cat image")
 
 type RegisterPostingUseCaseInterface interface {
 	RegisterPostingUseCase() (*model.Posting, error)

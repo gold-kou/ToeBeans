@@ -18,4 +18,10 @@ var User2 = model.User{
 	Password: "Password5678",
 }
 
+var User3 = model.User{
+	Name:     "testUser3",
+	Email:    "testUser3@example.com",
+	Password: "Password3333",
+}
+
 var SecretKey = "test_secret_key"

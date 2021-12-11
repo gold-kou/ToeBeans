@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"context"
+	"errors"
 	"time"
 
 	"github.com/gold-kou/ToeBeans/backend/app/domain/model"
@@ -14,6 +15,8 @@ import (
 	modelHTTP "github.com/gold-kou/ToeBeans/backend/app/domain/model/http"
 	"github.com/gold-kou/ToeBeans/backend/app/domain/repository"
 )
+
+var ErrOverPasswordResetCount = errors.New("you can't reset password as it exceeds limit counts")
 
 type PasswordResetEmailUseCaseInterface interface {
 	PasswordResetEmailUseCase() error
