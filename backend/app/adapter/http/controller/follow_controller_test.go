@@ -153,11 +153,11 @@ func TestRegisterFollow(t *testing.T) {
 			//if tt.wantStatus == 200 {
 			//	follows, err := testingHelper.FindAllFollows(context.Background(), db)
 			//	assert.NoError(t, err)
-			//	dummy.Follow1.CreatedAt = lib.NowFunc()
-			//	dummy.Follow1.UpdatedAt = lib.NowFunc()
+			//	dummy.Follow1to2.CreatedAt = lib.NowFunc()
+			//	dummy.Follow1to2.UpdatedAt = lib.NowFunc()
 			//	follows[0].CreatedAt = lib.NowFunc()
 			//	follows[0].UpdatedAt = lib.NowFunc()
-			//	assert.Equal(t, dummy.Follow1, follows[0])
+			//	assert.Equal(t, dummy.Follow1to2, follows[0])
 			//}
 
 			// assert http
@@ -260,7 +260,7 @@ func TestDeleteFollow(t *testing.T) {
 			err = userRepo.Create(context.Background(), &dummy.User3)
 			assert.NoError(t, err)
 			followRepo := repository.NewFollowRepository(db)
-			err = followRepo.Create(context.Background(), &dummy.Follow1)
+			err = followRepo.Create(context.Background(), &dummy.Follow1to2)
 			assert.NoError(t, err)
 			err = userRepo.UpdateFollowCount(context.Background(), dummy.User1.Name, true)
 			assert.NoError(t, err)

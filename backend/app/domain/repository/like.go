@@ -16,6 +16,7 @@ type LikeRepositoryInterface interface {
 	GetWhereUserNamePostingID(ctx context.Context, userName string, postingID int64) (like model.Like, err error)
 	DeleteWhereUserNamePostingID(ctx context.Context, userName string, postingID int64) (err error)
 	DeleteWhereUserName(ctx context.Context, userName string) (err error)
+	DeleteWhereInPosingIDs(ctx context.Context, userName string) (err error)
 }
 
 type LikeRepository struct {
@@ -93,6 +94,17 @@ func (r *LikeRepository) DeleteWhereUserNamePostingID(ctx context.Context, userN
 
 func (r *LikeRepository) DeleteWhereUserName(ctx context.Context, userName string) (err error) {
 	q := "DELETE FROM `likes` WHERE `user_name` = ?"
+	tx := m.GetTransaction(ctx)
+	if tx != nil {
+		_, err = tx.ExecContext(ctx, q, userName)
+	} else {
+		_, err = r.db.ExecContext(ctx, q, userName)
+	}
+	return
+}
+
+func (r *LikeRepository) DeleteWhereInPosingIDs(ctx context.Context, userName string) (err error) {
+	q := "DELETE FROM `likes` WHERE `posting_id` IN (SELECT `id` FROM `postings` WHERE `user_name` = ?)"
 	tx := m.GetTransaction(ctx)
 	if tx != nil {
 		_, err = tx.ExecContext(ctx, q, userName)

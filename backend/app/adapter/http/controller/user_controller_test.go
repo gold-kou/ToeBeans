@@ -513,7 +513,7 @@ func TestDeleteUser(t *testing.T) {
 		},
 		{
 			name:       "error not existing user is specified",
-			args:       args{userName: dummy.User2.Name},
+			args:       args{userName: "notExistingUser"},
 			method:     http.MethodDelete,
 			want:       errRespDeleteUserNotExistsUserNameSpecified,
 			wantStatus: http.StatusConflict,
@@ -538,6 +538,42 @@ func TestDeleteUser(t *testing.T) {
 			userRepo := repository.NewUserRepository(db)
 			err := userRepo.Create(context.Background(), &dummy.User1)
 			assert.NoError(t, err)
+			err = userRepo.Create(context.Background(), &dummy.User2)
+			assert.NoError(t, err)
+			postingRepo := repository.NewPostingRepository(db)
+			err = postingRepo.Create(context.Background(), &dummy.Posting1)
+			assert.NoError(t, err)
+			err = postingRepo.Create(context.Background(), &dummy.Posting2)
+			assert.NoError(t, err)
+			followRepo := repository.NewFollowRepository(db)
+			err = followRepo.Create(context.Background(), &dummy.Follow1to2)
+			assert.NoError(t, err)
+			err = userRepo.UpdateFollowCount(context.Background(), dummy.User1.Name, true)
+			assert.NoError(t, err)
+			err = userRepo.UpdateFollowedCount(context.Background(), dummy.User2.Name, true)
+			assert.NoError(t, err)
+			err = followRepo.Create(context.Background(), &dummy.Follow2to1)
+			assert.NoError(t, err)
+			err = userRepo.UpdateFollowCount(context.Background(), dummy.User2.Name, true)
+			assert.NoError(t, err)
+			err = userRepo.UpdateFollowedCount(context.Background(), dummy.User1.Name, true)
+			assert.NoError(t, err)
+			commentRepo := repository.NewCommentRepository(db)
+			err = commentRepo.Create(context.Background(), &dummy.Comment1)
+			assert.NoError(t, err)
+			likeRepo := repository.NewLikeRepository(db)
+			err = likeRepo.Create(context.Background(), &dummy.Like1to2)
+			assert.NoError(t, err)
+			err = userRepo.UpdateLikedCount(context.Background(), dummy.Posting2.ID, true)
+			assert.NoError(t, err)
+			err = postingRepo.UpdateLikedCount(context.Background(), dummy.Posting1.ID, true)
+			assert.NoError(t, err)
+			err = likeRepo.Create(context.Background(), &dummy.Like2to1)
+			assert.NoError(t, err)
+			err = userRepo.UpdateLikedCount(context.Background(), dummy.Posting1.ID, true)
+			assert.NoError(t, err)
+			err = postingRepo.UpdateLikedCount(context.Background(), dummy.Posting2.ID, true)
+			assert.NoError(t, err)
 
 			// http request
 			req, err := http.NewRequest(tt.method, fmt.Sprintf("/users/%s", tt.args.userName), nil)
@@ -559,7 +595,15 @@ func TestDeleteUser(t *testing.T) {
 			if tt.wantStatus == 200 {
 				users, err := testingHelper.FindAllUsers(context.Background(), db)
 				assert.NoError(t, err)
-				assert.Equal(t, 0, len(users))
+				assert.Equal(t, 1, len(users)) // user2がいるため
+
+				assert.Equal(t, int64(0), users[0].LikedCount)
+				assert.Equal(t, int64(0), users[0].FollowCount)
+				assert.Equal(t, int64(0), users[0].FollowedCount)
+
+				postings, err := testingHelper.FindAllPostings(context.Background(), db)
+				assert.NoError(t, err)
+				assert.Equal(t, int64(0), postings[0].LikedCount)
 			}
 
 			// assert http
