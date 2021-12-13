@@ -149,11 +149,11 @@ func TestRegisterLike(t *testing.T) {
 			if tt.wantStatus == 200 {
 				likes, err := testingHelper.FindAllLikes(context.Background(), db)
 				assert.NoError(t, err)
-				dummy.Like1.CreatedAt = lib.NowFunc()
-				dummy.Like1.UpdatedAt = lib.NowFunc()
+				dummy.Like1to2.CreatedAt = lib.NowFunc()
+				dummy.Like1to2.UpdatedAt = lib.NowFunc()
 				likes[0].CreatedAt = lib.NowFunc()
 				likes[0].UpdatedAt = lib.NowFunc()
-				assert.Equal(t, dummy.Like1, likes[0])
+				assert.Equal(t, dummy.Like1to2, likes[0])
 
 				// increment check
 				users, err := testingHelper.FindAllUsers(context.Background(), db)

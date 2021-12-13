@@ -15,6 +15,7 @@ type FollowRepositoryInterface interface {
 	Create(ctx context.Context, follow *model.Follow) (err error)
 	DeleteWhereFollowingFollowedUserName(ctx context.Context, followingUserName, followedUserName string) (err error)
 	DeleteWhereFollowingUserName(ctx context.Context, userName string) (err error)
+	DeleteWhereFollowedUserName(ctx context.Context, userName string) (err error)
 }
 
 type FollowRepository struct {
@@ -65,6 +66,17 @@ func (r *FollowRepository) DeleteWhereFollowingFollowedUserName(ctx context.Cont
 
 func (r *FollowRepository) DeleteWhereFollowingUserName(ctx context.Context, userName string) (err error) {
 	q := "DELETE FROM `follows` WHERE `following_user_name` = ?"
+	tx := m.GetTransaction(ctx)
+	if tx != nil {
+		_, err = tx.ExecContext(ctx, q, userName)
+	} else {
+		_, err = r.db.ExecContext(ctx, q, userName)
+	}
+	return
+}
+
+func (r *FollowRepository) DeleteWhereFollowedUserName(ctx context.Context, userName string) (err error) {
+	q := "DELETE FROM `follows` WHERE `followed_user_name` = ?"
 	tx := m.GetTransaction(ctx)
 	if tx != nil {
 		_, err = tx.ExecContext(ctx, q, userName)

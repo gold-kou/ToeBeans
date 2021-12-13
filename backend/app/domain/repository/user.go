@@ -24,6 +24,11 @@ type UserRepositoryInterface interface {
 	ResetPassword(ctx context.Context, password string, userName string, resetKey string) (err error)
 	UpdateLikeCount(ctx context.Context, userName string, increment bool) (err error)
 	UpdateLikedCount(ctx context.Context, userName string) (err error)
+	UpdateLikedCountDecrementWhenUserDelete(ctx context.Context, userName string) (err error)
+	UpdateFollowCount(ctx context.Context, userName string, increment bool) (err error)
+	UpdateFollowedCount(ctx context.Context, userName string, increment bool) (err error)
+	UpdateFollowCountDecrementWhereFollowedUserName(ctx context.Context, userName string) (err error)
+	UpdateFollowedCountDecrementWhereFollowingUserName(ctx context.Context, userName string) (err error)
 	DeleteWhereName(ctx context.Context, userName string) (err error)
 }
 
@@ -191,6 +196,17 @@ func (r *UserRepository) UpdateLikedCount(ctx context.Context, postingID int64, 
 	return
 }
 
+func (r *UserRepository) UpdateLikedCountDecrementWhenUserDelete(ctx context.Context, userName string) (err error) {
+	q := "UPDATE `users` SET `liked_count` = `liked_count` - 1 WHERE `name` IN (SELECT `user_name` FROM `postings` WHERE `id` IN (SELECT `posting_id` FROM `likes` WHERE `user_name` = ?))"
+	tx := m.GetTransaction(ctx)
+	if tx != nil {
+		_, err = tx.ExecContext(ctx, q, userName)
+	} else {
+		_, err = r.db.ExecContext(ctx, q, userName)
+	}
+	return
+}
+
 func (r *UserRepository) UpdateFollowCount(ctx context.Context, userName string, increment bool) (err error) {
 	var q string
 	if increment {
@@ -214,6 +230,28 @@ func (r *UserRepository) UpdateFollowedCount(ctx context.Context, userName strin
 	} else {
 		q = "UPDATE `users` SET `followed_count` = `followed_count` - 1 WHERE `name` = ?"
 	}
+	tx := m.GetTransaction(ctx)
+	if tx != nil {
+		_, err = tx.ExecContext(ctx, q, userName)
+	} else {
+		_, err = r.db.ExecContext(ctx, q, userName)
+	}
+	return
+}
+
+func (r *UserRepository) UpdateFollowCountDecrementWhereFollowedUserName(ctx context.Context, userName string) (err error) {
+	q := "UPDATE `users` SET `follow_count` = `follow_count` - 1 WHERE `name` IN (SELECT `following_user_name` FROM `follows` WHERE `followed_user_name` = ?)"
+	tx := m.GetTransaction(ctx)
+	if tx != nil {
+		_, err = tx.ExecContext(ctx, q, userName)
+	} else {
+		_, err = r.db.ExecContext(ctx, q, userName)
+	}
+	return
+}
+
+func (r *UserRepository) UpdateFollowedCountDecrementWhereFollowingUserName(ctx context.Context, userName string) (err error) {
+	q := "UPDATE `users` SET `followed_count` = `followed_count` - 1 WHERE `name` IN (SELECT `followed_user_name` FROM `follows` WHERE `following_user_name` = ?)"
 	tx := m.GetTransaction(ctx)
 	if tx != nil {
 		_, err = tx.ExecContext(ctx, q, userName)

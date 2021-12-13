@@ -17,6 +17,7 @@ type PostingRepositoryInterface interface {
 	GetWhereID(ctx context.Context, id int64) (posting model.Posting, err error)
 	GetWhereIDUserName(ctx context.Context, id int64, userName string) (posting model.Posting, err error)
 	UpdateLikedCount(ctx context.Context, id int64, increment bool) (err error)
+	UpdateLikedCountDecrementWhenUserDelete(ctx context.Context, userName string) (err error)
 	DeleteWhereID(ctx context.Context, id int64) (err error)
 	DeleteWhereUserName(ctx context.Context, userName string) (err error)
 }
@@ -112,6 +113,17 @@ func (r *PostingRepository) UpdateLikedCount(ctx context.Context, id int64, incr
 		_, err = tx.ExecContext(ctx, q, id)
 	} else {
 		_, err = r.db.ExecContext(ctx, q, id)
+	}
+	return
+}
+
+func (r *PostingRepository) UpdateLikedCountDecrementWhenUserDelete(ctx context.Context, userName string) (err error) {
+	q := "UPDATE `postings` SET `liked_count` = `liked_count` - 1 WHERE `id` IN (SELECT `posting_id` FROM `likes` WHERE `user_name` = ?)"
+	tx := m.GetTransaction(ctx)
+	if tx != nil {
+		_, err = tx.ExecContext(ctx, q, userName)
+	} else {
+		_, err = r.db.ExecContext(ctx, q, userName)
 	}
 	return
 }
