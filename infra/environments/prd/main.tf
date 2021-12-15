@@ -1,12 +1,12 @@
 terraform {
-  required_version = "0.15.4"
+  required_version = "0.15.5"
 
   required_providers {
     aws = "3.48.0"
   }
 
   backend "s3" {
-    bucket = "tfstate-toebeans-tcpip"
+    bucket = "tfstate-toebeans-tcpip2"
     key    = "terraform.tfstate"
     region = "ap-northeast-1"
   }

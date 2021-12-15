@@ -64,7 +64,8 @@ services:
       MINIO_SECRET_KEY: test_secret_key
       MINIO_REGION: ap-​northeast-1
     entrypoint: sh
-    command: -c 'mkdir -p /images/icons && mkdir -p /images/postings && /usr/bin/minio server /images'
+    command: -c 'mkdir -p /images/icons && mkdir -p /images/postings &&
+      /usr/bin/minio server /images'
     networks:
       - backend
     ports:
@@ -73,5 +74,6 @@ services:
 networks:
   backend:
 
+    null
 volumes:
-  db:
+  db: null

@@ -8,6 +8,7 @@ resource "aws_vpc" "toebeans" {
   }
 }
 
+# public
 # resource "aws_subnet" "public" {
 #   vpc_id                  = aws_vpc.toebeans.id
 #   cidr_block              = "10.0.0.0/24"
@@ -58,6 +59,7 @@ resource "aws_route_table_association" "public_1" {
   route_table_id = aws_route_table.public.id
 }
 
+# private
 # resource "aws_subnet" "private" {
 #   vpc_id                  = aws_vpc.toebeans.id
 #   cidr_block              = "10.0.64.0/24"
@@ -99,27 +101,28 @@ resource "aws_subnet" "private_1" {
 #   depends_on    = [aws_internet_gateway.toebeans]
 # }
 
-resource "aws_eip" "nat_gateway_0" {
-  vpc        = true
-  depends_on = [aws_internet_gateway.toebeans]
-}
+# MEMO nat gatewayはお金かかるので一時的に消す
+# resource "aws_eip" "nat_gateway_0" {
+#   vpc        = true
+#   depends_on = [aws_internet_gateway.toebeans]
+# }
 
-resource "aws_eip" "nat_gateway_1" {
-  vpc        = true
-  depends_on = [aws_internet_gateway.toebeans]
-}
+# resource "aws_eip" "nat_gateway_1" {
+#   vpc        = true
+#   depends_on = [aws_internet_gateway.toebeans]
+# }
 
-resource "aws_nat_gateway" "nat_gateway_0" {
-  allocation_id = aws_eip.nat_gateway_0.id
-  subnet_id     = aws_subnet.public_0.id
-  depends_on    = [aws_internet_gateway.toebeans]
-}
+# resource "aws_nat_gateway" "nat_gateway_0" {
+#   allocation_id = aws_eip.nat_gateway_0.id
+#   subnet_id     = aws_subnet.public_0.id
+#   depends_on    = [aws_internet_gateway.toebeans]
+# }
 
-resource "aws_nat_gateway" "nat_gateway_1" {
-  allocation_id = aws_eip.nat_gateway_1.id
-  subnet_id     = aws_subnet.public_1.id
-  depends_on    = [aws_internet_gateway.toebeans]
-}
+# resource "aws_nat_gateway" "nat_gateway_1" {
+#   allocation_id = aws_eip.nat_gateway_1.id
+#   subnet_id     = aws_subnet.public_1.id
+#   depends_on    = [aws_internet_gateway.toebeans]
+# }
 
 # resource "aws_route" "private" {
 #   route_table_id         = aws_route_table.private.id
@@ -135,17 +138,18 @@ resource "aws_route_table" "private_1" {
   vpc_id = aws_vpc.toebeans.id
 }
 
-resource "aws_route" "private_0" {
-  route_table_id         = aws_route_table.private_0.id
-  nat_gateway_id         = aws_nat_gateway.nat_gateway_0.id
-  destination_cidr_block = "0.0.0.0/0"
-}
+# MEMO nat gatewayはお金かかるので一時的に消す
+# resource "aws_route" "private_0" {
+#   route_table_id         = aws_route_table.private_0.id
+#   nat_gateway_id         = aws_nat_gateway.nat_gateway_0.id
+#   destination_cidr_block = "0.0.0.0/0"
+# }
 
-resource "aws_route" "private_1" {
-  route_table_id         = aws_route_table.private_1.id
-  nat_gateway_id         = aws_nat_gateway.nat_gateway_1.id
-  destination_cidr_block = "0.0.0.0/0"
-}
+# resource "aws_route" "private_1" {
+#   route_table_id         = aws_route_table.private_1.id
+#   nat_gateway_id         = aws_nat_gateway.nat_gateway_1.id
+#   destination_cidr_block = "0.0.0.0/0"
+# }
 
 resource "aws_route_table_association" "private_0" {
   subnet_id      = aws_subnet.private_0.id

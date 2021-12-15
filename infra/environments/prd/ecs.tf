@@ -16,7 +16,7 @@ resource "aws_ecs_service" "toebeans" {
   name                              = "toebeans"
   cluster                           = aws_ecs_cluster.toebeans.arn
   task_definition                   = aws_ecs_task_definition.toebeans.arn
-  desired_count                     = 0 // TODO
+  desired_count                     = 0 // MEMO 節約のため一時的に0
   launch_type                       = "FARGATE"
   platform_version                  = "1.3.0"
   health_check_grace_period_seconds = 60
