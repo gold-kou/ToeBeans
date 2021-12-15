@@ -51,3 +51,37 @@ resource "aws_s3_bucket" "artifact" {
     }
   }
 }
+
+# Frontend
+resource "aws_s3_bucket" "front_bucket" {
+  bucket = "toebeans-front-bucket-tcpip"
+  acl = "private" // CloudFrontのみからのアクセスとするためprivate
+
+  website {
+    index_document = "index.html"
+    # error_document = "error.html" // いずれ用意したい
+  } 
+}
+
+resource "aws_s3_bucket_policy" "front_bucket_policy" {
+    bucket = aws_s3_bucket.front_bucket.id
+    policy = data.aws_iam_policy_document.toebeans_frontend.json
+}
+
+data "aws_iam_policy_document" "toebeans_frontend" {
+  statement {
+    sid = "Allow CloudFront"
+    effect = "Allow"
+    principals {
+        type = "AWS"
+        identifiers = [aws_cloudfront_origin_access_identity.toebeans_frontend.iam_arn]
+    }
+    actions = [
+        "s3:GetObject"
+    ]
+
+    resources = [
+        "${aws_s3_bucket.front_bucket.arn}/*"
+    ]
+  }
+}

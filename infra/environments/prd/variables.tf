@@ -12,3 +12,8 @@ variable github_webhook_secret {
   type        = string
   default     = "VeryRandomStringMoreThan20Byte!"
 }
+
+variable ssh_public_key_path {
+  type        = string
+  default     = "~/.ssh/toebeans_rsa.pub"
+}

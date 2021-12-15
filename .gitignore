@@ -38,6 +38,7 @@ backend/secret/
 # Ignore CLI configuration files
 .terraformrc
 terraform.rc
+infra/secret/
 
 ## Others
 # IDE
