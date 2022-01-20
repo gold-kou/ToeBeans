@@ -10,6 +10,7 @@ resource "aws_ecs_task_definition" "toebeans" {
   requires_compatibilities = ["FARGATE"]
   container_definitions    = file("./container_definitions.json")
   execution_role_arn       = module.ecs_task_execution_role.iam_role_arn
+  task_role_arn = module.ecs_task_role.iam_role_arn
 }
 
 resource "aws_ecs_service" "toebeans" {
@@ -78,4 +79,38 @@ module "ecs_task_execution_role" {
   name       = "ecs-task-execution"
   identifier = "ecs-tasks.amazonaws.com"
   policy     = data.aws_iam_policy_document.ecs_task_execution.json
+}
+
+# data "aws_iam_policy" "ecs_task_role_policy" {
+#   arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskRolePolicy"
+# }
+
+data "aws_iam_policy_document" "ecs_task_role" {
+  # source_json = data.aws_iam_policy.ecs_task_role_policy.policy
+
+  statement {
+    effect    = "Allow"
+    actions   = [
+      "ssm:GetParameters",
+      "ssmmessages:CreateControlChannel",
+      "ssmmessages:CreateDataChannel",
+      "ssmmessages:OpenControlChannel",
+      "ssmmessages:OpenDataChannel",
+      "kms:Decrypt",
+      "rds:*",
+      "ses:SendEmail",
+      "ses:SendRawEmail",
+      "s3:ListBucket",
+      "s3:PutObject",
+      "s3:GetObject"
+    ]
+    resources = ["*"]
+  }
+}
+
+module "ecs_task_role" {
+  source     = "../../modules/iam"
+  name       = "ecs-task-role"
+  identifier = "ecs-tasks.amazonaws.com"
+  policy     = data.aws_iam_policy_document.ecs_task_role.json
 }
