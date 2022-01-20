@@ -101,6 +101,8 @@ GitHubコンソールの `Settings > Developer Settings > Personal access tokens
 
 `github_token` に関してはapply前に設定が必須。
 
+`google_api_key` の値は `$ cat backend/secret/service-account.json | tr -d '\n'` の実行結果からスペースを全て削除したものを設定する。
+
 ### apply
 ```
 $ cd environments/prd
@@ -142,7 +144,7 @@ GitHubアプリで自分のアカウントを選択し、 `接続` を押す。
 `backend/toebeans-sql/mysql/sql/001_create_tables.sql` の内容を実行する。
 
 ## CloudFront修正
-`cycle error` によりACMをTerraformのコード上で指定できない都合上、コンソールで設定の追加をする必要がある。
+`cycle error` によりACMをTerraformのコード上で指定できない都合上、コンソールで設定の追加をする必要がある。設定後数分で403 Errorでなくなる。
 
 - 代替ドメイン名を追加してtoebeans.tkを入力する
 - カスタムSSL証明書でバージニアのものを選択する

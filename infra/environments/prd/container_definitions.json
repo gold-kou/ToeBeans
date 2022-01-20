@@ -43,6 +43,10 @@
         "valueFrom": "/github_token"
       },
       {
+        "name": "GOOGLE_API_KEY",
+        "valueFrom": "/google_api_key"
+      },
+      {
         "name": "JWT_SECRET_KEY",
         "valueFrom": "/jwt_secret_key"
       },

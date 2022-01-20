@@ -9,12 +9,12 @@ resource "aws_vpc" "toebeans" {
 }
 
 # public
-# resource "aws_subnet" "public" {
-#   vpc_id                  = aws_vpc.toebeans.id
-#   cidr_block              = "10.0.0.0/24"
-#   availability_zone       = "ap-northeast-1a"
-#   map_public_ip_on_launch = true
-# }
+resource "aws_subnet" "public" {
+  vpc_id                  = aws_vpc.toebeans.id
+  cidr_block              = "10.0.0.0/24"
+  availability_zone       = "ap-northeast-1a"
+  map_public_ip_on_launch = true
+}
 
 resource "aws_subnet" "public_0" {
   vpc_id                  = aws_vpc.toebeans.id
@@ -60,12 +60,12 @@ resource "aws_route_table_association" "public_1" {
 }
 
 # private
-# resource "aws_subnet" "private" {
-#   vpc_id                  = aws_vpc.toebeans.id
-#   cidr_block              = "10.0.64.0/24"
-#   availability_zone       = "ap-northeast-1a"
-#   map_public_ip_on_launch = false
-# }
+resource "aws_subnet" "private" {
+  vpc_id                  = aws_vpc.toebeans.id
+  cidr_block              = "10.0.64.0/24"
+  availability_zone       = "ap-northeast-1a"
+  map_public_ip_on_launch = false
+}
 
 resource "aws_subnet" "private_0" {
   vpc_id                  = aws_vpc.toebeans.id
@@ -81,6 +81,7 @@ resource "aws_subnet" "private_1" {
   map_public_ip_on_launch = false
 }
 
+# MEMO nat gatewayはお金かかるので一時的に消す
 # resource "aws_route_table" "private" {
 #   vpc_id = aws_vpc.toebeans.id
 # }
@@ -101,7 +102,6 @@ resource "aws_subnet" "private_1" {
 #   depends_on    = [aws_internet_gateway.toebeans]
 # }
 
-# MEMO nat gatewayはお金かかるので一時的に消す
 # resource "aws_eip" "nat_gateway_0" {
 #   vpc        = true
 #   depends_on = [aws_internet_gateway.toebeans]
