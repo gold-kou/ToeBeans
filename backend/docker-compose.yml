@@ -16,10 +16,10 @@ services:
       - DB_PASSWORD=secret
       - DB_HOST=db
       - DB_PORT=3306
-      - GOOGLE_APPLICATION_CREDENTIALS=secret/service-account.json
-      - AWS_ACCESS_KEY=test_access_key # for local
-      - AWS_SECRET_KEY=test_secret_key # for local
-      - AWS_REGION=ap-​northeast-1 # for local
+      - GOOGLE_API_KEY=test_google_api_key # must not be real key
+      - AWS_ACCESS_KEY=test_access_key # must not be real key
+      - AWS_SECRET_KEY=test_secret_key # must not be real key
+      - AWS_REGION=ap-​northeast-1
       - SYSTEM_EMAIL=no-reply@toebeans.tk
       - S3_BUCKET_POSTINGS=/toebeans-postings
       - S3_BUCKET_ICONS=/toebeans-icons
@@ -64,8 +64,7 @@ services:
       MINIO_SECRET_KEY: test_secret_key
       MINIO_REGION: ap-​northeast-1
     entrypoint: sh
-    command: -c 'mkdir -p /images/toebeans-icons && mkdir -p
-      /images/toebeans-postings && /usr/bin/minio server /images'
+    command: -c 'mkdir -p /images/toebeans-icons && mkdir -p /images/toebeans-postings && /usr/bin/minio server /images'
     networks:
       - backend
     ports:
