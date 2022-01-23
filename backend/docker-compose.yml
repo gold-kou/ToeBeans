@@ -73,5 +73,6 @@ services:
 networks:
   backend:
 
+    null
 volumes:
-  db:
+  db: null

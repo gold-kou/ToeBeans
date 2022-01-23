@@ -1,4 +1,12 @@
-#Backend
+## Frontend
+# dependencies
+frontend/node_modules
+frontend/.pnp
+.pnp.js
+# production
+frontend/build
+
+## Backend
 # Binaries for programs and plugins
 *.exe
 *.exe~
@@ -18,16 +26,20 @@ backend/go-modules/
 backend/Gododir/godobin*
 # Docker
 backend/.docker-compose-data/
-# IDE
-.idea/
-
-# Frontend
-# dependencies
-frontend/node_modules
-frontend/.pnp
-.pnp.js
-# production
-frontend/build
-
 # Secret
 backend/secret/
+
+## infra
+# Local .terraform directories
+.terraform/
+# .tfstate files
+*.tfstate
+*.tfstate.*
+# Ignore CLI configuration files
+.terraformrc
+terraform.rc
+infra/secret/
+
+## Others
+# IDE
+.idea/

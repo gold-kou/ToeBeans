@@ -64,8 +64,6 @@ const MyPage = () => {
     await axios
       .get(`/postings?since_at=${sinceAt}&limit=10&user_name=${localStorage.getItem("loginUserName")}`)
       .then(response => {
-        console.log("hatano2")
-        console.log(response.data.postings)
         if (response.data.postings == null) {
           setHasMore(false);
           return;
