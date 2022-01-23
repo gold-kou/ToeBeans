@@ -80,3 +80,22 @@ This is written in Japanese.
   - 1000リクエスト/月まで無料
   - 500万リクエスト/月まで1.5$
   - https://cloud.google.com/vision/pricing
+
+#  Launch in local
+## Backend
+投稿機能を使用する場合は、 `docker-compose.yml` の `GOOGLE_API_KEY` を設定する。値はSSMのパラメータストアに設定されている。
+
+```
+$ cd backend
+$ ./serverrun.sh
+# go run main.go
+```
+
+## Frontend
+```
+$ npm install
+$ npm start
+```
+
+## Browser
+Access to `localhost:3000/login` .

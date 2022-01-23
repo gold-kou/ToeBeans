@@ -26,6 +26,7 @@ require (
 	golang.org/x/net v0.0.0-20210525063256-abc453219eb5
 	golang.org/x/sys v0.0.0-20210603125802-9665404d3644 // indirect
 	golang.org/x/time v0.0.0-20200630173020-3af7569d3a1e // indirect
+	google.golang.org/api v0.47.0
 	google.golang.org/genproto v0.0.0-20210603172842-58e84a565dcf // indirect
 	gopkg.in/DataDog/dd-trace-go.v1 v1.27.0
 	gopkg.in/yaml.v2 v2.3.0 // indirect
