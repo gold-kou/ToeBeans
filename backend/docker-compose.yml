@@ -16,7 +16,7 @@ services:
       - DB_PASSWORD=secret
       - DB_HOST=db
       - DB_PORT=3306
-      - GOOGLE_APPLICATION_CREDENTIALS=secret/service-account.json
+      - GOOGLE_API_KEY=test_google_api_key # must not be real key
       - AWS_ACCESS_KEY=test_access_key # must not be real key
       - AWS_SECRET_KEY=test_secret_key # must not be real key
       - AWS_REGION=ap-​northeast-1

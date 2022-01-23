@@ -4,19 +4,20 @@ import (
 	"context"
 	"os"
 
-	"github.com/pkg/errors"
-
 	vision "cloud.google.com/go/vision/apiv1"
+	"github.com/pkg/errors"
+	"google.golang.org/api/option"
 )
 
 // DetectLabels gets labels from the Vision API for an image at the given file path.
 func DetectLabels(file string) (labels []string, err error) {
 	ctx := context.Background()
 
-	client, err := vision.NewImageAnnotatorClient(ctx)
+	client, err := vision.NewImageAnnotatorClient(ctx, option.WithCredentialsJSON([]byte(os.Getenv("GOOGLE_API_KEY"))))
 	if err != nil {
 		return
 	}
+	defer client.Close()
 
 	f, err := os.Open(file)
 	if err != nil {
