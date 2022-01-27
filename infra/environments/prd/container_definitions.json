@@ -47,6 +47,10 @@
         "valueFrom": "/google_api_key"
       },
       {
+        "name": "GRACEFUL_SHUTDOWN_TIMEOUT_SECOND",
+        "valueFrom": "/graceful_shutdown_timeout_second"
+      },
+      {
         "name": "JWT_SECRET_KEY",
         "valueFrom": "/jwt_secret_key"
       },
