@@ -1,7 +1,7 @@
 [
   {
     "name": "toebeans",
-    "image": "022111582403.dkr.ecr.ap-northeast-1.amazonaws.com/toebeans:latest",
+    "image": "030816431860.dkr.ecr.ap-northeast-1.amazonaws.com/toebeans:latest",
     "essential": true,
     "logConfiguration": {
       "logDriver": "awslogs",
