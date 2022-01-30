@@ -35,7 +35,7 @@ resource "aws_ecs_service" "toebeans" {
   load_balancer {
     target_group_arn = aws_lb_target_group.toebeans.arn
     container_name   = "toebeans"
-    container_port   = 8080
+    container_port   = 80
   }
 
   lifecycle {
