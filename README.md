@@ -91,6 +91,8 @@ $ ./serverrun.sh
 # go run main.go
 ```
 
+`localhost:9000` でminioコンソールにログインし、 `toebeans-postings` の `Edit policy` で `* READ and Write` を追加する。サーバを再起動するたびに設定が必要。
+
 ## Frontend
 ```
 $ npm install
