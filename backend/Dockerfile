@@ -44,7 +44,6 @@ RUN apt update && apt upgrade -y --no-install-recommends liblz4-1 \
 COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 WORKDIR /go/src/github.com/gold-kou/ToeBeans/backend
 COPY config/logger.yml.tpl config/logger.yml.tpl
-COPY secret/ secret/
 WORKDIR /
 COPY --from=builder /go/src/github.com/gold-kou/ToeBeans/backend/backend /backend
 ENV TZ=Asia/Tokyo DB_NAME=toebeansdb DB_USER=toebeans DB_HOST=db DB_PORT=3306 GOOGLE_API_KEY=XXXXX SYSTEM_EMAIL=no-reply@toebeans.tk S3_BUCKET_POSTINGS=/toebeans-postings S3_BUCKET_ICONS=/toebeans-icons APP_ENV=prd LOG_LEVEL=info JWT_SECRET_KEY=samplekey DB_PASSWORD=secret DB_HOST=db-test AWS_ACCESS_KEY=test_access_key AWS_SECRET_KEY=test_secret_key AWS_REGION=ap-​northeast-1
