@@ -18,6 +18,19 @@ import (
 	"github.com/gorilla/mux"
 )
 
+const gracefulShutdownTimeoutDefault = 5
+
+var gracefulShutdownTimeout time.Duration
+
+func init() {
+	t, e := time.ParseDuration(os.Getenv("GRACEFUL_SHUTDOWN_TIMEOUT_SECOND") + "s")
+	if e != nil {
+		gracefulShutdownTimeout = gracefulShutdownTimeoutDefault
+	} else {
+		gracefulShutdownTimeout = t
+	}
+}
+
 func Serve() {
 	r := mux.NewRouter().StrictSlash(true)
 
@@ -64,10 +77,10 @@ func Serve() {
 		signal.Notify(sigCh, syscall.SIGTERM)
 		<-sigCh
 
-		ctx, cancel := context.WithTimeout(context.Background(), time.Duration(5))
+		ctx, cancel := context.WithTimeout(context.Background(), gracefulShutdownTimeout)
 		defer cancel()
 		if e := server.Shutdown(ctx); e != nil {
-			// Error from closing listeners, or context timeout:
+			// Error from closing listeners, or context gracefulShutdownTimeout:
 			log.Panic("Failed to gracefully shutdown ", e)
 		}
 		close(idleConnsClosed)

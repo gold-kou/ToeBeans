@@ -130,18 +130,14 @@ GitHubアプリで自分のアカウントを選択し、 `接続` を押す。
 
 対象のパイプラインを選択し、 `変更をリリースする` を押す。
 
-## RDSパスワード変更
-
-## DBマイグレーション
-踏み台サーバにログインする。
-
-`mysql -u admin -p -h <RDSエンドポイント>` を実行する。RDSエンドポイントはコンソールの `接続とセキュリティ` から確認可能。
-
-`CREATE DATABASE toebeansdb DEFAULT CHARACTER SET utf8;` を実行する。
-
-`USE toebeansdb;` を実行する。
-
-`backend/toebeans-sql/mysql/sql/001_create_tables.sql` の内容を実行する。
+## DBのパスワード変更とテーブルマイグレーション
+1. EC2コンソールを利用し、踏み台サーバにログインする。
+2. `mysql -u admin -p -h <RDSエンドポイント>` を実行する。RDSエンドポイントはコンソールの `接続とセキュリティ` から確認可能。初期パスワードはvariables.tfを参照する。
+3. `SET PASSWORD = PASSWORD('XXXXX');` を実行する。パスワード値は任意の値。
+4. `CREATE DATABASE toebeansdb DEFAULT CHARACTER SET utf8;` を実行する。
+5. `USE toebeansdb;` を実行する。
+6. `backend/toebeans-sql/mysql/sql/001_create_tables.sql` の内容を実行する。
+7. exitする。
 
 ## CloudFront修正
 `cycle error` によりACMをTerraformのコード上で指定できない都合上、コンソールで設定の追加をする必要がある。設定後数分で403 Errorでなくなる。

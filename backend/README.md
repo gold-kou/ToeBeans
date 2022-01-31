@@ -2,7 +2,7 @@
 同一オリジンあるいは特別に許可しているオリジン（ローカル開発用）以外のオリジンからはリクエストを許可していません。
 
 # CSRFトークン
-「RFCで定められている安全」なメソッド（本サービスではGET）以外のリクエストは全て `X-CSRF-Token` ヘッダにCSRFトークンを格納する必要があります。秘密鍵を使って、CSRF
+「RFCで定められている安全」なメソッド（本サービスではGET）以外のリクエストは全て `X-CSRF-Token` ヘッダにCSRFトークンを格納する必要があります。
 
 CSRFトークンは `/csrf-token GET` で取得可能です。
 
@@ -11,7 +11,9 @@ CSRFトークンは `/csrf-token GET` で取得可能です。
 [gorilla/csrf](https://github.com/gorilla/csrf) を使用しています。
 
 # ID Token
-ID Tokenは、本人であることを証明するトークンです。XSS対策として、Cookieに保存されてリクエストされることを想定しています。OpenIDConnectのID Tokenとは異なるものです。
+ID Tokenは、本人であることを証明するトークンです。OpenIDConnectのID Tokenとは異なるものです。
+
+XSS対策として、ID TokenはCookieに保存されます。
 
 トークンの生成と検証には、 [jwt-go](https://github.com/dgrijalva/jwt-go) を使用しています。
 
