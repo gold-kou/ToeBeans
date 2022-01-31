@@ -81,13 +81,7 @@ module "ecs_task_execution_role" {
   policy     = data.aws_iam_policy_document.ecs_task_execution.json
 }
 
-# data "aws_iam_policy" "ecs_task_role_policy" {
-#   arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskRolePolicy"
-# }
-
 data "aws_iam_policy_document" "ecs_task_role" {
-  # source_json = data.aws_iam_policy.ecs_task_role_policy.policy
-
   statement {
     effect    = "Allow"
     actions   = [
