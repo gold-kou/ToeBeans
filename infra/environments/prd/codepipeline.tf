@@ -2,7 +2,6 @@ data "aws_iam_policy_document" "codepipeline" {
   statement {
     effect    = "Allow"
     resources = ["*"]
-
     actions = [
       "s3:PutObject",
       "s3:GetObject",
@@ -41,10 +40,8 @@ data "aws_ssm_parameter" "github_token" {
 resource "aws_codepipeline" "toebeans" {
   name     = "toebeans"
   role_arn = module.codepipeline_role.iam_role_arn
-
   stage {
     name = "Source"
-
     action {
       name             = "Source"
       category         = "Source"
@@ -59,26 +56,10 @@ resource "aws_codepipeline" "toebeans" {
         OutputArtifactFormat = "CODEBUILD_CLONE_REF"
       }
     }
-    # action {
-    #   name             = "Source"
-    #   category         = "Source"
-    #   owner            = "ThirdParty"
-    #   provider         = "GitHub"
-    #   version          = 1
-    #   output_artifacts = ["Source"]
-
-    #   configuration = {
-    #     Owner                = "gold-kou"
-    #     Repo                 = "ToeBeans"
-    #     Branch               = "master"
-    #     PollForSourceChanges = false
-    #   }
-    # }
   }
 
   stage {
     name = "Build"
-
     action {
       name             = "Build"
       category         = "Build"
@@ -87,7 +68,6 @@ resource "aws_codepipeline" "toebeans" {
       version          = 1
       input_artifacts  = ["Source"]
       output_artifacts = ["Build"]
-
       configuration = {
         ProjectName = aws_codebuild_project.toebeans.id
       }
@@ -96,7 +76,6 @@ resource "aws_codepipeline" "toebeans" {
 
   stage {
     name = "Deploy"
-
     action {
       name            = "Deploy"
       category        = "Deploy"
@@ -104,7 +83,6 @@ resource "aws_codepipeline" "toebeans" {
       provider        = "ECS"
       version         = 1
       input_artifacts = ["Build"]
-
       configuration = {
         ClusterName = aws_ecs_cluster.toebeans.name
         ServiceName = aws_ecs_service.toebeans.name
@@ -124,11 +102,9 @@ resource "aws_codepipeline_webhook" "toebeans" {
   target_pipeline = aws_codepipeline.toebeans.name
   target_action   = "Source"
   authentication  = "GITHUB_HMAC"
-
   authentication_configuration {
     secret_token = var.codepipeline_webhook_secret_token
   }
-
   filter {
     json_path    = "$.ref"
     match_equals = "refs/heads/{Branch}"
@@ -137,13 +113,11 @@ resource "aws_codepipeline_webhook" "toebeans" {
 
 resource "github_repository_webhook" "toebeans" {
   repository = "ToeBeans"
-
   configuration {
     url          = aws_codepipeline_webhook.toebeans.url
     secret       = var.github_webhook_secret
     content_type = "json"
     insecure_ssl = false
   }
-
   events = ["push"]
 }

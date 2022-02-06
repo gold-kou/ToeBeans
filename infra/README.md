@@ -102,6 +102,7 @@ GitHubコンソールの `Settings > Developer Settings > Personal access tokens
 `github_token` に関してはapply前に設定が必須。
 
 `google_api_key` の値は `$ cat backend/secret/service-account.json | tr -d '\n'` の実行結果からスペースを全て削除したものを設定する。
+`db_host` の値はRDSエンドポイントの値を設定する。
 
 ### apply
 ```
@@ -130,14 +131,17 @@ GitHubアプリで自分のアカウントを選択し、 `接続` を押す。
 
 対象のパイプラインを選択し、 `変更をリリースする` を押す。
 
-## DBのパスワード変更とテーブルマイグレーション
+## DBの変更
+adminユーザのパスワード変更、テーブルマイグレーション、アプリケーショ用ユーザの作成、を実施します。
+
 1. EC2コンソールを利用し、踏み台サーバにログインする。
 2. `mysql -u admin -p -h <RDSエンドポイント>` を実行する。RDSエンドポイントはコンソールの `接続とセキュリティ` から確認可能。初期パスワードはvariables.tfを参照する。
-3. `SET PASSWORD = PASSWORD('XXXXX');` を実行する。パスワード値は任意の値。
+3. `SET PASSWORD = PASSWORD('XXXXX');` を実行してadminユーザのパスワードを変更する。パスワード値は任意の値。
 4. `CREATE DATABASE toebeansdb DEFAULT CHARACTER SET utf8;` を実行する。
 5. `USE toebeansdb;` を実行する。
 6. `backend/toebeans-sql/mysql/sql/001_create_tables.sql` の内容を実行する。
-7. exitする。
+7. `backend/toebeans-sql/mysql/sql/002_create_users.sql` の内容を実行する。パスワード値は任意の値。
+8. exitする。
 
 ## CloudFront修正
 `cycle error` によりACMをTerraformのコード上で指定できない都合上、コンソールで設定の追加をする必要がある。設定後数分で403 Errorでなくなる。

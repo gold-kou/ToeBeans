@@ -19,7 +19,8 @@ resource "aws_db_subnet_group" "toebeans" {
 }
 
 resource "aws_db_instance" "toebeans" {
-  identifier                 = "toebeans"
+  name                       = "toebeansdb"
+  identifier                 = "toebeansdb"
   engine                     = "mysql"
   engine_version             = "5.7.25"
   instance_class             = "db.t3.small"
