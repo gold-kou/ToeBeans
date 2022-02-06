@@ -31,6 +31,10 @@
         "valueFrom": "/csrf_auth_key"
       },
       {
+        "name": "DB_HOST",
+        "valueFrom": "/db_host"
+      },
+      {
         "name": "DB_PASSWORD",
         "valueFrom": "/db_password"
       },

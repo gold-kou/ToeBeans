@@ -7,9 +7,6 @@ import (
 	"net/url"
 	"os"
 	"strconv"
-
-	"github.com/go-sql-driver/mysql"
-	sqltrace "gopkg.in/DataDog/dd-trace-go.v1/contrib/database/sql"
 )
 
 var dbUser string
@@ -53,8 +50,7 @@ func init() {
 }
 
 func NewDB() (*sql.DB, error) {
-	sqltrace.Register("mysql", &mysql.MySQLDriver{}, sqltrace.WithServiceName("ToeBeans"))
-	db, e := sqltrace.Open("mysql", fmt.Sprintf("%v:%v@tcp(%v:%d)/%v?parseTime=true&loc=%v", dbUser, dbPassword, dbHost, dbPort, dbName, url.QueryEscape(dbTZ)))
+	db, e := sql.Open("mysql", fmt.Sprintf("%v:%v@tcp(%v:%d)/%v?parseTime=true&loc=%v", dbUser, dbPassword, dbHost, dbPort, dbName, url.QueryEscape(dbTZ)))
 	if e != nil {
 		return nil, e
 	}

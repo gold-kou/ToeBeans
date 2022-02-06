@@ -13,7 +13,8 @@ func ResponseSimpleSuccess(w http.ResponseWriter) {
 		Message: "success",
 	}
 	w.Header().Set(HeaderKeyContentType, HeaderValueApplicationJSON)
-	w.WriteHeader(http.StatusOK)
+	// TODO superfluousでる件で、試しにコメントアウトしてみる
+	// w.WriteHeader(http.StatusOK)
 	if err := json.NewEncoder(w).Encode(resp); err != nil {
 		panic(err.Error())
 	}
