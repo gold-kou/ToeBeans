@@ -2,6 +2,7 @@ package helper
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
 
 	model "github.com/gold-kou/ToeBeans/backend/app/domain/model/http"
@@ -102,6 +103,9 @@ func ResponseConflictError(w http.ResponseWriter, message string) {
 }
 
 func ResponseInternalServerError(w http.ResponseWriter, message string) {
+	// MEMO Sentryのお金ないので、リクエストとの紐付けが難しいが、標準ログを出すしかない
+	log.Println("internal server error: " + message)
+
 	resp := model.ResponseInternalServerError{
 		Status:  http.StatusInternalServerError,
 		Message: message,
