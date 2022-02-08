@@ -46,6 +46,7 @@ WORKDIR /go/src/github.com/gold-kou/ToeBeans/backend
 COPY config/logger.yml.tpl config/logger.yml.tpl
 WORKDIR /
 COPY --from=builder /go/src/github.com/gold-kou/ToeBeans/backend/backend /backend
-ENV TZ=Asia/Tokyo DB_NAME=toebeansdb DB_USER=toebeans DB_HOST=db DB_PORT=3306 GOOGLE_API_KEY=XXXXX SYSTEM_EMAIL=no-reply@toebeans.tk S3_BUCKET_POSTINGS=/toebeans-postings S3_BUCKET_ICONS=/toebeans-icons APP_ENV=prd LOG_LEVEL=info JWT_SECRET_KEY=samplekey DB_PASSWORD=secret DB_HOST=db-test AWS_ACCESS_KEY=test_access_key AWS_SECRET_KEY=test_secret_key AWS_REGION=ap-​northeast-1
+# 基本的に値を変えない環境変数のみをここに設定
+ENV AWS_REGION=ap-​northeast-1 DB_NAME=toebeansdb DB_PORT=3306 DB_USER=toebeans S3_BUCKET_POSTINGS=/toebeans-postings S3_BUCKET_ICONS=/toebeans-icons SYSTEM_EMAIL=no-reply@toebeans.tk TZ=Asia/Tokyo
 EXPOSE 80
 CMD ["/backend"]
