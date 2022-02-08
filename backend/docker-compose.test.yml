@@ -7,7 +7,6 @@ services:
     environment:
       - APP_ENV=development
       - GRACEFUL_SHUTDOWN_TIMEOUT_SECOND=1
-      - TZ=Asia/Tokyo
       - LOG_LEVEL=debug
       - JWT_SECRET_KEY=samplekey
       - DB_NAME=toebeans
@@ -15,12 +14,13 @@ services:
       - DB_PASSWORD=secret
       - DB_HOST=db-test
       - DB_PORT=3306
+      - AWS_REGION=ap-​northeast-1
       - AWS_ACCESS_KEY=test_access_key # must not be real key
       - AWS_SECRET_KEY=test_secret_key # must not be real key
-      - AWS_REGION=ap-​northeast-1
-      - SYSTEM_EMAIL=no-reply@toebeans.tk
       - S3_BUCKET_POSTINGS=/toebeans-postings
       - S3_BUCKET_ICONS=/toebeans-icons
+      - SYSTEM_EMAIL=no-reply@toebeans.tk
+      - TZ=Asia/Tokyo
     volumes:
       - ./:/go/src/github.com/gold-kou/ToeBeans/backend:cached
       - /go/src/github.com/gold-kou/ToeBeans/backend/.git
