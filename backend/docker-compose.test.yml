@@ -5,7 +5,7 @@ services:
       context: .
       target: debugger
     environment:
-      - APP_ENV=development
+      - APP_ENV=local
       - GRACEFUL_SHUTDOWN_TIMEOUT_SECOND=1
       - LOG_LEVEL=debug
       - JWT_SECRET_KEY=samplekey

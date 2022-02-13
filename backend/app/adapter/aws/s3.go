@@ -2,15 +2,15 @@ package aws
 
 import (
 	"bytes"
-	"flag"
 	"os"
-
-	"github.com/aws/aws-sdk-go/service/s3"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
+
+	"github.com/gold-kou/ToeBeans/backend/app"
 )
 
 func UploadObject(bucket, filename string, file []byte) (*s3manager.UploadOutput, error) {
@@ -42,7 +42,7 @@ func DeleteObject(bucket, filename string) (err error) {
 
 func generateS3Config() *aws.Config {
 	// use minio in local or test
-	if os.Getenv("APP_ENV") == "development" || flag.Lookup("test.v") != nil {
+	if app.IsLocal() || app.IsTest() {
 		creds := credentials.NewStaticCredentials(os.Getenv("AWS_ACCESS_KEY"), os.Getenv("AWS_SECRET_KEY"), "")
 		return &aws.Config{
 			Credentials: creds,

@@ -1,13 +1,13 @@
 package aws
 
 import (
-	"flag"
 	"os"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ses"
+	"github.com/gold-kou/ToeBeans/backend/app"
 )
 
 func SendEmail(to, title, body string) error {
@@ -44,7 +44,7 @@ func SendEmail(to, title, body string) error {
 }
 
 func generateSESConfig() *aws.Config {
-	if os.Getenv("APP_ENV") == "development" || flag.Lookup("test.v") != nil {
+	if app.IsLocal() || app.IsTest() {
 		return &aws.Config{
 			Region:      aws.String(os.Getenv("AWS_REGION")),
 			Credentials: credentials.NewStaticCredentials(os.Getenv("AWS_ACCESS_KEY"), os.Getenv("AWS_SECRET_KEY"), ""),

@@ -10,16 +10,14 @@ import (
 
 	"github.com/google/uuid"
 
-	"github.com/gold-kou/ToeBeans/backend/app/adapter/gcp"
-
-	"github.com/gold-kou/ToeBeans/backend/app/lib"
-
+	"github.com/gold-kou/ToeBeans/backend/app"
 	"github.com/gold-kou/ToeBeans/backend/app/adapter/aws"
-
+	"github.com/gold-kou/ToeBeans/backend/app/adapter/gcp"
 	"github.com/gold-kou/ToeBeans/backend/app/adapter/mysql"
 	"github.com/gold-kou/ToeBeans/backend/app/domain/model"
 	modelHTTP "github.com/gold-kou/ToeBeans/backend/app/domain/model/http"
 	"github.com/gold-kou/ToeBeans/backend/app/domain/repository"
+	"github.com/gold-kou/ToeBeans/backend/app/lib"
 )
 
 var ErrNotCatImage = errors.New("you can post only a cat image")
@@ -109,7 +107,7 @@ func (posting *RegisterPosting) RegisterPostingUseCase() error {
 	}
 
 	// INSERT
-	if os.Getenv("APP_ENV") == "development" {
+	if app.IsLocal() {
 		// localhostに置換したが、ブラウザの仕様でCORBされる。imgタグでオリジン跨ぎの画像を読み込みできない。
 		// with MIME type text/html. See https://www.chromestatus.com/feature/5629709824032768 for more details.
 		o.Location = strings.Replace(o.Location, "minio", "localhost", 1)
