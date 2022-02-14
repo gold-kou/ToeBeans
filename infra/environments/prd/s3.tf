@@ -1,15 +1,4 @@
-resource "aws_s3_bucket" "public" {
-  bucket = "public-toebeans"
-  acl    = "public-read"
-
-  cors_rule {
-    allowed_origins = ["https://toebeans.tk"]
-    allowed_methods = ["POST", "GET", "PUT"]
-    allowed_headers = ["*"]
-    max_age_seconds = 3000
-  }
-}
-
+# ALB log
 resource "aws_s3_bucket" "alb_log" {
   bucket = "alb-log-toebeans"
 
@@ -40,6 +29,7 @@ data "aws_iam_policy_document" "alb_log" {
   }
 }
 
+# artifact
 resource "aws_s3_bucket" "artifact" {
   bucket = "artifact-toebeans"
 
@@ -49,6 +39,27 @@ resource "aws_s3_bucket" "artifact" {
     expiration {
       days = "180"
     }
+  }
+}
+
+# Backend
+resource "aws_s3_bucket" "postings" {
+  bucket = "toebeans-postings-tcpip" // MEMO AWSアカウントごとに変える
+  cors_rule {
+    allowed_origins = ["https://(api.)?(toebeans.tk)$"]
+    allowed_methods = ["POST", "GET", "PUT", "DELETE"]
+    allowed_headers = ["*"]
+    max_age_seconds = 3000
+  }
+}
+
+resource "aws_s3_bucket" "icons" {
+  bucket = "toebeans-icons-tcpip" // MEMO AWSアカウントごとに変える
+  cors_rule {
+    allowed_origins = ["https://(api.)?(toebeans.tk)$"]
+    allowed_methods = ["POST", "GET", "PUT", "DELETE"]
+    allowed_headers = ["*"]
+    max_age_seconds = 3000
   }
 }
 
