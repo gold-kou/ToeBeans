@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/gold-kou/ToeBeans/backend/app"
 	"github.com/gold-kou/ToeBeans/backend/app/adapter/aws"
 
 	"golang.org/x/crypto/bcrypt"
@@ -67,7 +68,7 @@ func (user *RegisterUser) RegisterUserUseCase() error {
 		// send an email
 		if flag.Lookup("test.v") == nil {
 			var prefix string
-			if os.Getenv("APP_ENV") == "development" {
+			if app.IsLocal() || app.IsTest() {
 				prefix = "http://" + os.Getenv("DOMAIN")
 			} else {
 				prefix = "https://" + os.Getenv("DOMAIN")

@@ -19,7 +19,6 @@
       }
     ],
     "command": [
-      "/usr/bin/env",
       "/backend"
     ],
     "secrets": [

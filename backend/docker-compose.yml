@@ -5,7 +5,7 @@ services:
       context: .
       target: debugger
     environment:
-      - APP_ENV=development
+      - APP_ENV=test
       - GRACEFUL_SHUTDOWN_TIMEOUT_SECOND=1
       - DOMAIN=localhost:80
       - LOG_LEVEL=debug

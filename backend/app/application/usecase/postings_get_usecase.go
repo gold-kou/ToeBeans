@@ -4,11 +4,10 @@ import (
 	"context"
 	"time"
 
-	"github.com/gold-kou/ToeBeans/backend/app/lib"
-
 	"github.com/gold-kou/ToeBeans/backend/app/adapter/mysql"
 	"github.com/gold-kou/ToeBeans/backend/app/domain/model"
 	"github.com/gold-kou/ToeBeans/backend/app/domain/repository"
+	"github.com/gold-kou/ToeBeans/backend/app/lib"
 )
 
 type GetPostingsUseCaseInterface interface {
@@ -76,10 +75,5 @@ func (p *GetPostings) GetPostingsUseCase() (postings []model.Posting, likes []mo
 		}
 		return
 	}
-	//for i, posting := range postings {
-	//	if os.Getenv("APP_ENV") == "development" && strings.Contains(posting.ImageURL, "minio") {
-	//		postings[i].ImageURL = strings.Replace(posting.ImageURL, "minio", "localhost", -1)
-	//	}
-	//}
 	return
 }
