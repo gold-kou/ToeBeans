@@ -141,7 +141,8 @@ adminユーザのパスワード変更、テーブルマイグレーション、
 5. `USE toebeansdb;` を実行する。
 6. `backend/toebeans-sql/mysql/sql/001_create_tables.sql` の内容を実行する。
 7. `backend/toebeans-sql/mysql/sql/002_create_users.sql` の内容を実行する。パスワード値は任意の値。
-8. exitする。
+8. `backend/toebeans-sql/mysql/sql/003_insert_dummy_data.sql` の内容を実行する。ゲストユーザのみでよい。
+9. exitする。
 
 ## CloudFront修正
 `cycle error` によりACMをTerraformのコード上で指定できない都合上、コンソールで設定の追加をする必要がある。設定後数分で403 Errorでなくなる。
@@ -161,8 +162,6 @@ adminユーザのパスワード変更、テーブルマイグレーション、
 `build` ディレクトリ配下のファイルとディレクトリをS3へアップロードする。buildディレクトリ自体はアップロードしないように注意する。
 
 # イメージ更新（バックエンド）
-`gold-kou/toebeans` のmasterブランチにマージされると、CodePipelineが自動で最新のバックエンドのDockerイメージをデプロイする。
+`gold-kou/toebeans` のmasterブランチにマージされると、CodePipelineのSourceとBuildによりECRへ最新のバックエンドのDockerイメージがpushされ、Deployによりデプロイされる。マージしてからデプロイされるまでには約20分かかる。
 
 稀にレートリミットにひっかかる場合がある。その場合は、時間を置いてからCodeBuildを手動で再試行する。
-
-// MEMO 本当に自動でやってくれたっけ？applyしたから動いただけかも。要確認。

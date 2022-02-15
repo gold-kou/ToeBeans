@@ -43,3 +43,4 @@ infra/secret/
 ## Others
 # IDE
 .idea/
+.vscode/
