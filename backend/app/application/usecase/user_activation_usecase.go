@@ -4,7 +4,6 @@ import (
 	"context"
 
 	"github.com/gold-kou/ToeBeans/backend/app/domain/model"
-
 	"github.com/gold-kou/ToeBeans/backend/app/adapter/mysql"
 	"github.com/gold-kou/ToeBeans/backend/app/domain/repository"
 )
