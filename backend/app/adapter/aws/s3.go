@@ -15,7 +15,9 @@ import (
 
 func UploadObject(bucket, filename string, file []byte) (*s3manager.UploadOutput, error) {
 	sess := session.Must(session.NewSession(generateS3Config()))
-	uploader := s3manager.NewUploader(sess)
+	uploader := s3manager.NewUploader(sess, func(u *s3manager.Uploader) {
+		u.PartSize = 10 * 1024 // 10KB以上とする
+	})
 	return uploader.Upload(&s3manager.UploadInput{
 		Bucket: aws.String(bucket),
 		Key:    aws.String(filename),

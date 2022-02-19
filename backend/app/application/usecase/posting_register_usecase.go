@@ -108,8 +108,7 @@ func (posting *RegisterPosting) RegisterPostingUseCase() error {
 
 	// INSERT
 	if app.IsLocal() {
-		// localhostに置換したが、ブラウザの仕様でCORBされる。imgタグでオリジン跨ぎの画像を読み込みできない。
-		// with MIME type text/html. See https://www.chromestatus.com/feature/5629709824032768 for more details.
+		
 		o.Location = strings.Replace(o.Location, "minio", "localhost", 1)
 	}
 	err = posting.tx.Do(posting.ctx, func(ctx context.Context) error {
