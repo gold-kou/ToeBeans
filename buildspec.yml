@@ -6,9 +6,12 @@ phases:
       docker: 18
   pre_build:
     commands:
+      - echo Logging in to Amazon ECR...
       - $(aws ecr get-login --region $AWS_DEFAULT_REGION --no-include-email)
       - REPO=$(aws ecr describe-repositories --repository-names toebeans --output text --query "repositories[0].repositoryUri")
       - IMAGE=$REPO:latest
+      - echo Logging in to Docker Hub...
+      - echo $DOCKER_HUB_PASSWORD | docker login -u $DOCKER_HUB_ID --password-stdin
   build:
     commands:
       - cd backend
