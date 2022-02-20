@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/base64"
 	"os"
-	"strings"
 
 	"github.com/gold-kou/ToeBeans/backend/app/adapter/aws"
 
@@ -66,14 +65,11 @@ func (user *UpdateUser) UpdateUserUseCase() error {
 		if err != nil {
 			return ErrDecodeImage
 		}
-		o, err := aws.UploadObject(os.Getenv("S3_BUCKET_ICONS"), user.userName, decodedImg)
+		_, err = aws.UploadObject(os.Getenv("S3_BUCKET_ICONS"), user.userName, decodedImg)
 		if err != nil {
 			return err
 		}
-		// localhostに置換したが、ブラウザの仕様でCORBされる。imgタグでオリジン跨ぎの画像を読み込みできない。
-		// with MIME type text/html. See https://www.chromestatus.com/feature/5629709824032768 for more details.
-		o.Location = strings.Replace(o.Location, "minio", "localhost", 1)
-		err = user.userRepo.UpdateIconWhereName(user.ctx, o.Location, user.userName)
+		err = user.userRepo.UpdateIconWhereName(user.ctx, "http://localhost:9000/toebeans-icons/testUser1", user.userName)
 		if err != nil {
 			return err
 		}
