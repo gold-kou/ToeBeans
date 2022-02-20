@@ -5,6 +5,7 @@ import (
 	"encoding/base64"
 	"errors"
 	"flag"
+	"log"
 	"os"
 	"strings"
 
@@ -103,12 +104,15 @@ func (posting *RegisterPosting) RegisterPostingUseCase() error {
 	key := lib.NowFunc().Format(lib.DateTimeFormatNoSeparator) + "_" + posting.tokenUserName
 	o, err := aws.UploadObject(os.Getenv("S3_BUCKET_POSTINGS"), key, decodedImg)
 	if err != nil {
+		// TODO 消す
+		log.Println(o)
+		log.Println(err.Error())
 		return err
 	}
 
 	// INSERT
 	if app.IsLocal() {
-		
+
 		o.Location = strings.Replace(o.Location, "minio", "localhost", 1)
 	}
 	err = posting.tx.Do(posting.ctx, func(ctx context.Context) error {

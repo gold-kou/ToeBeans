@@ -45,22 +45,10 @@ resource "aws_s3_bucket" "artifact" {
 # Backend
 resource "aws_s3_bucket" "postings" {
   bucket = "toebeans-postings-tcpip" // MEMO AWSアカウントごとに変える
-  cors_rule {
-    allowed_origins = ["https://(api.)?(toebeans.tk)$"]
-    allowed_methods = ["POST", "GET", "PUT", "DELETE"]
-    allowed_headers = ["*"]
-    max_age_seconds = 3000
-  }
 }
 
 resource "aws_s3_bucket" "icons" {
   bucket = "toebeans-icons-tcpip" // MEMO AWSアカウントごとに変える
-  cors_rule {
-    allowed_origins = ["https://(api.)?(toebeans.tk)$"]
-    allowed_methods = ["POST", "GET", "PUT", "DELETE"]
-    allowed_headers = ["*"]
-    max_age_seconds = 3000
-  }
 }
 
 # Frontend
