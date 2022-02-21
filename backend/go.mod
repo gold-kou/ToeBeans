@@ -5,7 +5,7 @@ go 1.15
 require (
 	cloud.google.com/go v0.83.0
 	github.com/asaskevich/govalidator v0.0.0-20200108200545-475eaeb16496 // indirect
-	github.com/aws/aws-sdk-go v1.35.7
+	github.com/aws/aws-sdk-go v1.43.2
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/go-ozzo/ozzo-validation v3.6.0+incompatible
 	github.com/go-sql-driver/mysql v1.5.0
@@ -17,7 +17,7 @@ require (
 	github.com/stretchr/testify v1.6.1
 	go.uber.org/zap v1.16.0
 	golang.org/x/crypto v0.0.0-20200622213623-75b288015ac9
-	golang.org/x/net v0.0.0-20210525063256-abc453219eb5
+	golang.org/x/net v0.0.0-20211216030914-fe4d6282115f
 	golang.org/x/sys v0.0.0-20210603125802-9665404d3644 // indirect
 	google.golang.org/api v0.47.0
 	google.golang.org/genproto v0.0.0-20210603172842-58e84a565dcf // indirect
