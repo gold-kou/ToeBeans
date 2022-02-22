@@ -8,31 +8,32 @@ import (
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
+	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 
 	"github.com/gold-kou/ToeBeans/backend/app"
 )
 
-// func UploadObject(bucket, filename string, file []byte) (*s3manager.UploadOutput, error) {
-// 	sess := session.Must(session.NewSession(generateS3Config()))
-// 	uploader := s3manager.NewUploader(sess)
-// 	return uploader.Upload(&s3manager.UploadInput{
-// 		ACL:    aws.String("public-read"),
-// 		Bucket: aws.String(bucket),
-// 		Key:    aws.String(filename),
-// 		Body:   bytes.NewReader(file),
-// 	})
-// }
-
-func UploadObject(bucket, filename string, file []byte) (*s3.PutObjectOutput, error) {
+func UploadObject(bucket, filename string, file []byte) (*s3manager.UploadOutput, error) {
 	sess := session.Must(session.NewSession(generateS3Config()))
-	svc := s3.New(sess)
-	return svc.PutObject(&s3.PutObjectInput{
-		Body:   bytes.NewReader(file),
+	uploader := s3manager.NewUploader(sess)
+	return uploader.Upload(&s3manager.UploadInput{
+		ACL:    aws.String("public-read"),
 		Bucket: aws.String(bucket),
 		Key:    aws.String(filename),
-		ACL:    aws.String(s3.BucketCannedACLPublicRead),
+		Body:   bytes.NewReader(file),
 	})
 }
+
+// func UploadObject(bucket, filename string, file []byte) (*s3.PutObjectOutput, error) {
+// 	sess := session.Must(session.NewSession(generateS3Config()))
+// 	svc := s3.New(sess)
+// 	return svc.PutObject(&s3.PutObjectInput{
+// 		Body:   bytes.NewReader(file),
+// 		Bucket: aws.String(bucket),
+// 		Key:    aws.String(filename),
+// 		ACL:    aws.String(s3.BucketCannedACLPublicRead),
+// 	})
+// }
 
 func DeleteObject(bucket, filename string) (err error) {
 	sess := session.Must(session.NewSession(generateS3Config()))

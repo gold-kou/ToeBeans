@@ -65,11 +65,11 @@ func (user *UpdateUser) UpdateUserUseCase() error {
 		if err != nil {
 			return ErrDecodeImage
 		}
-		_, err = aws.UploadObject(os.Getenv("S3_BUCKET_ICONS"), user.userName, decodedImg)
+		o, err := aws.UploadObject(os.Getenv("S3_BUCKET_ICONS"), user.userName, decodedImg)
 		if err != nil {
 			return err
 		}
-		err = user.userRepo.UpdateIconWhereName(user.ctx, "http://localhost:9000/toebeans-icons/testUser1", user.userName)
+		err = user.userRepo.UpdateIconWhereName(user.ctx, o.Location, user.userName)
 		if err != nil {
 			return err
 		}

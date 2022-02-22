@@ -101,21 +101,21 @@ func (posting *RegisterPosting) RegisterPostingUseCase() error {
 
 	// put decoded file to s3
 	key := lib.NowFunc().Format(lib.DateTimeFormatNoSeparator) + "_" + posting.tokenUserName
-	_, err = aws.UploadObject(os.Getenv("S3_BUCKET_POSTINGS"), key, decodedImg)
+	o, err := aws.UploadObject(os.Getenv("S3_BUCKET_POSTINGS"), key, decodedImg)
 	if err != nil {
 		return err
 	}
 
 	// INSERT
 	if app.IsLocal() {
-		// o.Location = strings.Replace(o.Location, "minio", "localhost", 1)
+		o.Location = strings.Replace(o.Location, "minio", "localhost", 1)
 	}
 	err = posting.tx.Do(posting.ctx, func(ctx context.Context) error {
 		u := model.Posting{
 			UserName: posting.tokenUserName,
 			Title:    posting.reqRegisterPosting.Title,
-			// ImageURL: o.Location,
-			ImageURL: "http://localhost:9000/toebeans-postings/20200101000000_testUser1",
+			ImageURL: o.Location,
+			// ImageURL: "http://localhost:9000/toebeans-postings/20200101000000_testUser1",
 		}
 		err = posting.postingRepo.Create(ctx, &u)
 		if err != nil {
