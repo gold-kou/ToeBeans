@@ -67,7 +67,8 @@ func (posting *RegisterPosting) RegisterPostingUseCase() error {
 	if err != nil {
 		return err
 	}
-	file, err := os.Create("image" + u.String() + ".jpg")
+	filePath := "image" + u.String() + ".jpg"
+	file, err := os.Create(filePath)
 	if err != nil {
 		return err
 	}
@@ -80,12 +81,12 @@ func (posting *RegisterPosting) RegisterPostingUseCase() error {
 	}
 	// delete file
 	defer func() {
-		_ = os.Remove("image" + u.String() + ".jpg")
+		_ = os.Remove(filePath)
 	}()
 
 	// check cat or not
 	if flag.Lookup("test.v") == nil {
-		labels, err := gcp.DetectLabels("image" + u.String() + ".jpg")
+		labels, err := gcp.DetectLabels(filePath)
 		if err != nil {
 			return err
 		}
@@ -99,9 +100,15 @@ func (posting *RegisterPosting) RegisterPostingUseCase() error {
 		}
 	}
 
-	// put decoded file to s3
+	// put file to s3
+	savedFile, err := os.Open(filePath)
+	if err != nil {
+		return err
+	}
+	defer savedFile.Close()
+
 	key := lib.NowFunc().Format(lib.DateTimeFormatNoSeparator) + "_" + posting.tokenUserName
-	o, err := aws.UploadObject(os.Getenv("S3_BUCKET_POSTINGS"), key, decodedImg)
+	o, err := aws.UploadObject(os.Getenv("S3_BUCKET_POSTINGS"), key, savedFile)
 	if err != nil {
 		return err
 	}

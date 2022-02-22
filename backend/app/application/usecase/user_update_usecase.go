@@ -4,13 +4,15 @@ import (
 	"context"
 	"encoding/base64"
 	"os"
+	"strings"
 
-	"github.com/gold-kou/ToeBeans/backend/app/adapter/aws"
-
+	"github.com/gold-kou/ToeBeans/backend/app"
 	"github.com/gold-kou/ToeBeans/backend/app/domain/model"
+	"github.com/google/uuid"
 
 	"golang.org/x/crypto/bcrypt"
 
+	"github.com/gold-kou/ToeBeans/backend/app/adapter/aws"
 	"github.com/gold-kou/ToeBeans/backend/app/adapter/mysql"
 	modelHTTP "github.com/gold-kou/ToeBeans/backend/app/domain/model/http"
 	"github.com/gold-kou/ToeBeans/backend/app/domain/repository"
@@ -61,13 +63,46 @@ func (user *UpdateUser) UpdateUserUseCase() error {
 	}
 	// the case of icon
 	if user.reqUpdateUser.Icon != "" {
+		// base64 decode
 		decodedImg, err := base64.StdEncoding.DecodeString(user.reqUpdateUser.Icon)
 		if err != nil {
 			return ErrDecodeImage
 		}
-		o, err := aws.UploadObject(os.Getenv("S3_BUCKET_ICONS"), user.userName, decodedImg)
+
+		// save decoded file
+		u, err := uuid.NewRandom()
 		if err != nil {
 			return err
+		}
+		filePath := "image" + u.String() + ".jpg"
+		file, err := os.Create(filePath)
+		if err != nil {
+			return err
+		}
+		defer file.Close()
+		if _, err := file.Write(decodedImg); err != nil {
+			return err
+		}
+		if err := file.Sync(); err != nil {
+			return err
+		}
+		// delete file
+		defer func() {
+			_ = os.Remove(filePath)
+		}()
+
+		savedFile, err := os.Open(filePath)
+		if err != nil {
+			return err
+		}
+		defer savedFile.Close()
+		o, err := aws.UploadObject(os.Getenv("S3_BUCKET_ICONS"), user.userName, savedFile)
+		if err != nil {
+			return err
+		}
+
+		if app.IsLocal() {
+			o.Location = strings.Replace(o.Location, "minio", "localhost", 1)
 		}
 		err = user.userRepo.UpdateIconWhereName(user.ctx, o.Location, user.userName)
 		if err != nil {

@@ -1,7 +1,6 @@
 package aws
 
 import (
-	"bytes"
 	"os"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -13,14 +12,14 @@ import (
 	"github.com/gold-kou/ToeBeans/backend/app"
 )
 
-func UploadObject(bucket, filename string, file []byte) (*s3manager.UploadOutput, error) {
+func UploadObject(bucket, filename string, file *os.File) (*s3manager.UploadOutput, error) {
 	sess := session.Must(session.NewSession(generateS3Config()))
 	uploader := s3manager.NewUploader(sess)
 	return uploader.Upload(&s3manager.UploadInput{
 		ACL:    aws.String("public-read"),
 		Bucket: aws.String(bucket),
 		Key:    aws.String(filename),
-		Body:   bytes.NewReader(file),
+		Body:   file,
 	})
 }
 
