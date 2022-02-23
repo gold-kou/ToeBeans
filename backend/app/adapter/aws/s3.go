@@ -1,6 +1,7 @@
 package aws
 
 import (
+	"log"
 	"os"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -13,6 +14,8 @@ import (
 )
 
 func UploadObject(bucket, filename string, file *os.File) (*s3manager.UploadOutput, error) {
+	// TODO デバッグコードなので検証後に削除する
+	log.Println(bucket)
 	sess := session.Must(session.NewSession(generateS3Config()))
 	uploader := s3manager.NewUploader(sess)
 	return uploader.Upload(&s3manager.UploadInput{
