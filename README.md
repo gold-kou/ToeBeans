@@ -86,7 +86,6 @@ This is written in Japanese.
 投稿機能を使用する場合は、 `docker-compose.yml` の `GOOGLE_API_KEY` を設定する。値はSSMのパラメータストアに設定されている。
 
 ```
-$ cd backend
 $ ./serverrun.sh
 # go run main.go
 ```
@@ -94,6 +93,8 @@ $ ./serverrun.sh
 `localhost:9000` でminioコンソールにログインし、 `toebeans-postings` の `Edit policy` で `* READ and Write` を追加する。サーバを再起動するたびに設定が必要。
 
 ## Frontend
+`frontend/.env` をローカル用のものに変更する。
+
 ```
 $ npm install
 $ npm start

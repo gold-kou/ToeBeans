@@ -94,10 +94,11 @@ data "aws_iam_policy_document" "ecs_task_role" {
       "rds:*",
       "ses:SendEmail",
       "ses:SendRawEmail",
+      "s3:GetObject",
       "s3:ListBucket",
       "s3:PutObject",
       "s3:PutObjectAcl",
-      "s3:GetObject"
+      "s3:DeleteObject"
     ]
     resources = ["*"]
   }
