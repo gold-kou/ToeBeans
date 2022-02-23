@@ -96,13 +96,16 @@ GitHubコンソールの `Settings > Developer Settings > Personal access tokens
 新規の場合は、 `Generate new token` を押す。 `Select scopes` では `repo` と `admin:repo_hook` を全てチェック。
 再発行の場合は、 `Regenarate token` を押す。
 
-## SSMパラメータストアの設定
+### SSMパラメータストアの設定
 `cotainer_definitions.json` の `secrets` の内容を設定する。
 
 `github_token` に関してはapply前に設定が必須。
 
 `google_api_key` の値は `$ cat backend/secret/service-account.json | tr -d '\n'` の実行結果からスペースを全て削除したものを設定する。
 `db_host` の値はRDSエンドポイントの値を設定する。
+
+### S3バケット名の決定
+Goアプリケーションが使用するS3バケット名を決定し、 `s3.tf` を編集する。バケット名は世界中で一意である必要がある。諸事情により、複数のAWSアカウントで開発しているため、バケット名が重複してしまう場合はバケット名を既存のものから変更すること。その際は、 `backend/Dockerfile` のENVの設定もあわせて実施すること。
 
 ### apply
 ```
