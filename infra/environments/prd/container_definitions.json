@@ -61,14 +61,6 @@
       {
         "name": "LOG_LEVEL",
         "valueFrom": "/log_level"
-      },
-      {
-        "name": "S3_BUCKET_ICONS",
-        "valueFrom": "/s3_bucket_icons"
-      },
-      {
-        "name": "S3_BUCKET_POSTINGS",
-        "valueFrom": "/s3_bucket_postings"
       }
     ]
   }
