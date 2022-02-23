@@ -19,6 +19,13 @@ import (
 	"github.com/gold-kou/ToeBeans/backend/app/domain/repository"
 )
 
+var domain string
+
+func init() {
+	// testでの空文字を許容する
+	domain = os.Getenv("DOMAIN")
+}
+
 type RegisterUserUseCaseInterface interface {
 	RegisterUserUseCase() (*model.User, error)
 }
@@ -68,10 +75,10 @@ func (user *RegisterUser) RegisterUserUseCase() error {
 		// send an email
 		if flag.Lookup("test.v") == nil {
 			var prefix string
-			if app.IsLocal() || app.IsTest() {
-				prefix = "http://" + os.Getenv("DOMAIN")
+			if app.IsLocal() {
+				prefix = "http://" + domain
 			} else {
-				prefix = "https://" + os.Getenv("DOMAIN")
+				prefix = "https://" + domain
 			}
 			title := "Welcome to ToeBeans"
 			activateLink := fmt.Sprintf(prefix+"/user-activation/%s/%s", user.userName, activationKey.String())

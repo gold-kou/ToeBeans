@@ -18,6 +18,15 @@ import (
 	"github.com/gold-kou/ToeBeans/backend/app/domain/repository"
 )
 
+var bucketIcons string
+
+func init() {
+	bucketIcons = os.Getenv("S3_BUCKET_ICONS")
+	if bucketIcons == "" {
+		panic("S3_BUCKET_ICONS is unset")
+	}
+}
+
 type UpdateUserUseCaseInterface interface {
 	UpdateUserUseCase() (*model.User, error)
 }
@@ -96,7 +105,7 @@ func (user *UpdateUser) UpdateUserUseCase() error {
 			return err
 		}
 		defer savedFile.Close()
-		o, err := aws.UploadObject(os.Getenv("S3_BUCKET_ICONS"), user.userName, savedFile)
+		o, err := aws.UploadObject(bucketIcons, user.userName, savedFile)
 		if err != nil {
 			return err
 		}

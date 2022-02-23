@@ -9,11 +9,20 @@ import (
 	"google.golang.org/api/option"
 )
 
+var apiKey string
+
+func init() {
+	apiKey = os.Getenv("GOOGLE_API_KEY")
+	if apiKey == "" {
+		panic("GOOGLE_API_KEY is unset")
+	}
+}
+
 // DetectLabels gets labels from the Vision API for an image at the given file path.
 func DetectLabels(file string) (labels []string, err error) {
 	ctx := context.Background()
 
-	client, err := vision.NewImageAnnotatorClient(ctx, option.WithCredentialsJSON([]byte(os.Getenv("GOOGLE_API_KEY"))))
+	client, err := vision.NewImageAnnotatorClient(ctx, option.WithCredentialsJSON([]byte(apiKey)))
 	if err != nil {
 		return
 	}

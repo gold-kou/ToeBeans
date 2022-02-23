@@ -21,6 +21,14 @@ import (
 )
 
 var ErrNotCatImage = errors.New("you can post only a cat image")
+var bucketPosting string
+
+func init() {
+	bucketPosting = os.Getenv("S3_BUCKET_POSTINGS")
+	if bucketPosting == "" {
+		panic("S3_BUCKET_POSTINGS is unset")
+	}
+}
 
 type RegisterPostingUseCaseInterface interface {
 	RegisterPostingUseCase() (*model.Posting, error)
@@ -108,7 +116,7 @@ func (posting *RegisterPosting) RegisterPostingUseCase() error {
 	defer savedFile.Close()
 
 	key := lib.NowFunc().Format(lib.DateTimeFormatNoSeparator) + "_" + posting.tokenUserName
-	o, err := aws.UploadObject(os.Getenv("S3_BUCKET_POSTINGS"), key, savedFile)
+	o, err := aws.UploadObject(bucketPosting, key, savedFile)
 	if err != nil {
 		return err
 	}

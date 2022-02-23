@@ -21,6 +21,7 @@ import (
 const gracefulShutdownTimeoutDefault = 5
 
 var gracefulShutdownTimeout time.Duration
+var csrfAuthKey string
 
 func init() {
 	t, e := time.ParseDuration(os.Getenv("GRACEFUL_SHUTDOWN_TIMEOUT_SECOND") + "s")
@@ -29,6 +30,12 @@ func init() {
 	} else {
 		gracefulShutdownTimeout = t
 	}
+
+	csrfAuthKey = os.Getenv("CSRF_AUTH_KEY")
+	if csrfAuthKey == "" {
+		panic(csrfAuthKey)
+	}
+
 }
 
 func Serve() {
@@ -37,7 +44,7 @@ func Serve() {
 	// middleware
 	r.Use(middleware.CORSMiddleware)
 
-	csrfMiddleware := csrf.Protect([]byte(os.Getenv("CSRF_AUTH_KEY")))
+	csrfMiddleware := csrf.Protect([]byte(csrfAuthKey))
 	r.Use(csrfMiddleware)
 
 	r.Use(middleware.CurrentTimeMiddleware)
