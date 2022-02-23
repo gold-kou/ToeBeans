@@ -2,13 +2,11 @@ package usecase
 
 import (
 	"context"
-	"os"
-
-	"github.com/gold-kou/ToeBeans/backend/app/lib"
 
 	"github.com/gold-kou/ToeBeans/backend/app/adapter/aws"
 	"github.com/gold-kou/ToeBeans/backend/app/adapter/mysql"
 	"github.com/gold-kou/ToeBeans/backend/app/domain/repository"
+	"github.com/gold-kou/ToeBeans/backend/app/lib"
 )
 
 type DeletePostingUseCaseInterface interface {
@@ -50,7 +48,7 @@ func (posting *DeletePosting) DeletePostingUseCase() error {
 		return err
 	}
 
-	err = aws.DeleteObject(os.Getenv("S3_BUCKET_POSTINGS"), p.Title)
+	err = aws.DeleteObject(bucketPosting, p.Title)
 	if err != nil {
 		return err
 	}

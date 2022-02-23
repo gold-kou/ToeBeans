@@ -1,8 +1,6 @@
 package aws
 
 import (
-	"os"
-
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
@@ -34,7 +32,7 @@ func SendEmail(to, title, body string) error {
 				Data:    aws.String(title),
 			},
 		},
-		Source: aws.String(os.Getenv("SYSTEM_EMAIL")),
+		Source: aws.String(emailFrom),
 	}
 	_, err = svc.SendEmail(input)
 	if err != nil {
@@ -46,8 +44,8 @@ func SendEmail(to, title, body string) error {
 func generateSESConfig() *aws.Config {
 	if app.IsLocal() || app.IsTest() {
 		return &aws.Config{
-			Region:      aws.String(os.Getenv("AWS_REGION")),
-			Credentials: credentials.NewStaticCredentials(os.Getenv("AWS_ACCESS_KEY"), os.Getenv("AWS_SECRET_KEY"), ""),
+			Region:      aws.String(region),
+			Credentials: credentials.NewStaticCredentials(accessKey, secretKey, ""),
 		}
 	}
 	return &aws.Config{}

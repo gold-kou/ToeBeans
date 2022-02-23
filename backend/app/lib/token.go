@@ -20,6 +20,15 @@ var ErrNotFoundName = errors.New("not found name in token")
 const GuestUserName = "guest"
 const TokenExpirationHour = 24
 
+var jwtSecretKey string
+
+func init() {
+	jwtSecretKey = os.Getenv("JWT_SECRET_KEY")
+	if jwtSecretKey == "" {
+		panic("JWT_SECRET_KEY is unset")
+	}
+}
+
 func GenerateToken(userName string) (tokenString string, err error) {
 	// header
 	token := jwt.New(jwt.SigningMethodHS256)
@@ -32,7 +41,7 @@ func GenerateToken(userName string) (tokenString string, err error) {
 	claims["exp"] = time.Now().Add(time.Hour * TokenExpirationHour).Unix()
 
 	// generate token by secret key
-	tokenString, err = token.SignedString([]byte(os.Getenv("JWT_SECRET_KEY")))
+	tokenString, err = token.SignedString([]byte(jwtSecretKey))
 	if err != nil {
 		return "", err
 	}
@@ -48,7 +57,7 @@ func VerifyToken(tokenString string) (userName string, err error) {
 			err = errors.New(ErrUnexpectedSigningMethod.Error())
 			return nil, err
 		}
-		return []byte(os.Getenv("JWT_SECRET_KEY")), nil
+		return []byte(jwtSecretKey), nil
 	})
 
 	// check the result
