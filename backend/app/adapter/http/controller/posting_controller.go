@@ -230,7 +230,7 @@ func getPostings(r *http.Request) (postings []model.Posting, likes []model.Like,
 		if err == usecase.ErrDecodeImage {
 			return nil, nil, helper.NewBadRequestError(err.Error())
 		}
-		if err == repository.ErrNotExistsData {
+		if err == usecase.ErrNotExistsData {
 			return nil, nil, helper.NewBadRequestError(err.Error())
 		}
 		return nil, nil, helper.NewInternalServerError(err.Error())
@@ -281,7 +281,7 @@ func deletePosting(r *http.Request) error {
 	u := usecase.NewDeletePosting(r.Context(), tx, int64(postingID), tokenUserName, userRepo, postingRepo)
 	if err = u.DeletePostingUseCase(); err != nil {
 		log.Println(err)
-		if err == repository.ErrNotExistsData {
+		if err == usecase.ErrNotExistsData {
 			return helper.NewBadRequestError(err.Error())
 		}
 		return helper.NewInternalServerError(err.Error())

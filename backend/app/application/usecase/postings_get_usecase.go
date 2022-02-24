@@ -54,6 +54,9 @@ func (p *GetPostings) GetPostingsUseCase() (postings []model.Posting, likes []mo
 	if p.userName != "" {
 		_, err = p.userRepo.GetUserWhereName(p.ctx, p.userName)
 		if err != nil {
+			if err == repository.ErrNotExistsData {
+				return nil, nil, ErrNotExistsData
+			}
 			return
 		}
 	}

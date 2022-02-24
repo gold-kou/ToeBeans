@@ -53,6 +53,9 @@ func (comment *RegisterComment) RegisterCommentUseCase() error {
 
 	_, err = comment.postingRepo.GetWhereID(comment.ctx, int64(comment.postingID))
 	if err != nil {
+		if err == repository.ErrNotExistsData {
+			return ErrNotExistsData
+		}
 		return err
 	}
 	err = comment.tx.Do(comment.ctx, func(ctx context.Context) error {
@@ -63,6 +66,9 @@ func (comment *RegisterComment) RegisterCommentUseCase() error {
 		}
 		err := comment.commentRepo.Create(ctx, &c)
 		if err != nil {
+			if err == repository.ErrDuplicateData {
+				return ErrDuplicateData
+			}
 			return err
 		}
 

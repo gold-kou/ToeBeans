@@ -10,13 +10,14 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/gorilla/mux"
+	"github.com/stretchr/testify/assert"
+
 	httpContext "github.com/gold-kou/ToeBeans/backend/app/adapter/http/context"
 	"github.com/gold-kou/ToeBeans/backend/app/domain/repository"
 	"github.com/gold-kou/ToeBeans/backend/app/lib"
 	testingHelper "github.com/gold-kou/ToeBeans/backend/testing"
 	"github.com/gold-kou/ToeBeans/backend/testing/dummy"
-	"github.com/gorilla/mux"
-	"github.com/stretchr/testify/assert"
 )
 
 var successReqRegisterComment = `

@@ -44,6 +44,9 @@ func (user *GetUser) GetUserUseCase() (u model.User, err error) {
 
 	u, err = user.userRepo.GetUserWhereName(user.ctx, user.userName)
 	if err != nil {
+		if err == repository.ErrNotExistsData {
+			return model.User{}, ErrNotExistsData
+		}
 		return
 	}
 	return

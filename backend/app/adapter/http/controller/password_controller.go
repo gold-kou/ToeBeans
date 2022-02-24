@@ -130,7 +130,7 @@ func changePassword(r *http.Request) (err error) {
 	u := usecase.NewChangePassword(r.Context(), tx, tokenUserName, reqChangePassword, userRepo)
 	if err = u.ChangePasswordUseCase(); err != nil {
 		log.Println(err)
-		if err == repository.ErrNotExistsData || err == usecase.ErrNotCorrectPassword {
+		if err == usecase.ErrNotCorrectPassword {
 			return helper.NewBadRequestError(err.Error())
 		}
 		if err == lib.ErrTokenInvalidNotExistingUserName {
@@ -178,7 +178,7 @@ func passwordResetEmail(r *http.Request) error {
 	re := usecase.NewPasswordResetEmail(r.Context(), tx, reqPasswordResetEmail, userRepo)
 	if err = re.PasswordResetEmailUseCase(); err != nil {
 		log.Println(err)
-		if err == repository.ErrNotExistsData {
+		if err == usecase.ErrNotExistsData {
 			return helper.NewBadRequestError(err.Error())
 		}
 		if err == usecase.ErrOverPasswordResetCount {
@@ -226,7 +226,7 @@ func passwordReset(r *http.Request) error {
 	re := usecase.NewPasswordReset(r.Context(), tx, reqResetPassword, userRepo)
 	if err = re.PasswordResetUseCase(); err != nil {
 		log.Println(err)
-		if err == repository.ErrNotExistsData {
+		if err == usecase.ErrNotExistsData {
 			return helper.NewBadRequestError(errMsgUserNameResetKeyNotExistsResetKeyExpired)
 		}
 		return helper.NewInternalServerError(err.Error())

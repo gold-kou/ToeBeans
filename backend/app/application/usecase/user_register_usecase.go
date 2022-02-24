@@ -69,6 +69,9 @@ func (user *RegisterUser) RegisterUserUseCase() error {
 		}
 		err = user.userRepo.Create(ctx, &u)
 		if err != nil {
+			if err == repository.ErrDuplicateData {
+				return ErrDuplicateData
+			}
 			return err
 		}
 

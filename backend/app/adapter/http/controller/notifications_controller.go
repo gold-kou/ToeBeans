@@ -90,7 +90,7 @@ func getNotifications(r *http.Request) (notifications []model.Notification, err 
 	u := usecase.NewGetNotifications(r.Context(), tx, tokenUserName, visitedName, userRepo, notificationRepo)
 	if notifications, err = u.GetNotificationsUseCase(); err != nil {
 		log.Println(err)
-		if err == repository.ErrNotExistsData {
+		if err == usecase.ErrNotExistsData {
 			return nil, helper.NewBadRequestError(err.Error())
 		}
 		return nil, helper.NewInternalServerError(err.Error())

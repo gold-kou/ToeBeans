@@ -45,6 +45,9 @@ func (comment *DeleteComment) DeleteCommentUseCase() error {
 	}
 
 	if err := comment.commentRepo.DeleteWhereID(comment.ctx, comment.commentID); err != nil {
+		if err == repository.ErrNotExistsData {
+			return ErrNotExistsData
+		}
 		return err
 	}
 	return nil

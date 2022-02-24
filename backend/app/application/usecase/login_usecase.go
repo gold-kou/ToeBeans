@@ -36,6 +36,9 @@ func NewLogin(ctx context.Context, tx mysql.DBTransaction, reqLogin *modelHTTP.R
 func (l *Login) LoginUseCase() (idToken string, err error) {
 	user, err := l.userRepo.GetUserWhereEmail(l.ctx, l.reqLogin.Email)
 	if err != nil {
+		if err == repository.ErrNotExistsData {
+			return "", ErrNotExistsData
+		}
 		return
 	}
 

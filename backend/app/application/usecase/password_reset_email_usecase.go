@@ -42,6 +42,9 @@ func (re *PasswordResetEmail) PasswordResetEmailUseCase() (err error) {
 	// email exists check
 	u, err := re.userRepo.GetUserWhereEmail(re.ctx, re.reqPasswordResetEmail.Email)
 	if err != nil {
+		if err == repository.ErrNotExistsData {
+			return ErrNotExistsData
+		}
 		return
 	}
 

@@ -45,6 +45,9 @@ func (posting *DeletePosting) DeletePostingUseCase() error {
 
 	p, err := posting.postingRepo.GetWhereIDUserName(posting.ctx, posting.postingID, posting.tokenUserName)
 	if err != nil {
+		if err == repository.ErrNotExistsData {
+			return ErrNotExistsData
+		}
 		return err
 	}
 

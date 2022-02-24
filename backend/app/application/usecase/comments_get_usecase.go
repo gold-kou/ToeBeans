@@ -49,6 +49,9 @@ func (c *GetComments) GetCommentsUseCase() (comments []model.Comment, err error)
 	// check postingID exists
 	_, err = c.postingRepo.GetWhereID(c.ctx, c.postingID)
 	if err != nil {
+		if err == repository.ErrNotExistsData {
+			return nil, ErrNotExistsData
+		}
 		return
 	}
 

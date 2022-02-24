@@ -172,10 +172,10 @@ func registerComment(r *http.Request) error {
 	u := usecase.NewRegisterComment(r.Context(), tx, tokenUserName, postingID, reqRegisterComment, userRepo, postingRepo, commentRepo, notificationRepo)
 	if err = u.RegisterCommentUseCase(); err != nil {
 		log.Println(err)
-		if err == repository.ErrNotExistsData {
+		if err == usecase.ErrNotExistsData {
 			return helper.NewBadRequestError(err.Error())
 		}
-		if err == repository.ErrDuplicateData {
+		if err == usecase.ErrDuplicateData {
 			return helper.NewBadRequestError("Whoops, you already commented that")
 		}
 		return helper.NewInternalServerError(err.Error())
@@ -219,7 +219,7 @@ func getComments(r *http.Request) (comments []model.Comment, err error) {
 	u := usecase.NewGetComments(r.Context(), tx, tokenUserName, int64(id), userRepo, postingRepo, commentRepo)
 	if comments, err = u.GetCommentsUseCase(); err != nil {
 		log.Println(err)
-		if err == repository.ErrNotExistsData {
+		if err == usecase.ErrNotExistsData {
 			return nil, helper.NewBadRequestError(err.Error())
 		}
 		return nil, helper.NewInternalServerError(err.Error())
@@ -270,7 +270,7 @@ func deleteComment(r *http.Request) error {
 	u := usecase.NewDeleteComment(r.Context(), tx, tokenUserName, int64(commentID), userRepo, commentRepo)
 	if err = u.DeleteCommentUseCase(); err != nil {
 		log.Println(err)
-		if err == repository.ErrNotExistsData {
+		if err == usecase.ErrNotExistsData {
 			return helper.NewBadRequestError(err.Error())
 		}
 		return helper.NewInternalServerError(err.Error())
