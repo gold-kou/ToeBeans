@@ -16,8 +16,6 @@ import (
 	"github.com/gold-kou/ToeBeans/backend/app/domain/model"
 	"github.com/gorilla/mux"
 
-	"github.com/gold-kou/ToeBeans/backend/app/lib"
-
 	"github.com/gold-kou/ToeBeans/backend/app/adapter/http/helper"
 	"github.com/gold-kou/ToeBeans/backend/app/adapter/mysql"
 	"github.com/gold-kou/ToeBeans/backend/app/application/usecase"
@@ -245,7 +243,7 @@ func deletePosting(r *http.Request) error {
 		log.Println(err)
 		return helper.NewInternalServerError(err.Error())
 	}
-	if tokenUserName == lib.GuestUserName {
+	if tokenUserName == helper.GuestUserName {
 		log.Println(errMsgGuestUserForbidden)
 		return helper.NewForbiddenError(errMsgGuestUserForbidden)
 	}

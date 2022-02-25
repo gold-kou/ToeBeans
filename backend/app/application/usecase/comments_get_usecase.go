@@ -3,8 +3,6 @@ package usecase
 import (
 	"context"
 
-	"github.com/gold-kou/ToeBeans/backend/app/lib"
-
 	"github.com/gold-kou/ToeBeans/backend/app/adapter/mysql"
 	"github.com/gold-kou/ToeBeans/backend/app/domain/model"
 	"github.com/gold-kou/ToeBeans/backend/app/domain/repository"
@@ -41,7 +39,7 @@ func (c *GetComments) GetCommentsUseCase() (comments []model.Comment, err error)
 	_, err = c.userRepo.GetUserWhereName(c.ctx, c.tokenUserName)
 	if err != nil {
 		if err == repository.ErrNotExistsData {
-			return nil, lib.ErrTokenInvalidNotExistingUserName
+			return nil, ErrTokenInvalidNotExistingUserName
 		}
 		return nil, err
 	}

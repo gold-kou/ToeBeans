@@ -3,7 +3,6 @@ package usecase
 import (
 	"context"
 
-	"github.com/gold-kou/ToeBeans/backend/app/lib"
 	"github.com/pkg/errors"
 
 	"github.com/gold-kou/ToeBeans/backend/app/adapter/mysql"
@@ -44,7 +43,7 @@ func (follow *RegisterFollow) RegisterFollowUseCase() error {
 	_, err := follow.userRepo.GetUserWhereName(follow.ctx, follow.tokenUserName)
 	if err != nil {
 		if err == repository.ErrNotExistsData {
-			return lib.ErrTokenInvalidNotExistingUserName
+			return ErrTokenInvalidNotExistingUserName
 		}
 		return err
 	}

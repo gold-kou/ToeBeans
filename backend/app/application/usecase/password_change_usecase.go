@@ -3,8 +3,6 @@ package usecase
 import (
 	"context"
 
-	"github.com/gold-kou/ToeBeans/backend/app/lib"
-
 	"github.com/gold-kou/ToeBeans/backend/app/domain/model"
 
 	"golang.org/x/crypto/bcrypt"
@@ -41,7 +39,7 @@ func (user *ChangePassword) ChangePasswordUseCase() error {
 	dbUser, err := user.userRepo.GetUserWhereName(user.ctx, user.tokenUserName)
 	if err != nil {
 		if err == repository.ErrNotExistsData {
-			return lib.ErrTokenInvalidNotExistingUserName
+			return ErrTokenInvalidNotExistingUserName
 		}
 		return err
 	}

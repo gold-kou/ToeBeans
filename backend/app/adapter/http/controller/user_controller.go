@@ -19,7 +19,6 @@ import (
 	"github.com/gold-kou/ToeBeans/backend/app/domain/model"
 	modelHTTP "github.com/gold-kou/ToeBeans/backend/app/domain/model/http"
 	"github.com/gold-kou/ToeBeans/backend/app/domain/repository"
-	"github.com/gold-kou/ToeBeans/backend/app/lib"
 )
 
 func UserController(w http.ResponseWriter, r *http.Request) {
@@ -231,7 +230,7 @@ func getUser(r *http.Request) (user model.User, err error) {
 		if err == usecase.ErrNotExistsData {
 			return model.User{}, helper.NewNotFoundError(err.Error())
 		}
-		if err == lib.ErrTokenInvalidNotExistingUserName {
+		if err == usecase.ErrTokenInvalidNotExistingUserName {
 			return model.User{}, helper.NewAuthorizationError(err.Error())
 		}
 		return model.User{}, helper.NewInternalServerError(err.Error())
@@ -246,7 +245,7 @@ func updateUser(r *http.Request) (err error) {
 		log.Println(err)
 		return helper.NewInternalServerError(err.Error())
 	}
-	if tokenUserName == lib.GuestUserName {
+	if tokenUserName == helper.GuestUserName {
 		log.Println(errMsgGuestUserForbidden)
 		return helper.NewForbiddenError(errMsgGuestUserForbidden)
 	}
@@ -318,7 +317,7 @@ func deleteUser(r *http.Request) (err error) {
 		log.Println(err)
 		return helper.NewInternalServerError(err.Error())
 	}
-	if tokenUserName == lib.GuestUserName {
+	if tokenUserName == helper.GuestUserName {
 		log.Println(errMsgGuestUserForbidden)
 		return helper.NewForbiddenError(errMsgGuestUserForbidden)
 	}

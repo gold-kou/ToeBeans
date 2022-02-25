@@ -12,7 +12,6 @@ import (
 
 	"github.com/gold-kou/ToeBeans/backend/app/adapter/http/context"
 
-	"github.com/gold-kou/ToeBeans/backend/app/lib"
 	"github.com/gorilla/mux"
 
 	"github.com/gold-kou/ToeBeans/backend/app/adapter/http/helper"
@@ -73,7 +72,7 @@ func FollowController(w http.ResponseWriter, r *http.Request) {
 func registerFollow(r *http.Request) error {
 	// not allowed to guest user
 	tokenUserName, err := context.GetTokenUserName(r.Context())
-	if tokenUserName == lib.GuestUserName {
+	if tokenUserName == helper.GuestUserName {
 		log.Println(errMsgGuestUserForbidden)
 		return helper.NewForbiddenError(errMsgGuestUserForbidden)
 	}
@@ -120,7 +119,7 @@ func deleteFollow(r *http.Request) error {
 	if err != nil {
 		return helper.NewAuthorizationError(err.Error())
 	}
-	if tokenUserName == lib.GuestUserName {
+	if tokenUserName == helper.GuestUserName {
 		log.Println(errMsgGuestUserForbidden)
 		return helper.NewForbiddenError(errMsgGuestUserForbidden)
 	}

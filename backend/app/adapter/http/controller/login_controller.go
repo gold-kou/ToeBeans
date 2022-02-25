@@ -7,8 +7,6 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/gold-kou/ToeBeans/backend/app/lib"
-
 	"github.com/gold-kou/ToeBeans/backend/app/adapter/mysql"
 	"github.com/gold-kou/ToeBeans/backend/app/domain/repository"
 
@@ -25,7 +23,7 @@ func LoginController(w http.ResponseWriter, r *http.Request) {
 		idToken, err := login(r)
 		switch err := err.(type) {
 		case nil:
-			expiration := time.Now().Add(lib.TokenExpirationHour * time.Hour)
+			expiration := time.Now().Add(helper.TokenExpirationHour * time.Hour)
 			cookie := &http.Cookie{
 				Name:     helper.CookieIDToken,
 				Value:    idToken,

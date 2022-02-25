@@ -11,8 +11,7 @@ import (
 
 	"golang.org/x/crypto/bcrypt"
 
-	"github.com/gold-kou/ToeBeans/backend/app/lib"
-
+	"github.com/gold-kou/ToeBeans/backend/app/adapter/http/helper"
 	"github.com/gold-kou/ToeBeans/backend/app/domain/repository"
 
 	"github.com/gold-kou/ToeBeans/backend/testing/dummy"
@@ -196,7 +195,7 @@ func TestLoginController(t *testing.T) {
 				var respLogin modelHttp.Token
 				err = json.Unmarshal(respBodyByte, &respLogin)
 				assert.NoError(t, err)
-				tokenUserName, err := lib.VerifyToken(respLogin.IdToken)
+				tokenUserName, err := helper.VerifyToken(respLogin.IdToken)
 				assert.NoError(t, err)
 				assert.Equal(t, dummy.User1.Name, tokenUserName)
 			} else {

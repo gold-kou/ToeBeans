@@ -11,6 +11,7 @@ import (
 	"testing"
 
 	httpContext "github.com/gold-kou/ToeBeans/backend/app/adapter/http/context"
+	"github.com/gold-kou/ToeBeans/backend/app/adapter/http/helper"
 
 	"github.com/gorilla/mux"
 
@@ -411,7 +412,7 @@ func TestDeletePosting(t *testing.T) {
 			vars := map[string]string{"posting_id": strconv.Itoa(int(tt.args.postingID))}
 			req = mux.SetURLVars(req, vars)
 			if tt.name == "error forbidden guest user" {
-				req = req.WithContext(httpContext.SetTokenUserName(req.Context(), lib.GuestUserName))
+				req = req.WithContext(httpContext.SetTokenUserName(req.Context(), helper.GuestUserName))
 			} else {
 				req = req.WithContext(httpContext.SetTokenUserName(req.Context(), dummy.User1.Name))
 			}

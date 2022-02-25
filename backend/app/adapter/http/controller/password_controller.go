@@ -13,7 +13,6 @@ import (
 	"github.com/gold-kou/ToeBeans/backend/app/application/usecase"
 	modelHTTP "github.com/gold-kou/ToeBeans/backend/app/domain/model/http"
 	"github.com/gold-kou/ToeBeans/backend/app/domain/repository"
-	"github.com/gold-kou/ToeBeans/backend/app/lib"
 )
 
 func PasswordController(w http.ResponseWriter, r *http.Request) {
@@ -89,7 +88,7 @@ func changePassword(r *http.Request) (err error) {
 		log.Println(err)
 		return helper.NewInternalServerError(err.Error())
 	}
-	if tokenUserName == lib.GuestUserName {
+	if tokenUserName == helper.GuestUserName {
 		log.Println(errMsgGuestUserForbidden)
 		return helper.NewForbiddenError(errMsgGuestUserForbidden)
 	}
@@ -133,7 +132,7 @@ func changePassword(r *http.Request) (err error) {
 		if err == usecase.ErrNotCorrectPassword {
 			return helper.NewBadRequestError(err.Error())
 		}
-		if err == lib.ErrTokenInvalidNotExistingUserName {
+		if err == usecase.ErrTokenInvalidNotExistingUserName {
 			return helper.NewAuthorizationError(err.Error())
 		}
 		return helper.NewInternalServerError(err.Error())

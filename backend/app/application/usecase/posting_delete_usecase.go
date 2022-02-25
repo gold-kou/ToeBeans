@@ -6,7 +6,6 @@ import (
 	"github.com/gold-kou/ToeBeans/backend/app/adapter/aws"
 	"github.com/gold-kou/ToeBeans/backend/app/adapter/mysql"
 	"github.com/gold-kou/ToeBeans/backend/app/domain/repository"
-	"github.com/gold-kou/ToeBeans/backend/app/lib"
 )
 
 type DeletePostingUseCaseInterface interface {
@@ -38,7 +37,7 @@ func (posting *DeletePosting) DeletePostingUseCase() error {
 	_, err := posting.userRepo.GetUserWhereName(posting.ctx, posting.tokenUserName)
 	if err != nil {
 		if err == repository.ErrNotExistsData {
-			return lib.ErrTokenInvalidNotExistingUserName
+			return ErrTokenInvalidNotExistingUserName
 		}
 		return err
 	}

@@ -59,7 +59,7 @@ func (posting *RegisterPosting) RegisterPostingUseCase() error {
 	_, err := posting.userRepo.GetUserWhereName(posting.ctx, posting.tokenUserName)
 	if err != nil {
 		if err == repository.ErrNotExistsData {
-			return lib.ErrTokenInvalidNotExistingUserName
+			return ErrTokenInvalidNotExistingUserName
 		}
 		return err
 	}

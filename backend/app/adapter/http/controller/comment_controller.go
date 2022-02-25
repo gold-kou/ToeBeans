@@ -10,8 +10,6 @@ import (
 
 	validation "github.com/go-ozzo/ozzo-validation"
 
-	"github.com/gold-kou/ToeBeans/backend/app/lib"
-
 	"github.com/gold-kou/ToeBeans/backend/app/adapter/http/context"
 
 	"github.com/gold-kou/ToeBeans/backend/app/domain/model"
@@ -117,7 +115,7 @@ func registerComment(r *http.Request) error {
 		log.Println(err)
 		return helper.NewInternalServerError(err.Error())
 	}
-	if tokenUserName == lib.GuestUserName {
+	if tokenUserName == helper.GuestUserName {
 		log.Println(errMsgGuestUserForbidden)
 		return helper.NewForbiddenError(errMsgGuestUserForbidden)
 	}
@@ -234,7 +232,7 @@ func deleteComment(r *http.Request) error {
 		log.Println(err)
 		return helper.NewInternalServerError(err.Error())
 	}
-	if tokenUserName == lib.GuestUserName {
+	if tokenUserName == helper.GuestUserName {
 		log.Println(errMsgGuestUserForbidden)
 		return helper.NewForbiddenError(errMsgGuestUserForbidden)
 	}

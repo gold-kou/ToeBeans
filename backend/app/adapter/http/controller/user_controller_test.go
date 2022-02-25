@@ -434,7 +434,7 @@ func TestUpdateUser(t *testing.T) {
 		},
 		{
 			name:       "error forbidden guest user",
-			args:       args{userName: lib.GuestUserName, reqBody: successReqUpdateUser},
+			args:       args{userName: helper.GuestUserName, reqBody: successReqUpdateUser},
 			method:     http.MethodPut,
 			want:       testingHelper.ErrForbidden,
 			wantStatus: http.StatusForbidden,
@@ -459,7 +459,7 @@ func TestUpdateUser(t *testing.T) {
 			vars := map[string]string{"user_name": tt.args.userName}
 			req = mux.SetURLVars(req, vars)
 			if tt.name == "error forbidden guest user" {
-				req = req.WithContext(httpContext.SetTokenUserName(req.Context(), lib.GuestUserName))
+				req = req.WithContext(httpContext.SetTokenUserName(req.Context(), helper.GuestUserName))
 			} else {
 				req = req.WithContext(httpContext.SetTokenUserName(req.Context(), dummy.User1.Name))
 			}
@@ -581,7 +581,7 @@ func TestDeleteUser(t *testing.T) {
 			vars := map[string]string{"user_name": tt.args.userName}
 			req = mux.SetURLVars(req, vars)
 			if tt.name == "error forbidden guest user" {
-				req = req.WithContext(httpContext.SetTokenUserName(req.Context(), lib.GuestUserName))
+				req = req.WithContext(httpContext.SetTokenUserName(req.Context(), helper.GuestUserName))
 			} else {
 				req = req.WithContext(httpContext.SetTokenUserName(req.Context(), tt.args.userName))
 			}

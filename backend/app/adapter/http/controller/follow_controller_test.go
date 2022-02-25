@@ -9,12 +9,12 @@ import (
 	"testing"
 
 	httpContext "github.com/gold-kou/ToeBeans/backend/app/adapter/http/context"
+	"github.com/gold-kou/ToeBeans/backend/app/adapter/http/helper"
 
 	"github.com/gorilla/mux"
 
 	"github.com/gold-kou/ToeBeans/backend/app/domain/repository"
 
-	"github.com/gold-kou/ToeBeans/backend/app/lib"
 	"github.com/gold-kou/ToeBeans/backend/testing/dummy"
 
 	testingHelper "github.com/gold-kou/ToeBeans/backend/testing"
@@ -119,7 +119,7 @@ func TestRegisterFollow(t *testing.T) {
 			vars := map[string]string{"followed_user_name": tt.args.followedUserName}
 			req = mux.SetURLVars(req, vars)
 			if tt.name == "error forbidden guest user" {
-				req = req.WithContext(httpContext.SetTokenUserName(req.Context(), lib.GuestUserName))
+				req = req.WithContext(httpContext.SetTokenUserName(req.Context(), helper.GuestUserName))
 			} else {
 				req = req.WithContext(httpContext.SetTokenUserName(req.Context(), dummy.User1.Name))
 			}
@@ -273,7 +273,7 @@ func TestDeleteFollow(t *testing.T) {
 			vars := map[string]string{"followed_user_name": tt.args.followedUserName}
 			req = mux.SetURLVars(req, vars)
 			if tt.name == "error forbidden guest user" {
-				req = req.WithContext(httpContext.SetTokenUserName(req.Context(), lib.GuestUserName))
+				req = req.WithContext(httpContext.SetTokenUserName(req.Context(), helper.GuestUserName))
 			} else {
 				req = req.WithContext(httpContext.SetTokenUserName(req.Context(), dummy.User1.Name))
 			}
