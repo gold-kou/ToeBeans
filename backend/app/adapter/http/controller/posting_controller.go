@@ -16,8 +16,6 @@ import (
 	"github.com/gold-kou/ToeBeans/backend/app/domain/model"
 	"github.com/gorilla/mux"
 
-	"github.com/gold-kou/ToeBeans/backend/app/lib"
-
 	"github.com/gold-kou/ToeBeans/backend/app/adapter/http/helper"
 	"github.com/gold-kou/ToeBeans/backend/app/adapter/mysql"
 	"github.com/gold-kou/ToeBeans/backend/app/application/usecase"
@@ -230,7 +228,7 @@ func getPostings(r *http.Request) (postings []model.Posting, likes []model.Like,
 		if err == usecase.ErrDecodeImage {
 			return nil, nil, helper.NewBadRequestError(err.Error())
 		}
-		if err == repository.ErrNotExistsData {
+		if err == usecase.ErrNotExistsData {
 			return nil, nil, helper.NewBadRequestError(err.Error())
 		}
 		return nil, nil, helper.NewInternalServerError(err.Error())
@@ -245,7 +243,7 @@ func deletePosting(r *http.Request) error {
 		log.Println(err)
 		return helper.NewInternalServerError(err.Error())
 	}
-	if tokenUserName == lib.GuestUserName {
+	if tokenUserName == helper.GuestUserName {
 		log.Println(errMsgGuestUserForbidden)
 		return helper.NewForbiddenError(errMsgGuestUserForbidden)
 	}
@@ -281,7 +279,7 @@ func deletePosting(r *http.Request) error {
 	u := usecase.NewDeletePosting(r.Context(), tx, int64(postingID), tokenUserName, userRepo, postingRepo)
 	if err = u.DeletePostingUseCase(); err != nil {
 		log.Println(err)
-		if err == repository.ErrNotExistsData {
+		if err == usecase.ErrNotExistsData {
 			return helper.NewBadRequestError(err.Error())
 		}
 		return helper.NewInternalServerError(err.Error())

@@ -3,8 +3,6 @@ package usecase
 import (
 	"context"
 
-	"github.com/gold-kou/ToeBeans/backend/app/lib"
-
 	"github.com/gold-kou/ToeBeans/backend/app/adapter/mysql"
 	"github.com/gold-kou/ToeBeans/backend/app/domain/model"
 	modelHTTP "github.com/gold-kou/ToeBeans/backend/app/domain/model/http"
@@ -46,13 +44,16 @@ func (comment *RegisterComment) RegisterCommentUseCase() error {
 	_, err := comment.userRepo.GetUserWhereName(comment.ctx, comment.tokenUserName)
 	if err != nil {
 		if err == repository.ErrNotExistsData {
-			return lib.ErrTokenInvalidNotExistingUserName
+			return ErrTokenInvalidNotExistingUserName
 		}
 		return err
 	}
 
 	_, err = comment.postingRepo.GetWhereID(comment.ctx, int64(comment.postingID))
 	if err != nil {
+		if err == repository.ErrNotExistsData {
+			return ErrNotExistsData
+		}
 		return err
 	}
 	err = comment.tx.Do(comment.ctx, func(ctx context.Context) error {
@@ -63,6 +64,9 @@ func (comment *RegisterComment) RegisterCommentUseCase() error {
 		}
 		err := comment.commentRepo.Create(ctx, &c)
 		if err != nil {
+			if err == repository.ErrDuplicateData {
+				return ErrDuplicateData
+			}
 			return err
 		}
 

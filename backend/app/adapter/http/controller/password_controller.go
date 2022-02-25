@@ -13,7 +13,6 @@ import (
 	"github.com/gold-kou/ToeBeans/backend/app/application/usecase"
 	modelHTTP "github.com/gold-kou/ToeBeans/backend/app/domain/model/http"
 	"github.com/gold-kou/ToeBeans/backend/app/domain/repository"
-	"github.com/gold-kou/ToeBeans/backend/app/lib"
 )
 
 func PasswordController(w http.ResponseWriter, r *http.Request) {
@@ -89,7 +88,7 @@ func changePassword(r *http.Request) (err error) {
 		log.Println(err)
 		return helper.NewInternalServerError(err.Error())
 	}
-	if tokenUserName == lib.GuestUserName {
+	if tokenUserName == helper.GuestUserName {
 		log.Println(errMsgGuestUserForbidden)
 		return helper.NewForbiddenError(errMsgGuestUserForbidden)
 	}
@@ -130,10 +129,10 @@ func changePassword(r *http.Request) (err error) {
 	u := usecase.NewChangePassword(r.Context(), tx, tokenUserName, reqChangePassword, userRepo)
 	if err = u.ChangePasswordUseCase(); err != nil {
 		log.Println(err)
-		if err == repository.ErrNotExistsData || err == usecase.ErrNotCorrectPassword {
+		if err == usecase.ErrNotCorrectPassword {
 			return helper.NewBadRequestError(err.Error())
 		}
-		if err == lib.ErrTokenInvalidNotExistingUserName {
+		if err == usecase.ErrTokenInvalidNotExistingUserName {
 			return helper.NewAuthorizationError(err.Error())
 		}
 		return helper.NewInternalServerError(err.Error())
@@ -178,7 +177,7 @@ func passwordResetEmail(r *http.Request) error {
 	re := usecase.NewPasswordResetEmail(r.Context(), tx, reqPasswordResetEmail, userRepo)
 	if err = re.PasswordResetEmailUseCase(); err != nil {
 		log.Println(err)
-		if err == repository.ErrNotExistsData {
+		if err == usecase.ErrNotExistsData {
 			return helper.NewBadRequestError(err.Error())
 		}
 		if err == usecase.ErrOverPasswordResetCount {
@@ -226,7 +225,7 @@ func passwordReset(r *http.Request) error {
 	re := usecase.NewPasswordReset(r.Context(), tx, reqResetPassword, userRepo)
 	if err = re.PasswordResetUseCase(); err != nil {
 		log.Println(err)
-		if err == repository.ErrNotExistsData {
+		if err == usecase.ErrNotExistsData {
 			return helper.NewBadRequestError(errMsgUserNameResetKeyNotExistsResetKeyExpired)
 		}
 		return helper.NewInternalServerError(err.Error())

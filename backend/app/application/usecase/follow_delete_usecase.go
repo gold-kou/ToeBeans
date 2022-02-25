@@ -4,8 +4,6 @@ import (
 	"context"
 	"errors"
 
-	"github.com/gold-kou/ToeBeans/backend/app/lib"
-
 	"github.com/gold-kou/ToeBeans/backend/app/adapter/mysql"
 	"github.com/gold-kou/ToeBeans/backend/app/domain/model"
 	"github.com/gold-kou/ToeBeans/backend/app/domain/repository"
@@ -42,7 +40,7 @@ func (follow *DeleteFollow) DeleteFollowUseCase() error {
 	_, err := follow.userRepo.GetUserWhereName(follow.ctx, follow.followUserName)
 	if err != nil {
 		if err == repository.ErrNotExistsData {
-			return lib.ErrTokenInvalidNotExistingUserName
+			return ErrTokenInvalidNotExistingUserName
 		}
 		return err
 	}

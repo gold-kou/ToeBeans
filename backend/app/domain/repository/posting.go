@@ -5,8 +5,6 @@ import (
 	"database/sql"
 	"time"
 
-	"github.com/go-sql-driver/mysql"
-
 	m "github.com/gold-kou/ToeBeans/backend/app/adapter/mysql"
 	"github.com/gold-kou/ToeBeans/backend/app/domain/model"
 )
@@ -39,10 +37,6 @@ func (r *PostingRepository) Create(ctx context.Context, posting *model.Posting) 
 		_, err = tx.ExecContext(ctx, q, posting.UserName, posting.Title, posting.ImageURL)
 	} else {
 		_, err = r.db.ExecContext(ctx, q, posting.UserName, posting.Title, posting.ImageURL)
-	}
-	mysqlErr, ok := err.(*mysql.MySQLError)
-	if ok && mysqlErr.Number == 1062 {
-		return ErrDuplicateData
 	}
 	return
 }

@@ -146,7 +146,7 @@ func TestPasswordChange(t *testing.T) {
 			req, err := http.NewRequest(tt.method, "/password", strings.NewReader(tt.args.reqBody))
 			assert.NoError(t, err)
 			if tt.name == "error forbidden guest user" {
-				req = req.WithContext(httpContext.SetTokenUserName(req.Context(), lib.GuestUserName))
+				req = req.WithContext(httpContext.SetTokenUserName(req.Context(), helper.GuestUserName))
 			} else {
 				req = req.WithContext(httpContext.SetTokenUserName(req.Context(), dummy.User1.Name))
 			}

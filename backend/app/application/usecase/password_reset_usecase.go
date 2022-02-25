@@ -36,6 +36,9 @@ func (reset *PasswordReset) PasswordResetUseCase() (err error) {
 	// name and resetKey exists check
 	_, err = reset.userRepo.GetUserWhereNameResetKey(reset.ctx, reset.reqPasswordReset.UserName, reset.reqPasswordReset.PasswordResetKey, lib.NowFunc())
 	if err != nil {
+		if err == repository.ErrNotExistsData {
+			return ErrNotExistsData
+		}
 		return err
 	}
 

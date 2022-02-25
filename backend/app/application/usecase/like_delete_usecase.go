@@ -4,8 +4,6 @@ import (
 	"context"
 	"errors"
 
-	"github.com/gold-kou/ToeBeans/backend/app/lib"
-
 	"github.com/gold-kou/ToeBeans/backend/app/adapter/mysql"
 	"github.com/gold-kou/ToeBeans/backend/app/domain/model"
 	"github.com/gold-kou/ToeBeans/backend/app/domain/repository"
@@ -44,7 +42,7 @@ func (like *DeleteLike) DeleteLikeUseCase() error {
 	_, err := like.userRepo.GetUserWhereName(like.ctx, like.tokenUserName)
 	if err != nil {
 		if err == repository.ErrNotExistsData {
-			return lib.ErrTokenInvalidNotExistingUserName
+			return ErrTokenInvalidNotExistingUserName
 		}
 		return err
 	}

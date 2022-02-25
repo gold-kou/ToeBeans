@@ -35,6 +35,9 @@ func NewGetNotifications(ctx context.Context, tx mysql.DBTransaction, tokenUserN
 func (n *GetNotifications) GetNotificationsUseCase() (notifications []model.Notification, err error) {
 	notifications, err = n.notificationRepo.GetNotifications(n.ctx, n.visitedName)
 	if err != nil {
+		if err == repository.ErrNotExistsData {
+			return nil, ErrNotExistsData
+		}
 		return
 	}
 	return

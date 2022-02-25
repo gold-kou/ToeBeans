@@ -4,8 +4,6 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/gold-kou/ToeBeans/backend/app/lib"
-
 	"github.com/gorilla/csrf"
 
 	"github.com/gold-kou/ToeBeans/backend/app/adapter/http/helper"
@@ -19,7 +17,7 @@ func CSRFTokenController(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set(helper.HeaderKeyContentType, helper.HeaderValueApplicationJSON)
 
 		token := csrf.Token(r)
-		csrf.MaxAge(3600 * lib.TokenExpirationHour)
+		csrf.MaxAge(3600 * helper.TokenExpirationHour)
 		resp := modelHttp.ResponseGetCsrfToken{
 			CsrfToken: token,
 		}

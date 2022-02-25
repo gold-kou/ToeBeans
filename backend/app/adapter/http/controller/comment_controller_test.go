@@ -10,13 +10,15 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/gorilla/mux"
+	"github.com/stretchr/testify/assert"
+
 	httpContext "github.com/gold-kou/ToeBeans/backend/app/adapter/http/context"
+	"github.com/gold-kou/ToeBeans/backend/app/adapter/http/helper"
 	"github.com/gold-kou/ToeBeans/backend/app/domain/repository"
 	"github.com/gold-kou/ToeBeans/backend/app/lib"
 	testingHelper "github.com/gold-kou/ToeBeans/backend/testing"
 	"github.com/gold-kou/ToeBeans/backend/testing/dummy"
-	"github.com/gorilla/mux"
-	"github.com/stretchr/testify/assert"
 )
 
 var successReqRegisterComment = `
@@ -114,7 +116,7 @@ func TestRegisterComment(t *testing.T) {
 			vars := map[string]string{"posting_id": strconv.Itoa(int(tt.args.postingID))}
 			req = mux.SetURLVars(req, vars)
 			if tt.name == "error forbidden guest user" {
-				req = req.WithContext(httpContext.SetTokenUserName(req.Context(), lib.GuestUserName))
+				req = req.WithContext(httpContext.SetTokenUserName(req.Context(), helper.GuestUserName))
 			} else {
 				req = req.WithContext(httpContext.SetTokenUserName(req.Context(), dummy.User1.Name))
 			}
@@ -322,7 +324,7 @@ func TestDeleteComment(t *testing.T) {
 			vars := map[string]string{"comment_id": strconv.Itoa(int(tt.args.commentID))}
 			req = mux.SetURLVars(req, vars)
 			if tt.name == "error forbidden guest user" {
-				req = req.WithContext(httpContext.SetTokenUserName(req.Context(), lib.GuestUserName))
+				req = req.WithContext(httpContext.SetTokenUserName(req.Context(), helper.GuestUserName))
 			} else {
 				req = req.WithContext(httpContext.SetTokenUserName(req.Context(), dummy.User1.Name))
 			}

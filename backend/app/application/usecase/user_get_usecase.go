@@ -3,8 +3,6 @@ package usecase
 import (
 	"context"
 
-	"github.com/gold-kou/ToeBeans/backend/app/lib"
-
 	"github.com/gold-kou/ToeBeans/backend/app/adapter/mysql"
 	"github.com/gold-kou/ToeBeans/backend/app/domain/model"
 	"github.com/gold-kou/ToeBeans/backend/app/domain/repository"
@@ -37,13 +35,16 @@ func (user *GetUser) GetUserUseCase() (u model.User, err error) {
 	_, err = user.userRepo.GetUserWhereName(user.ctx, user.tokenUserName)
 	if err != nil {
 		if err == repository.ErrNotExistsData {
-			return model.User{}, lib.ErrTokenInvalidNotExistingUserName
+			return model.User{}, ErrTokenInvalidNotExistingUserName
 		}
 		return model.User{}, err
 	}
 
 	u, err = user.userRepo.GetUserWhereName(user.ctx, user.userName)
 	if err != nil {
+		if err == repository.ErrNotExistsData {
+			return model.User{}, ErrNotExistsData
+		}
 		return
 	}
 	return

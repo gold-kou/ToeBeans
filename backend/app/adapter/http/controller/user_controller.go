@@ -19,7 +19,6 @@ import (
 	"github.com/gold-kou/ToeBeans/backend/app/domain/model"
 	modelHTTP "github.com/gold-kou/ToeBeans/backend/app/domain/model/http"
 	"github.com/gold-kou/ToeBeans/backend/app/domain/repository"
-	"github.com/gold-kou/ToeBeans/backend/app/lib"
 )
 
 func UserController(w http.ResponseWriter, r *http.Request) {
@@ -183,7 +182,7 @@ func registerUser(r *http.Request) error {
 	u := usecase.NewRegisterUser(r.Context(), tx, userName, reqRegisterUser, userRepo)
 	if err = u.RegisterUserUseCase(); err != nil {
 		log.Println(err)
-		if err == repository.ErrDuplicateData {
+		if err == usecase.ErrDuplicateData {
 			return helper.NewBadRequestError(err.Error() + ", the user name or email have been already used.")
 		}
 		return helper.NewInternalServerError(err.Error())
@@ -228,10 +227,10 @@ func getUser(r *http.Request) (user model.User, err error) {
 	u := usecase.NewGetUser(r.Context(), tx, tokenUserName, userName, userRepo)
 	if user, err = u.GetUserUseCase(); err != nil {
 		log.Println(err)
-		if err == repository.ErrNotExistsData {
+		if err == usecase.ErrNotExistsData {
 			return model.User{}, helper.NewNotFoundError(err.Error())
 		}
-		if err == lib.ErrTokenInvalidNotExistingUserName {
+		if err == usecase.ErrTokenInvalidNotExistingUserName {
 			return model.User{}, helper.NewAuthorizationError(err.Error())
 		}
 		return model.User{}, helper.NewInternalServerError(err.Error())
@@ -246,7 +245,7 @@ func updateUser(r *http.Request) (err error) {
 		log.Println(err)
 		return helper.NewInternalServerError(err.Error())
 	}
-	if tokenUserName == lib.GuestUserName {
+	if tokenUserName == helper.GuestUserName {
 		log.Println(errMsgGuestUserForbidden)
 		return helper.NewForbiddenError(errMsgGuestUserForbidden)
 	}
@@ -300,7 +299,7 @@ func updateUser(r *http.Request) (err error) {
 	u := usecase.NewUpdateUser(r.Context(), tx, userName, reqUpdateUser, userRepo)
 	if err = u.UpdateUserUseCase(); err != nil {
 		log.Println(err)
-		if err == repository.ErrNotExistsData || err == usecase.ErrDecodeImage {
+		if err == usecase.ErrNotExistsData || err == usecase.ErrDecodeImage {
 			return helper.NewBadRequestError(err.Error())
 		}
 		if err == usecase.ErrNotExitsUser {
@@ -318,7 +317,7 @@ func deleteUser(r *http.Request) (err error) {
 		log.Println(err)
 		return helper.NewInternalServerError(err.Error())
 	}
-	if tokenUserName == lib.GuestUserName {
+	if tokenUserName == helper.GuestUserName {
 		log.Println(errMsgGuestUserForbidden)
 		return helper.NewForbiddenError(errMsgGuestUserForbidden)
 	}

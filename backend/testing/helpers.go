@@ -7,14 +7,19 @@ import (
 	"os"
 	"time"
 
-	"github.com/gold-kou/ToeBeans/backend/testing/dummy"
-
-	"github.com/gold-kou/ToeBeans/backend/app/lib"
-
-	"github.com/gold-kou/ToeBeans/backend/app/domain/model"
-
 	"github.com/gold-kou/ToeBeans/backend/app/adapter/mysql"
+	"github.com/gold-kou/ToeBeans/backend/app/domain/model"
+	"github.com/gold-kou/ToeBeans/backend/app/lib"
+	"github.com/gold-kou/ToeBeans/backend/testing/dummy"
 )
+
+func SetTestEnv(key, val string) func() {
+	preVal := os.Getenv(key)
+	os.Setenv(key, val)
+	return func() {
+		os.Setenv(key, preVal)
+	}
+}
 
 func SetTime(t time.Time) {
 	lib.NowFunc = func() time.Time { return t }

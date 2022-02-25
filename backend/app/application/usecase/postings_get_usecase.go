@@ -7,7 +7,6 @@ import (
 	"github.com/gold-kou/ToeBeans/backend/app/adapter/mysql"
 	"github.com/gold-kou/ToeBeans/backend/app/domain/model"
 	"github.com/gold-kou/ToeBeans/backend/app/domain/repository"
-	"github.com/gold-kou/ToeBeans/backend/app/lib"
 )
 
 type GetPostingsUseCaseInterface interface {
@@ -45,7 +44,7 @@ func (p *GetPostings) GetPostingsUseCase() (postings []model.Posting, likes []mo
 	_, err = p.userRepo.GetUserWhereName(p.ctx, p.tokenUserName)
 	if err != nil {
 		if err == repository.ErrNotExistsData {
-			return nil, nil, lib.ErrTokenInvalidNotExistingUserName
+			return nil, nil, ErrTokenInvalidNotExistingUserName
 		}
 		return nil, nil, err
 	}
@@ -54,6 +53,9 @@ func (p *GetPostings) GetPostingsUseCase() (postings []model.Posting, likes []mo
 	if p.userName != "" {
 		_, err = p.userRepo.GetUserWhereName(p.ctx, p.userName)
 		if err != nil {
+			if err == repository.ErrNotExistsData {
+				return nil, nil, ErrNotExistsData
+			}
 			return
 		}
 	}

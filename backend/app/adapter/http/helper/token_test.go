@@ -1,12 +1,12 @@
-package lib
+package helper_test
 
 import (
-	"os"
 	"strings"
 	"testing"
 
+	"github.com/gold-kou/ToeBeans/backend/app/adapter/http/helper"
+	testingHelper "github.com/gold-kou/ToeBeans/backend/testing"
 	"github.com/gold-kou/ToeBeans/backend/testing/dummy"
-
 	"github.com/stretchr/testify/assert"
 )
 
@@ -36,11 +36,11 @@ func TestGenerateToken(t *testing.T) {
 			a := assert.New(t)
 
 			// set env
-			tmp := setTestEnv("JWT_SECRET_KEY", tt.environment)
+			tmp := testingHelper.SetTestEnv("JWT_SECRET_KEY", tt.environment)
 			defer tmp()
 
 			// test target
-			got, err := GenerateToken(tt.args.userName)
+			got, err := helper.GenerateToken(tt.args.userName)
 			sharedTestToken = got
 
 			if tt.wantErr {
@@ -85,13 +85,13 @@ func TestVerifyToken(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			// set env
-			tmp := setTestEnv("JWT_SECRET_KEY", tt.environment)
+			tmp := testingHelper.SetTestEnv("JWT_SECRET_KEY", tt.environment)
 			defer tmp()
 
 			a := assert.New(t)
 
 			// test target
-			got, err := VerifyToken(tt.args.tokenString)
+			got, err := helper.VerifyToken(tt.args.tokenString)
 
 			// assert
 			if tt.wantErr {
@@ -102,13 +102,5 @@ func TestVerifyToken(t *testing.T) {
 				a.Equal(tt.want, got)
 			}
 		})
-	}
-}
-
-func setTestEnv(key, val string) func() {
-	preVal := os.Getenv(key)
-	os.Setenv(key, val)
-	return func() {
-		os.Setenv(key, preVal)
 	}
 }

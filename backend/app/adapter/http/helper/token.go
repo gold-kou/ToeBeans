@@ -1,4 +1,4 @@
-package lib
+package helper
 
 import (
 	"os"
@@ -8,14 +8,11 @@ import (
 	"github.com/pkg/errors"
 )
 
-var ErrNotFoundAuthorizationHeader = errors.New("not found Authorization header")
-var ErrNotFoundBearerToken = errors.New("not found bearer token")
-var ErrUnexpectedSigningMethod = errors.New("unexpected signing method")
-var ErrTokenExpired = errors.New("token is expired")
-var ErrTokenInvalid = errors.New("token is invalid")
-var ErrTokenInvalidNotExistingUserName = errors.New("the user name contained in token doesn't exist")
-var ErrNotFoundClaims = errors.New("not found claims in token")
-var ErrNotFoundName = errors.New("not found name in token")
+var errUnexpectedSigningMethod = errors.New("unexpected signing method")
+var errTokenExpired = errors.New("token is expired")
+var errTokenInvalid = errors.New("token is invalid")
+var errNotFoundClaims = errors.New("not found claims in token")
+var errNotFoundName = errors.New("not found name in token")
 
 const GuestUserName = "guest"
 const TokenExpirationHour = 24
@@ -54,7 +51,7 @@ func VerifyToken(tokenString string) (userName string, err error) {
 	parsedToken, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		// check signing method
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			err = errors.New(ErrUnexpectedSigningMethod.Error())
+			err = errUnexpectedSigningMethod
 			return nil, err
 		}
 		return []byte(jwtSecretKey), nil
@@ -64,19 +61,19 @@ func VerifyToken(tokenString string) (userName string, err error) {
 	if err != nil {
 		if ve, ok := err.(*jwt.ValidationError); ok {
 			if ve.Errors&jwt.ValidationErrorExpired != 0 {
-				return "", errors.New(ErrTokenExpired.Error())
+				return "", errTokenExpired
 			}
-			return "", errors.New(ErrTokenInvalid.Error())
+			return "", errTokenInvalid
 		}
 	}
 
 	claims, ok := parsedToken.Claims.(jwt.MapClaims)
 	if !ok {
-		return "", errors.New(ErrNotFoundClaims.Error())
+		return "", errNotFoundClaims
 	}
 	userName, ok = claims["name"].(string)
 	if !ok {
-		return "", errors.New(ErrNotFoundName.Error())
+		return "", errNotFoundName
 	}
 
 	return

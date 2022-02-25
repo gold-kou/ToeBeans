@@ -7,9 +7,7 @@ import (
 	"golang.org/x/net/context"
 
 	httpContext "github.com/gold-kou/ToeBeans/backend/app/adapter/http/context"
-
 	"github.com/gold-kou/ToeBeans/backend/app/adapter/http/helper"
-	"github.com/gold-kou/ToeBeans/backend/app/lib"
 )
 
 func AuthMiddleware(next http.Handler) http.Handler {
@@ -35,7 +33,7 @@ func AuthMiddleware(next http.Handler) http.Handler {
 			w.WriteHeader(http.StatusUnauthorized)
 			return
 		}
-		tokenUserName, err = lib.VerifyToken(cookie.Value)
+		tokenUserName, err = helper.VerifyToken(cookie.Value)
 		if err != nil {
 			_, _ = w.Write([]byte(err.Error()))
 			w.WriteHeader(http.StatusUnauthorized)

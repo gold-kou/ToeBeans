@@ -7,8 +7,6 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/gold-kou/ToeBeans/backend/app/lib"
-
 	"github.com/gold-kou/ToeBeans/backend/app/adapter/mysql"
 	"github.com/gold-kou/ToeBeans/backend/app/domain/repository"
 
@@ -25,7 +23,7 @@ func LoginController(w http.ResponseWriter, r *http.Request) {
 		idToken, err := login(r)
 		switch err := err.(type) {
 		case nil:
-			expiration := time.Now().Add(lib.TokenExpirationHour * time.Hour)
+			expiration := time.Now().Add(helper.TokenExpirationHour * time.Hour)
 			cookie := &http.Cookie{
 				Name:     helper.CookieIDToken,
 				Value:    idToken,
@@ -98,7 +96,7 @@ func login(r *http.Request) (idToken string, err error) {
 	l := usecase.NewLogin(r.Context(), tx, reqLogin, userRepo)
 	if idToken, err = l.LoginUseCase(); err != nil {
 		log.Println(err)
-		if err == repository.ErrNotExistsData || err == usecase.ErrNotCorrectPassword {
+		if err == usecase.ErrNotExistsData || err == usecase.ErrNotCorrectPassword {
 			return "", helper.NewBadRequestError(errMsgWrongUserNameOrPassword)
 		}
 		if err == usecase.ErrNotVerifiedUser {
