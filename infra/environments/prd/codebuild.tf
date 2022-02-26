@@ -52,15 +52,15 @@ resource "aws_codebuild_project" "toebeans" {
     compute_type    = "BUILD_GENERAL1_SMALL"
     image           = "aws/codebuild/standard:2.0"
     privileged_mode = true
-    # environment_variable {
-    #   name  = "DOCKER_HUB_ID"
-    #   type = "PARAMETER_STORE"
-    #   value = "/docker_hub_id"
-    # }
-    # environment_variable {
-    #   name  = "DOCKER_HUB_PASSWORD"
-    #   type = "PARAMETER_STORE"
-    #   value = "/docker_hub_password"
-    # }
+    environment_variable {
+      name  = "DOCKER_HUB_ID"
+      type = "PARAMETER_STORE"
+      value = ""
+    }
+    environment_variable {
+      name  = "DOCKER_HUB_PASSWORD"
+      type = "PARAMETER_STORE"
+      value = ""
+    }
   }
 }

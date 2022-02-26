@@ -1,5 +1,8 @@
 version: 0.2
-
+env:
+  parameter-store:
+    DOCKER_HUB_ID: "docker_hub_id"
+    DOCKER_HUB_PASSWORD: "docker_hub_password"
 phases:
   install:
     runtime-versions:
@@ -10,8 +13,8 @@ phases:
       - $(aws ecr get-login --region $AWS_DEFAULT_REGION --no-include-email)
       - REPO=$(aws ecr describe-repositories --repository-names toebeans --output text --query "repositories[0].repositoryUri")
       - IMAGE=$REPO:latest
-      # - echo Logging in to Docker Hub...
-      # - echo $DOCKER_HUB_PASSWORD | docker login -u $DOCKER_HUB_ID --password-stdin
+      - echo Logging in to Docker Hub...
+      - echo $DOCKER_HUB_PASSWORD | docker login -u $DOCKER_HUB_ID --password-stdin
   build:
     commands:
       - cd backend
