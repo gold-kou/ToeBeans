@@ -55,12 +55,12 @@ resource "aws_codebuild_project" "toebeans" {
     environment_variable {
       name  = "DOCKER_HUB_ID"
       type = "PARAMETER_STORE"
-      value = ""
+      value = "docker_hub_id"
     }
     environment_variable {
       name  = "DOCKER_HUB_PASSWORD"
       type = "PARAMETER_STORE"
-      value = ""
+      value = "docker_hub_password"
     }
   }
 }
