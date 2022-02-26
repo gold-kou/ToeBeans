@@ -1,8 +1,4 @@
 version: 0.2
-env:
-  parameter-store:
-    DOCKER_HUB_ID: "docker_hub_id"
-    DOCKER_HUB_PASSWORD: "docker_hub_password"
 phases:
   install:
     runtime-versions:
