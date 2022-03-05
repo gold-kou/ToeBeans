@@ -6,13 +6,14 @@ import { useHistory } from "react-router-dom";
 import InfiniteScroll from "react-infinite-scroller";
 
 import Sidebar from "./Sidebar";
-import { getMyUserInfo, updateUser } from "./User";
+import { getUserInfo, updateUser } from "./User";
 import Post from "./Post";
 
-import "./MyPage.css";
+import "./UserPage.css";
 import "./common.css";
 
-const MyPage = () => {
+const UserPage = (props) => {
+  const [userName, setUserName] = useState(props.userName);
   // const [avator, setAvator] = useState("");
   const [selfIntroduction, setSelfIntroduction] = useState("");
   const [postingCount, setPostingCount] = useState(0);
@@ -26,11 +27,12 @@ const MyPage = () => {
   const [hasMore, setHasMore] = useState(true);
   const [successMessage, setSuccessMessage] = useState("");
   const [errMessage, setErrMessage] = useState("");
+  const loginUserName = localStorage.getItem("loginUserName");
   const history = useHistory();
 
   useEffect(() => {
-    getMyUserInfo()
-      .then(response => {
+    getUserInfo({ userName })
+      .then((response) => {
         // setAvator(response.data.icon);
         setSelfIntroduction(response.data.self_introduction);
         setPostingCount(response.data.posting_count);
@@ -40,30 +42,31 @@ const MyPage = () => {
         setFollowedCount(response.data.followed_count);
         setCreatedAt(response.data.created_at);
       })
-      .catch(error => {
+      .catch((error) => {
         if (error.response) {
           if (error.response.data.status === 401) {
             localStorage.removeItem("isLoggedIn");
             localStorage.removeItem("loginUserName");
             history.push({ pathname: "login" });
-          }
-          else {
+          } else {
             setErrMessage(error.response.data.message);
           }
-        }
-        else if (error.request) {
+        } else if (error.request) {
           setErrMessage(error.request.data.message);
-        }
-        else {
+        } else {
           console.log(error);
         }
       });
+
+    // TODO
+    // loginUserNameとuserNameでfollowsテーブルにレコードが存在するかをチェックするAPIが必要。レスポンス次第でfollowかunfollowボタンのどちらを表示するかをハンドリングする。
+    // follow状態をstateで持たせる必要がありそう。followのstateが変わったら再描画でfollow/unfollowが切り替わる。
   }, [history]);
 
   const getUserPosts = async () => {
     await axios
-      .get(`/postings?since_at=${sinceAt}&limit=10&user_name=${localStorage.getItem("loginUserName")}`)
-      .then(response => {
+      .get(`/postings?since_at=${sinceAt}&limit=10&user_name=${userName}`)
+      .then((response) => {
         if (response.data.postings == null) {
           setHasMore(false);
           return;
@@ -75,21 +78,18 @@ const MyPage = () => {
           response.data.postings[response.data.postings.length - 1].uploaded_at
         );
       })
-      .catch(error => {
+      .catch((error) => {
         if (error.response) {
           if (error.response.data.status === 401) {
             localStorage.removeItem("isLoggedIn");
             localStorage.removeItem("loginUserName");
             history.push({ pathname: "login" });
-          }
-          else {
+          } else {
             setErrMessage(error.response.data.message);
           }
-        }
-        else if (error.request) {
+        } else if (error.request) {
           setErrMessage(error.request.data.message);
-        }
-        else {
+        } else {
           console.log(error);
         }
       });
@@ -102,25 +102,22 @@ const MyPage = () => {
   );
 
   async function updateSelfIntroduction() {
-    updateUser("", "", selfIntroduction, localStorage.getItem("loginUserName"))
+    updateUser("", "", selfIntroduction, loginUserName)
       .then(() => {
         setSuccessMessage("update success");
       })
-      .catch(error => {
+      .catch((error) => {
         if (error.response) {
           if (error.response.data.status === 401) {
             localStorage.removeItem("isLoggedIn");
             localStorage.removeItem("loginUserName");
             history.push({ pathname: "login" });
-          }
-          else {
+          } else {
             setErrMessage(error.response.data.message);
           }
-        }
-        else if (error.request) {
+        } else if (error.request) {
           setErrMessage(error.request.data.message);
-        }
-        else {
+        } else {
           console.log(error);
         }
       });
@@ -139,19 +136,36 @@ const MyPage = () => {
               <Alert variant="success">{successMessage}</Alert>
             )}
             {errMessage && <Alert variant="danger">{errMessage}</Alert>}
-            <div className="mypage">
+            <div className="userpage">
               <div className="content_header">
-                <h2>My Page</h2>
+                <h2>User Page</h2>
               </div>
 
-              <Container className="mt-5 mb-5 ml-2">
-                {/* <img src={avator} alt="" /> */}
-                {localStorage.getItem("loginUserName")}
-                <div className="mini-character">
-                  since {createdAt.split("T")[0]}
-                </div>
+              <Container className="mt-3 mb-5 ml-2">
+                <Row>
+                  <Col className="ml-5">
+                    {/* <img src={avator} alt="" /> */}
+                    {userName}
+                    <div className="mini-character">
+                      since {createdAt.split("T")[0]}
+                    </div>
+                  </Col>
 
-                <Row className="mt-5 mypage-data">
+                  <Col>
+                    {userName !== loginUserName && (
+                      <Button
+                        variant="contained"
+                        color="primary"
+                        className="mr-5 float-right"
+                        // onClick={}
+                      >
+                        Follow
+                      </Button>
+                    )}
+                  </Col>
+                </Row>
+
+                <Row className="mt-5 userpage-data">
                   <Col sm-3 md-5>
                     like count
                   </Col>
@@ -159,7 +173,7 @@ const MyPage = () => {
                     liked count
                   </Col>
                 </Row>
-                <Row className="mt-1 mypage-data">
+                <Row className="mt-1 userpage-data">
                   <Col sm-3 md-5>
                     {likeCount}
                   </Col>
@@ -167,7 +181,7 @@ const MyPage = () => {
                     {likedCount}
                   </Col>
                 </Row>
-                <Row className="mt-3 mypage-data">
+                <Row className="mt-3 userpage-data">
                   <Col sm-3 md-5>
                     follow count
                   </Col>
@@ -175,7 +189,7 @@ const MyPage = () => {
                     followed count
                   </Col>
                 </Row>
-                <Row className="mt-1 mypage-data">
+                <Row className="mt-1 userpage-data">
                   <Col sm-3 md-5>
                     {followCount}
                   </Col>
@@ -183,40 +197,42 @@ const MyPage = () => {
                     {followedCount}
                   </Col>
                 </Row>
-                <Row className="mt-3 mypage-data">
+                <Row className="mt-3 userpage-data">
                   <Col sm-3 md-5>
                     post count
                   </Col>
                   <Col sm-3 md-5></Col>
                 </Row>
-                <Row className="mt-1 mypage-data">
+                <Row className="mt-1 userpage-data">
                   <Col sm-3 md-5>
                     {postingCount}
                   </Col>
                   <Col sm-3 md-5></Col>
                 </Row>
 
-                <Form className="mt-5">
-                  <Form.Group>
-                    <Form.Label>Self introduction</Form.Label>
-                    <Form.Control
-                      as="textarea"
-                      rows={3}
-                      placeholder={selfIntroduction}
-                      value={selfIntroduction}
-                      onChange={e => setSelfIntroduction(e.target.value)}
-                    />
-                  </Form.Group>
-                  <Button
-                    onClick={updateSelfIntroduction}
-                    variant="contained"
-                    color="primary"
-                    size="sm"
-                    className="float-right"
-                  >
-                    Update
-                  </Button>
-                </Form>
+                {userName === loginUserName && (
+                  <Form className="mt-5">
+                    <Form.Group>
+                      <Form.Label>Self introduction</Form.Label>
+                      <Form.Control
+                        as="textarea"
+                        rows={3}
+                        placeholder={selfIntroduction}
+                        value={selfIntroduction}
+                        onChange={(e) => setSelfIntroduction(e.target.value)}
+                      />
+                    </Form.Group>
+                    <Button
+                      onClick={updateSelfIntroduction}
+                      variant="contained"
+                      color="primary"
+                      size="sm"
+                      className="float-right"
+                    >
+                      Update
+                    </Button>
+                  </Form>
+                )}
               </Container>
               <br></br>
               <br></br>
@@ -226,7 +242,7 @@ const MyPage = () => {
                 hasMore={hasMore} //読み込みを行うかどうかの判定
                 loader={loader}
               >
-                {posts.map(post => (
+                {posts.map((post) => (
                   <Post
                     key={post.posting_id}
                     postingID={post.posting_id}
@@ -236,7 +252,7 @@ const MyPage = () => {
                     uploadedAt={post.uploaded_at}
                     likedCount={post.liked_count}
                     liked={post.liked}
-                    loginUserName={localStorage.getItem("loginUserName")}
+                    loginUserName={loginUserName}
                   />
                 ))}
               </InfiniteScroll>
@@ -248,4 +264,4 @@ const MyPage = () => {
   );
 };
 
-export default MyPage;
+export default UserPage;

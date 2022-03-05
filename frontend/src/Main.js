@@ -2,20 +2,29 @@ import React from "react";
 import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
 
 import Feed from "./Feed";
-import MyPage from "./MyPage";
+import UserPage from "./UserPage";
 import Settings from "./Settings";
 import ChangePassword from "./ChangePassword";
-
 import "./Main.css";
 
-// TODO TypeScript化
 function Main() {
+  const loginUserName = localStorage.getItem("loginUserName");
   return (
     <div>
       <Router>
         <Switch>
           <Route exact path="/home" component={Feed}></Route>
-          <Route exact path="/mypage" component={MyPage}></Route>
+          <Route
+            exact
+            path="/mypage"
+            render={() => <UserPage userName={loginUserName} />}
+          ></Route>
+          <Route
+            path="/userpage/:userName"
+            render={(props) => (
+              <UserPage userName={props.match.params.userName} />
+            )}
+          ></Route>
           <Route exact path="/settings" component={Settings}></Route>
           <Route
             exact

@@ -126,16 +126,22 @@ func (posting *RegisterPosting) RegisterPostingUseCase() error {
 		o.Location = strings.Replace(o.Location, "minio", "localhost", 1)
 	}
 	err = posting.tx.Do(posting.ctx, func(ctx context.Context) error {
-		u := model.Posting{
+		p := model.Posting{
 			UserName: posting.tokenUserName,
 			Title:    posting.reqRegisterPosting.Title,
 			ImageURL: o.Location,
 			// ImageURL: "http://localhost:9000/toebeans-postings/20200101000000_testUser1",
 		}
-		err = posting.postingRepo.Create(ctx, &u)
+		err = posting.postingRepo.Create(ctx, &p)
 		if err != nil {
 			return err
 		}
+
+		err = posting.userRepo.UpdatePostingCount(ctx, p.UserName, true)
+		if err != nil {
+			return err
+		}
+
 		return nil
 	})
 	if err != nil {

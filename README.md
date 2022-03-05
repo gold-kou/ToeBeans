@@ -86,6 +86,7 @@ This is written in Japanese.
 投稿機能を使用する場合は、 `docker-compose.yml` の `GOOGLE_API_KEY` を設定する。値はSSMのパラメータストアに設定されている。
 
 ```
+$ cd backend
 $ ./serverrun.sh
 # go run main.go
 ```
@@ -96,6 +97,7 @@ $ ./serverrun.sh
 `frontend/.env` をローカル用のものに変更する。
 
 ```
+$ cd frontend
 $ npm install
 $ npm start
 ```

@@ -1,0 +1,12 @@
+.userpage {
+  border-left: 1px solid var(--toebeans-background);
+  border-right: 1px solid var(--toebeans-background);
+  min-width: fit-content;
+  overflow-y: scroll;
+}
+
+.userpage-data {
+  font-size: 1rem;
+  font-family: Arial, sans-serif;
+  text-align: center;
+}

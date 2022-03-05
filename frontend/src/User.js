@@ -18,8 +18,8 @@ export async function registerUser(userName, email, password) {
   return await axios.post(`/users/${userName}`, reqBody);
 }
 
-export async function getUser(userName) {
-  return await axios.get(`/users?${userName}`);
+export async function getUserInfo(userName) {
+  return await axios.get(`/users?user_name=${userName.userName}`);
 }
 
 export async function updateUser(newPassword, avator, selfIntroduction, userName) {

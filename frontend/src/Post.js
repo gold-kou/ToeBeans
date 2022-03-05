@@ -1,5 +1,5 @@
 import React, { useState, forwardRef } from "react";
-import { useHistory } from "react-router-dom";
+import { Link, useHistory } from "react-router-dom";
 import { Alert, Button } from "react-bootstrap";
 import { Avatar, IconButton } from "@material-ui/core";
 import FavoriteIcon from "@material-ui/icons/Favorite";
@@ -9,7 +9,6 @@ import axios from "axios";
 import "./Post.css";
 import "./common.css";
 
-// TODO 優先度低（ユーザー名クリックでユーザー情報詳細画面）
 const Post = forwardRef(
   (
     {
@@ -119,7 +118,9 @@ const Post = forwardRef(
         <div className="post__body">
           <div className="post__headerText">
             <span className="mini-character">
-              {userName} {uploadedAt.split("T")[0]}
+              <Link to={"/userpage/" + userName}>
+                {userName} {uploadedAt.split("T")[0]}
+              </Link>
             </span>
 
             {userName === loginUserName && (
