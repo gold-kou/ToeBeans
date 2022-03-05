@@ -5,17 +5,16 @@ import axios from "axios";
 import Auth from "./Auth";
 import Landing from "./Landing";
 import UserRegistration from "./UserRegistration";
+import UserPage from "./UserPage";
 import Login from "./Login";
 import Logout from "./Logout";
 import Main from "./Main";
-import MyPage from "./MyPage";
 import Settings from "./Settings";
 import ChangePassword from "./ChangePassword";
 
 axios.defaults.baseURL = process.env.REACT_APP_BACK_BASE_URL;
 axios.defaults.withCredentials = true;
 
-// TODO ユーザ登録、サービストップ
 function App() {
   useEffect(() => {
     const getCsrfToken = async () => {
@@ -24,6 +23,8 @@ function App() {
     };
     getCsrfToken();
   }, []);
+
+  const loginUserName = localStorage.getItem("loginUserName")
 
   return (
     <Router>
@@ -34,7 +35,8 @@ function App() {
         <Route exact path="/logout" component={Logout} />
         <Auth>
           <Route exact path="/home" component={Main} />
-          <Route exact path="/mypage" component={MyPage} />
+          <Route exact path="/mypage" render={() => <UserPage userName={loginUserName} />}></Route>
+          <Route path="/userpage/:userName" render={(props) => <UserPage userName={props.match.params.userName} />}></Route>
           <Route exact path="/settings" component={Settings} />
           <Route exact path="/change_password" component={ChangePassword} />
         </Auth>
