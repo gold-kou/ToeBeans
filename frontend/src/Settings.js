@@ -4,25 +4,25 @@ import { Button } from "@material-ui/core";
 import { Alert, Container, Row, Col } from "react-bootstrap";
 
 import Sidebar from "./Sidebar";
-import { deleteUser } from "./User";
+import { deleteUser } from "./UserLibrary";
 
 import "./Settings.css";
 import "./common.css";
 
-const Settings = props => {
-  useEffect(() => { }, []);
+const Settings = (props) => {
+  useEffect(() => {}, []);
 
   const [successMessage, setSuccessMessage] = useState("");
   const [errMessage, setErrMessage] = useState("");
   const history = useHistory();
 
-  function refreshPage() {
+  function onClickRefreshPage() {
     setTimeout(() => {
       window.location.reload(false);
     }, 300);
   }
 
-  async function deleteAccount() {
+  async function onClickDeleteAccount() {
     deleteUser(localStorage.getItem("loginUserName"))
       .then(() => {
         setSuccessMessage("delete success");
@@ -30,21 +30,18 @@ const Settings = props => {
           props.history.push("/login");
         }, 1500);
       })
-      .catch(error => {
+      .catch((error) => {
         if (error.response) {
           if (error.response.data.status === 401) {
             localStorage.removeItem("isLoggedIn");
             localStorage.removeItem("loginUserName");
             history.push({ pathname: "login" });
-          }
-          else {
+          } else {
             setErrMessage(error.response.data.message);
           }
-        }
-        else if (error.request) {
+        } else if (error.request) {
           setErrMessage(error.request.data.message);
-        }
-        else {
+        } else {
           console.log(error);
         }
       });
@@ -86,7 +83,7 @@ const Settings = props => {
                   color="primary"
                   component={Link}
                   to="/logout"
-                  onClick={refreshPage}
+                  onClick={() => onClickRefreshPage()}
                   style={{ textTransform: "none" }}
                 >
                   Logout
@@ -97,7 +94,7 @@ const Settings = props => {
                 <Button
                   variant="contained"
                   color="primary"
-                  onClick={deleteAccount}
+                  onClick={() => onClickDeleteAccount()}
                   style={{ textTransform: "none" }}
                 >
                   Delete an account

@@ -7,17 +7,19 @@ import InfiniteScroll from "react-infinite-scroller";
 
 import Sidebar from "./Sidebar";
 import { getUserInfo, updateUser } from "./UserLibrary";
-import { follow, getFollowState, unfollow } from "./FollowLibrary";
 import Post from "./Post";
 
 import "./UserPage.css";
 import "./common.css";
 
-const UserPage = (props) => {
-  const userName = props.userName;
-  // const [avator, setAvator] = useState("");
-  const [selfIntroduction, setSelfIntroduction] = useState("");
+/*
+異なるユーザのユーザページからマイページへ遷移する場合に、useStateが実行されないため、ユーザページとマイページで別々にコンポーネントを用意する。
+*/
+
+const MyPage = () => {
+  const userName = localStorage.getItem("loginUserName");
   const loginUserName = localStorage.getItem("loginUserName");
+  const [selfIntroduction, setSelfIntroduction] = useState("");
   const history = useHistory();
   const [postingCount, setPostingCount] = useState(0);
   const [likeCount, setLikeCount] = useState(0);
@@ -25,7 +27,6 @@ const UserPage = (props) => {
   const [followCount, setFollowCount] = useState(0);
   const [followedCount, setFollowedCount] = useState(0);
   const [createdAt, setCreatedAt] = useState("");
-  const [isFollow, setIsFollow] = useState(false);
   const [posts, setPosts] = useState([]);
   const [sinceAt, setSinceAt] = useState("2100-01-01T00:00:00+09:00");
   const [hasMore, setHasMore] = useState(true);
@@ -34,7 +35,6 @@ const UserPage = (props) => {
   useEffect(() => {
     getUserInfo({ userName })
       .then((response) => {
-        // setAvator(response.data.icon);
         setSelfIntroduction(response.data.self_introduction);
         setPostingCount(response.data.posting_count);
         setLikeCount(response.data.like_count);
@@ -58,73 +58,7 @@ const UserPage = (props) => {
           console.log(error);
         }
       });
-
-    if ({ userName } !== loginUserName) {
-      getFollowState({ userName })
-        .then((response) => {
-          setIsFollow(response.data.is_follow);
-        })
-        .catch((error) => {
-          if (error.response) {
-            if (error.response.data.status === 401) {
-              localStorage.removeItem("isLoggedIn");
-              localStorage.removeItem("loginUserName");
-              history.push({ pathname: "login" });
-            } else {
-              setErrMessage(error.response.data.message);
-            }
-          } else if (error.request) {
-            setErrMessage(error.request.data.message);
-          } else {
-            console.log(error);
-          }
-        });
-    }
-  }, [userName, isFollow]);
-
-  const onClickFollow = async () => {
-    follow({ userName })
-      .then((response) => {
-        setIsFollow(true);
-      })
-      .catch((error) => {
-        if (error.response) {
-          if (error.response.data.status === 401) {
-            localStorage.removeItem("isLoggedIn");
-            localStorage.removeItem("loginUserName");
-            history.push({ pathname: "login" });
-          } else {
-            setErrMessage(error.response.data.message);
-          }
-        } else if (error.request) {
-          setErrMessage(error.request.data.message);
-        } else {
-          console.log(error);
-        }
-      });
-  };
-
-  const onClickUnFollow = async () => {
-    unfollow({ userName })
-      .then((response) => {
-        setIsFollow(false);
-      })
-      .catch((error) => {
-        if (error.response) {
-          if (error.response.data.status === 401) {
-            localStorage.removeItem("isLoggedIn");
-            localStorage.removeItem("loginUserName");
-            history.push({ pathname: "login" });
-          } else {
-            setErrMessage(error.response.data.message);
-          }
-        } else if (error.request) {
-          setErrMessage(error.request.data.message);
-        } else {
-          console.log(error);
-        }
-      });
-  };
+  }, [userName]);
 
   const getUserPosts = async () => {
     await axios
@@ -156,7 +90,7 @@ const UserPage = (props) => {
   };
 
   async function onClickUpdateSelfIntroduction() {
-    updateUser("", "", selfIntroduction, loginUserName)
+    updateUser("", "", selfIntroduction, userName)
       .then(() => {
         setSelfIntroduction(selfIntroduction);
       })
@@ -200,30 +134,6 @@ const UserPage = (props) => {
                     <div className="mini-character">
                       since {createdAt.split("T")[0]}
                     </div>
-                  </Col>
-
-                  <Col>
-                    {userName !== loginUserName && isFollow === false && (
-                      <Button
-                        variant="contained"
-                        color="primary"
-                        className="mr-5 float-right"
-                        onClick={() => onClickFollow({ userName })}
-                      >
-                        Follow
-                      </Button>
-                    )}
-
-                    {userName !== loginUserName && isFollow === true && (
-                      <Button
-                        variant="contained"
-                        color="secondary"
-                        className="mr-5 float-right"
-                        onClick={() => onClickUnFollow({ userName })}
-                      >
-                        Unfollow
-                      </Button>
-                    )}
                   </Col>
                 </Row>
 
@@ -283,17 +193,15 @@ const UserPage = (props) => {
                       onChange={(e) => setSelfIntroduction(e.target.value)}
                     />
                   </Form.Group>
-                  {userName === loginUserName && (
-                    <Button
-                      onClick={() => onClickUpdateSelfIntroduction()}
-                      variant="contained"
-                      color="primary"
-                      size="sm"
-                      className="float-right"
-                    >
-                      Update
-                    </Button>
-                  )}
+                  <Button
+                    onClick={() => onClickUpdateSelfIntroduction()}
+                    variant="contained"
+                    color="primary"
+                    size="sm"
+                    className="float-right"
+                  >
+                    Update
+                  </Button>
                 </Form>
               </Container>
               <br></br>
@@ -325,4 +233,4 @@ const UserPage = (props) => {
   );
 };
 
-export default UserPage;
+export default MyPage;

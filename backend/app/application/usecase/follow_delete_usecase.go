@@ -55,7 +55,7 @@ func (follow *DeleteFollow) DeleteFollowUseCase() error {
 	}
 
 	// 存在しないフォローの削除はConflictエラー
-	_, err = follow.followRepo.GetWhereBothUserNames(follow.ctx, follow.followUserName, follow.followedUserName)
+	_, err = follow.followRepo.FindByBothUserNames(follow.ctx, follow.followUserName, follow.followedUserName)
 	if err != nil {
 		if err == repository.ErrNotExistsData {
 			return ErrDeleteNotExistsFollow

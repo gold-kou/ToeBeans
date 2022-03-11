@@ -6,11 +6,11 @@ import {
   Alert,
   Container,
   Row,
-  Col
+  Col,
 } from "react-bootstrap";
 
 import Sidebar from "./Sidebar";
-import { changePassword } from "./User";
+import { changePassword } from "./UserLibrary";
 import LoaderButton from "./LoaderButton";
 import { useFormFields } from "./libs/hooksLib";
 
@@ -20,7 +20,7 @@ function ChangePassword() {
   const [fields, handleFieldChange] = useFormFields({
     oldPassword: "",
     newPassword: "",
-    confirmPassword: ""
+    confirmPassword: "",
   });
   const [isChanging, setIsChanging] = useState(false);
 
@@ -44,15 +44,13 @@ function ChangePassword() {
       .then(() => {
         setSuccessMessage("update success");
       })
-      .catch(error => {
+      .catch((error) => {
         setIsChanging(false);
         if (error.response) {
           setErrMessage(error.response.data.message);
-        }
-        else if (error.request) {
+        } else if (error.request) {
           setErrMessage(error.request.data.message);
-        }
-        else {
+        } else {
           console.log(error);
         }
       });

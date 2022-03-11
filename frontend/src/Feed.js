@@ -7,7 +7,7 @@ import { Container, Row, Col, Alert } from "react-bootstrap";
 import Sidebar from "./Sidebar";
 import PostBox from "./PostBox";
 import Post from "./Post";
-import { getMyUserInfo } from "./User";
+import { getMyUserInfo } from "./UserLibrary";
 
 import "./Feed.css";
 import "./common.css";
@@ -21,25 +21,22 @@ function Feed() {
 
   useEffect(() => {
     getMyUserInfo()
-      .then(response => {
+      .then((response) => {
         localStorage.setItem("loginUserName", response.data.user_name);
         // setAvator(response.data.icon);
       })
-      .catch(error => {
+      .catch((error) => {
         if (error.response) {
           if (error.response.data.status === 401) {
             localStorage.removeItem("isLoggedIn");
             localStorage.removeItem("loginUserName");
             history.push({ pathname: "login" });
-          }
-          else {
+          } else {
             setErrMessage(error.response.data.message);
           }
-        }
-        else if (error.request) {
+        } else if (error.request) {
           setErrMessage(error.request.data.message);
-        }
-        else {
+        } else {
           console.log(error);
         }
       });
@@ -48,46 +45,32 @@ function Feed() {
   const getPosts = async () => {
     await axios
       .get(`/postings?since_at=${sinceAt}&limit=10`)
-      .then(response => {
-        //データ件数が0件の場合、これ以上は読み込みしない
-        if (response.data.postings == null) {
+      .then((response) => {
+        if (response.data.postings.length < 10) {
           setHasMore(false);
-          return;
         }
-
         setPosts([...posts, ...response.data.postings]);
-
         // 取得データのうち一番古い uploaded_at を次のリクエスト用に保持しておく
         setSinceAt(
           response.data.postings[response.data.postings.length - 1].uploaded_at
         );
       })
-      .catch(error => {
+      .catch((error) => {
         if (error.response) {
           if (error.response.data.status === 401) {
             localStorage.removeItem("isLoggedIn");
             localStorage.removeItem("loginUserName");
             history.push({ pathname: "login" });
-          }
-          else {
+          } else {
             setErrMessage(error.response.data.message);
           }
-        }
-        else if (error.request) {
+        } else if (error.request) {
           setErrMessage(error.request.data.message);
-        }
-        else {
+        } else {
           console.log(error);
         }
       });
   };
-
-  //ロード中に表示する項目
-  const loader = (
-    <div className="loader" key={0}>
-      Loading ...
-    </div>
-  );
 
   return (
     <div className="main">
@@ -109,7 +92,6 @@ function Feed() {
               <InfiniteScroll
                 loadMore={getPosts} //項目を読み込む際に処理するコールバック関数
                 hasMore={hasMore} //読み込みを行うかどうかの判定
-                loader={loader}
               >
                 {posts.map((post) => (
                   <Post

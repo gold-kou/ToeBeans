@@ -16,7 +16,7 @@ function PostBox(onFileSelect) {
   const [errMessage, setErrMessage] = useState("");
   const history = useHistory();
 
-  function sendPost(e) {
+  function onClickSendPost(e) {
     e.preventDefault();
 
     if (isCorrectSize(image) === false) {
@@ -24,31 +24,28 @@ function PostBox(onFileSelect) {
         "The selected file is too large, maximum file size is 10MB."
       );
     } else {
-      getBase64(image, result => {
+      getBase64(image, (result) => {
         const reqBody = {
           title: title,
-          image: result
+          image: result,
         };
         axios
           .post("/postings", reqBody)
           .then(function () {
             setSuccessMessage("success post");
           })
-          .catch(error => {
+          .catch((error) => {
             if (error.response) {
               if (error.response.data.status === 401) {
                 localStorage.removeItem("isLoggedIn");
                 localStorage.removeItem("loginUserName");
                 history.push({ pathname: "login" });
-              }
-              else {
+              } else {
                 setErrMessage(error.response.data.message);
               }
-            }
-            else if (error.request) {
+            } else if (error.request) {
               setErrMessage(error.request.data.message);
-            }
-            else {
+            } else {
               console.log(error);
             }
           })
@@ -78,7 +75,7 @@ function PostBox(onFileSelect) {
             type="text"
             placeholder="Title here"
             value={title}
-            onChange={e => setTitle(e.target.value)}
+            onChange={(e) => setTitle(e.target.value)}
             className="mt-2"
           />
         </Form.Group>
@@ -87,11 +84,11 @@ function PostBox(onFileSelect) {
             id="file"
             label={image.name}
             accept="image/png,image/jpeg,image/gif"
-            onChange={e => setImage(e.target.files[0])}
+            onChange={(e) => setImage(e.target.files[0])}
           />
         </Form.Group>
         <Button
-          onClick={sendPost}
+          onClick={() => onClickSendPost()}
           type="submit"
           variant="contained"
           color="primary"
