@@ -1,22 +1,20 @@
 package controller
 
 import (
+	"encoding/json"
 	"log"
 	"net/http"
 	"strings"
 
 	validation "github.com/go-ozzo/ozzo-validation"
 	"github.com/go-ozzo/ozzo-validation/is"
-
-	modelHTTP "github.com/gold-kou/ToeBeans/backend/app/domain/model/http"
-
-	"github.com/gold-kou/ToeBeans/backend/app/adapter/http/context"
-
 	"github.com/gorilla/mux"
 
+	"github.com/gold-kou/ToeBeans/backend/app/adapter/http/context"
 	"github.com/gold-kou/ToeBeans/backend/app/adapter/http/helper"
 	"github.com/gold-kou/ToeBeans/backend/app/adapter/mysql"
 	"github.com/gold-kou/ToeBeans/backend/app/application/usecase"
+	modelHTTP "github.com/gold-kou/ToeBeans/backend/app/domain/model/http"
 	"github.com/gold-kou/ToeBeans/backend/app/domain/repository"
 )
 
@@ -29,6 +27,31 @@ func FollowController(w http.ResponseWriter, r *http.Request) {
 			switch err := err.(type) {
 			case nil:
 				helper.ResponseSimpleSuccess(w)
+			case *helper.BadRequestError:
+				helper.ResponseBadRequest(w, err.Error())
+			case *helper.AuthorizationError:
+				helper.ResponseUnauthorized(w, err.Error())
+			case *helper.ForbiddenError:
+				helper.ResponseForbidden(w, err.Error())
+			case *helper.ConflictError:
+				helper.ResponseConflictError(w, err.Error())
+			case *helper.InternalServerError:
+				helper.ResponseInternalServerError(w, err.Error())
+			default:
+				helper.ResponseInternalServerError(w, err.Error())
+			}
+		case http.MethodGet:
+			exists, err := getFollowState(r)
+			switch err := err.(type) {
+			case nil:
+				resp := modelHTTP.ResponseGetFollowState{
+					IsFollow: exists,
+				}
+				w.Header().Set(helper.HeaderKeyContentType, helper.HeaderValueApplicationJSON)
+				w.WriteHeader(http.StatusOK)
+				if err := json.NewEncoder(w).Encode(resp); err != nil {
+					panic(err.Error())
+				}
 			case *helper.BadRequestError:
 				helper.ResponseBadRequest(w, err.Error())
 			case *helper.AuthorizationError:
@@ -70,11 +93,9 @@ func FollowController(w http.ResponseWriter, r *http.Request) {
 }
 
 func registerFollow(r *http.Request) error {
-	// not allowed to guest user
 	tokenUserName, err := context.GetTokenUserName(r.Context())
-	if tokenUserName == helper.GuestUserName {
-		log.Println(errMsgGuestUserForbidden)
-		return helper.NewForbiddenError(errMsgGuestUserForbidden)
+	if err != nil {
+		return helper.NewAuthorizationError(err.Error())
 	}
 
 	// get request parameter
@@ -113,15 +134,52 @@ func registerFollow(r *http.Request) error {
 	return err
 }
 
+// return follow or not
+func getFollowState(r *http.Request) (bool, error) {
+	tokenUserName, err := context.GetTokenUserName(r.Context())
+	if err != nil {
+		return false, helper.NewAuthorizationError(err.Error())
+	}
+
+	// get request parameter
+	vars := mux.Vars(r)
+	followedUserName, _ := vars["followed_user_name"]
+
+	// validation check
+	if err = validation.Validate(followedUserName, validation.Required, validation.Length(modelHTTP.MinVarcharLength, modelHTTP.MaxVarcharLength), is.Alphanumeric); err != nil {
+		log.Println(err)
+		return false, helper.NewBadRequestError(err.Error())
+	}
+
+	// db connect
+	db, err := mysql.NewDB()
+	if err != nil {
+		log.Println(err)
+		return false, helper.NewInternalServerError(err.Error())
+	}
+	defer db.Close()
+	tx := mysql.NewDBTransaction(db)
+
+	// repository
+	userRepo := repository.NewUserRepository(db)
+	followRepo := repository.NewFollowRepository(db)
+
+	// UseCase
+	u := usecase.NewGetFollowState(r.Context(), tx, tokenUserName, followedUserName, userRepo, followRepo)
+	if err = u.GetFollowStateUseCase(); err != nil {
+		if err == usecase.ErrNotExistsData {
+			return false, nil
+		}
+		log.Println(err)
+		return false, helper.NewInternalServerError(err.Error())
+	}
+	return true, nil
+}
+
 func deleteFollow(r *http.Request) error {
-	// not allowed to guest user
 	tokenUserName, err := context.GetTokenUserName(r.Context())
 	if err != nil {
 		return helper.NewAuthorizationError(err.Error())
-	}
-	if tokenUserName == helper.GuestUserName {
-		log.Println(errMsgGuestUserForbidden)
-		return helper.NewForbiddenError(errMsgGuestUserForbidden)
 	}
 
 	// get request parameter

@@ -6,29 +6,30 @@ import { useHistory } from "react-router-dom";
 import InfiniteScroll from "react-infinite-scroller";
 
 import Sidebar from "./Sidebar";
-import { getUserInfo, updateUser } from "./User";
+import { getUserInfo, updateUser } from "./UserLibrary";
+import { follow, getFollowState, unfollow } from "./FollowLibrary";
 import Post from "./Post";
 
 import "./UserPage.css";
 import "./common.css";
 
 const UserPage = (props) => {
-  const [userName, setUserName] = useState(props.userName);
+  const userName = props.userName;
   // const [avator, setAvator] = useState("");
   const [selfIntroduction, setSelfIntroduction] = useState("");
+  const loginUserName = localStorage.getItem("loginUserName");
+  const history = useHistory();
   const [postingCount, setPostingCount] = useState(0);
   const [likeCount, setLikeCount] = useState(0);
   const [likedCount, setLikedCount] = useState(0);
   const [followCount, setFollowCount] = useState(0);
   const [followedCount, setFollowedCount] = useState(0);
   const [createdAt, setCreatedAt] = useState("");
+  const [isFollow, setIsFollow] = useState(false);
   const [posts, setPosts] = useState([]);
   const [sinceAt, setSinceAt] = useState("2100-01-01T00:00:00+09:00");
   const [hasMore, setHasMore] = useState(true);
-  const [successMessage, setSuccessMessage] = useState("");
   const [errMessage, setErrMessage] = useState("");
-  const loginUserName = localStorage.getItem("loginUserName");
-  const history = useHistory();
 
   useEffect(() => {
     getUserInfo({ userName })
@@ -58,22 +59,81 @@ const UserPage = (props) => {
         }
       });
 
-    // TODO
-    // loginUserNameとuserNameでfollowsテーブルにレコードが存在するかをチェックするAPIが必要。レスポンス次第でfollowかunfollowボタンのどちらを表示するかをハンドリングする。
-    // follow状態をstateで持たせる必要がありそう。followのstateが変わったら再描画でfollow/unfollowが切り替わる。
-  }, [history]);
+    if ({ userName } !== loginUserName) {
+      getFollowState({ userName })
+        .then((response) => {
+          setIsFollow(response.data.is_follow);
+        })
+        .catch((error) => {
+          if (error.response) {
+            if (error.response.data.status === 401) {
+              localStorage.removeItem("isLoggedIn");
+              localStorage.removeItem("loginUserName");
+              history.push({ pathname: "login" });
+            } else {
+              setErrMessage(error.response.data.message);
+            }
+          } else if (error.request) {
+            setErrMessage(error.request.data.message);
+          } else {
+            console.log(error);
+          }
+        });
+    }
+  }, [userName, isFollow]);
+
+  const onClickFollow = async () => {
+    follow({ userName })
+      .then((response) => {
+        setIsFollow(true);
+      })
+      .catch((error) => {
+        if (error.response) {
+          if (error.response.data.status === 401) {
+            localStorage.removeItem("isLoggedIn");
+            localStorage.removeItem("loginUserName");
+            history.push({ pathname: "login" });
+          } else {
+            setErrMessage(error.response.data.message);
+          }
+        } else if (error.request) {
+          setErrMessage(error.request.data.message);
+        } else {
+          console.log(error);
+        }
+      });
+  };
+
+  const onClickUnFollow = async () => {
+    unfollow({ userName })
+      .then((response) => {
+        setIsFollow(false);
+      })
+      .catch((error) => {
+        if (error.response) {
+          if (error.response.data.status === 401) {
+            localStorage.removeItem("isLoggedIn");
+            localStorage.removeItem("loginUserName");
+            history.push({ pathname: "login" });
+          } else {
+            setErrMessage(error.response.data.message);
+          }
+        } else if (error.request) {
+          setErrMessage(error.request.data.message);
+        } else {
+          console.log(error);
+        }
+      });
+  };
 
   const getUserPosts = async () => {
     await axios
       .get(`/postings?since_at=${sinceAt}&limit=10&user_name=${userName}`)
       .then((response) => {
-        if (response.data.postings == null) {
+        if (response.data.postings.length < 10) {
           setHasMore(false);
-          return;
         }
-
         setPosts([...posts, ...response.data.postings]);
-
         setSinceAt(
           response.data.postings[response.data.postings.length - 1].uploaded_at
         );
@@ -95,16 +155,10 @@ const UserPage = (props) => {
       });
   };
 
-  const loader = (
-    <div className="loader" key={0}>
-      Loading ...
-    </div>
-  );
-
-  async function updateSelfIntroduction() {
+  async function onClickUpdateSelfIntroduction() {
     updateUser("", "", selfIntroduction, loginUserName)
       .then(() => {
-        setSuccessMessage("update success");
+        setSelfIntroduction(selfIntroduction);
       })
       .catch((error) => {
         if (error.response) {
@@ -132,9 +186,6 @@ const UserPage = (props) => {
           </Col>
 
           <Col xs={8} sm={8} md={6} lg={6}>
-            {successMessage && (
-              <Alert variant="success">{successMessage}</Alert>
-            )}
             {errMessage && <Alert variant="danger">{errMessage}</Alert>}
             <div className="userpage">
               <div className="content_header">
@@ -152,14 +203,25 @@ const UserPage = (props) => {
                   </Col>
 
                   <Col>
-                    {userName !== loginUserName && (
+                    {userName !== loginUserName && isFollow === false && (
                       <Button
                         variant="contained"
                         color="primary"
                         className="mr-5 float-right"
-                        // onClick={}
+                        onClick={() => onClickFollow({ userName })}
                       >
                         Follow
+                      </Button>
+                    )}
+
+                    {userName !== loginUserName && isFollow === true && (
+                      <Button
+                        variant="contained"
+                        color="secondary"
+                        className="mr-5 float-right"
+                        onClick={() => onClickUnFollow({ userName })}
+                      >
+                        Unfollow
                       </Button>
                     )}
                   </Col>
@@ -210,20 +272,20 @@ const UserPage = (props) => {
                   <Col sm-3 md-5></Col>
                 </Row>
 
-                {userName === loginUserName && (
-                  <Form className="mt-5">
-                    <Form.Group>
-                      <Form.Label>Self introduction</Form.Label>
-                      <Form.Control
-                        as="textarea"
-                        rows={3}
-                        placeholder={selfIntroduction}
-                        value={selfIntroduction}
-                        onChange={(e) => setSelfIntroduction(e.target.value)}
-                      />
-                    </Form.Group>
+                <Form className="mt-5">
+                  <Form.Group>
+                    <Form.Label>Self introduction</Form.Label>
+                    <Form.Control
+                      as="textarea"
+                      rows={3}
+                      placeholder={selfIntroduction}
+                      value={selfIntroduction}
+                      onChange={(e) => setSelfIntroduction(e.target.value)}
+                    />
+                  </Form.Group>
+                  {userName === loginUserName && (
                     <Button
-                      onClick={updateSelfIntroduction}
+                      onClick={() => onClickUpdateSelfIntroduction()}
                       variant="contained"
                       color="primary"
                       size="sm"
@@ -231,16 +293,15 @@ const UserPage = (props) => {
                     >
                       Update
                     </Button>
-                  </Form>
-                )}
+                  )}
+                </Form>
               </Container>
               <br></br>
               <br></br>
 
               <InfiniteScroll
-                loadMore={getUserPosts} //項目を読み込む際に処理するコールバック関数
-                hasMore={hasMore} //読み込みを行うかどうかの判定
-                loader={loader}
+                loadMore={getUserPosts} // 項目を読み込む際に処理するコールバック関数
+                hasMore={hasMore} // 読み込みを行うかどうかの判定
               >
                 {posts.map((post) => (
                   <Post

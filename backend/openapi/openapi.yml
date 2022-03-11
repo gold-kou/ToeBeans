@@ -491,7 +491,7 @@ paths:
           $ref: '#/components/responses/internalServerError'
   /follows/{followed_user_name}:
     post:
-      description: register follow. Not allowed to guest user.
+      description: register follow
       operationId: registerFollow
       tags:
         - follow
@@ -517,8 +517,35 @@ paths:
           $ref: '#/components/responses/notAllowedMethod'
         "500":
           $ref: '#/components/responses/internalServerError'
+    get:
+      description: 対象ユーザをフォローしているかどうかを返すAPI
+      operationId: getFollowState
+      tags:
+        - follow
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: followed_user_name
+          schema:
+            type: string
+          in: path
+          required: true
+          example: user1
+      responses:
+        "200":
+          $ref: '#/components/responses/getFollowState'
+        "400":
+          $ref: '#/components/responses/badRequest'
+        "401":
+          $ref: '#/components/responses/unauthorized'
+        "403":
+          $ref: '#/components/responses/forbidden'
+        "405":
+          $ref: '#/components/responses/notAllowedMethod'
+        "500":
+          $ref: '#/components/responses/internalServerError'  
     delete:
-      description: delete follow. Not allowed to guest user.
+      description: delete follow
       operationId: deleteFollow
       tags:
         - follow
@@ -710,6 +737,12 @@ components:
         'application/json':
           schema:
             $ref: '#/components/schemas/responseGetComments'
+    getFollowState:
+      description: get follow state
+      content:
+        'application/json':
+          schema:
+            $ref: '#/components/schemas/responseGetFollowState'
     getNotifications:
       description: get notifications
       content:
@@ -1054,6 +1087,15 @@ components:
         - user_name
         - commented_at
         - comment
+    responseGetFollowState:
+      type: object
+      properties:
+        is_follow:
+          description: follow or not
+          type: boolean
+          example: true
+      required:
+        - is_follow
     responseGetNotifications:
       description: get notifications
       type: object

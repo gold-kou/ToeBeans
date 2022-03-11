@@ -11,7 +11,7 @@ import (
 )
 
 type FollowRepositoryInterface interface {
-	GetWhereBothUserNames(ctx context.Context, followingUserName, followedUserName string) (follow model.Follow, err error)
+	FindByBothUserNames(ctx context.Context, followingUserName, followedUserName string) (follow model.Follow, err error)
 	Create(ctx context.Context, follow *model.Follow) (err error)
 	DeleteWhereFollowingFollowedUserName(ctx context.Context, followingUserName, followedUserName string) (err error)
 	DeleteWhereFollowingUserName(ctx context.Context, userName string) (err error)
@@ -43,7 +43,7 @@ func (r *FollowRepository) Create(ctx context.Context, follow *model.Follow) (er
 	return
 }
 
-func (r *FollowRepository) GetWhereBothUserNames(ctx context.Context, followingUserName, followedUserName string) (follow model.Follow, err error) {
+func (r *FollowRepository) FindByBothUserNames(ctx context.Context, followingUserName, followedUserName string) (follow model.Follow, err error) {
 	q := "SELECT `id`, `following_user_name`, `followed_user_name`, `created_at`, `updated_at` FROM `follows` WHERE `following_user_name` = ? AND `followed_user_name` = ?"
 	err = r.db.QueryRowContext(ctx, q, followingUserName, followedUserName).Scan(&follow.ID, &follow.FollowingUserName, &follow.FollowedUserName, &follow.CreatedAt, &follow.UpdatedAt)
 	if err == sql.ErrNoRows {

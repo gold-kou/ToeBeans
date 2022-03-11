@@ -21,14 +21,14 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-var errRespRegisterFollowWithoutUserName = `
+var errRespFollowWithoutUserName = `
 {
   "status": 400,
   "message": "cannot be blank"
 }
 `
 
-var errRespRegisterFollowUserNameNotAlphanumeric = `
+var errRespFollowUserNameNotAlphanumeric = `
 {
   "status": 400,
   "message": "must contain English letters and digits only"
@@ -65,14 +65,14 @@ func TestRegisterFollow(t *testing.T) {
 			name:       "error empty user_name",
 			args:       args{},
 			method:     http.MethodPost,
-			want:       errRespRegisterFollowWithoutUserName,
+			want:       errRespFollowWithoutUserName,
 			wantStatus: http.StatusBadRequest,
 		},
 		{
 			name:       "error user_name not alphanumeric",
 			args:       args{followedUserName: "test_2"},
 			method:     http.MethodPost,
-			want:       errRespRegisterFollowUserNameNotAlphanumeric,
+			want:       errRespFollowUserNameNotAlphanumeric,
 			wantStatus: http.StatusBadRequest,
 		},
 		{
@@ -159,6 +159,118 @@ func TestRegisterFollow(t *testing.T) {
 			//	follows[0].UpdatedAt = lib.NowFunc()
 			//	assert.Equal(t, dummy.Follow1to2, follows[0])
 			//}
+
+			// assert http
+			assert.Equal(t, tt.wantStatus, resp.Code)
+			respBodyByte, err := ioutil.ReadAll(resp.Body)
+			assert.NoError(t, err)
+			respBody := string(respBodyByte)
+			assert.JSONEq(t, tt.want, respBody)
+		})
+	}
+}
+
+var successRespGetFollowStateTrue = `
+{
+  "is_follow": true
+}
+`
+
+var successRespGetFollowStateFalse = `
+{
+  "is_follow": false
+}
+`
+
+func TestGetFollowState(t *testing.T) {
+	type args struct {
+		followedUserName string
+	}
+	tests := []struct {
+		name       string
+		args       args
+		method     string
+		want       string
+		wantStatus int
+	}{
+		{
+			name:       "success true",
+			args:       args{followedUserName: dummy.User2.Name},
+			method:     http.MethodGet,
+			want:       successRespGetFollowStateTrue,
+			wantStatus: http.StatusOK,
+		},
+		{
+			name:       "success false",
+			args:       args{followedUserName: dummy.User2.Name},
+			method:     http.MethodGet,
+			want:       successRespGetFollowStateFalse,
+			wantStatus: http.StatusOK,
+		},
+		{
+			name:       "error empty user_name",
+			args:       args{},
+			method:     http.MethodGet,
+			want:       errRespFollowWithoutUserName,
+			wantStatus: http.StatusBadRequest,
+		},
+		{
+			name:       "error user_name not alphanumeric",
+			args:       args{followedUserName: "test_2"},
+			method:     http.MethodGet,
+			want:       errRespFollowUserNameNotAlphanumeric,
+			wantStatus: http.StatusBadRequest,
+		},
+		{
+			name:       "error forbidden guest user",
+			args:       args{followedUserName: dummy.User2.Name},
+			method:     http.MethodGet,
+			want:       testingHelper.ErrForbidden,
+			wantStatus: http.StatusForbidden,
+		},
+		{
+			name:       "not allowed method",
+			args:       args{},
+			method:     http.MethodHead,
+			want:       testingHelper.ErrNotAllowedMethod,
+			wantStatus: http.StatusMethodNotAllowed,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			// init
+			db := testingHelper.SetupDBTest()
+			defer testingHelper.TeardownDBTest(db)
+			testingHelper.SetTestTime()
+			defer testingHelper.ResetTime()
+
+			// insert dummy data
+			userRepo := repository.NewUserRepository(db)
+			err := userRepo.Create(context.Background(), &dummy.User1)
+			assert.NoError(t, err)
+			err = userRepo.Create(context.Background(), &dummy.User2)
+			assert.NoError(t, err)
+			if tt.want == successRespGetFollowStateTrue {
+				followRepo := repository.NewFollowRepository(db)
+				err := followRepo.Create(context.Background(), &dummy.Follow1to2)
+				assert.NoError(t, err)
+			}
+
+			// http request
+			req, err := http.NewRequest(tt.method, fmt.Sprintf("/follows/%s", tt.args.followedUserName), nil)
+			assert.NoError(t, err)
+			vars := map[string]string{"followed_user_name": tt.args.followedUserName}
+			req = mux.SetURLVars(req, vars)
+			if tt.name == "error forbidden guest user" {
+				req = req.WithContext(httpContext.SetTokenUserName(req.Context(), helper.GuestUserName))
+			} else {
+				req = req.WithContext(httpContext.SetTokenUserName(req.Context(), dummy.User1.Name))
+			}
+			resp := httptest.NewRecorder()
+
+			// test target
+			FollowController(resp, req)
+			assert.NoError(t, err)
 
 			// assert http
 			assert.Equal(t, tt.wantStatus, resp.Code)
