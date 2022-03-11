@@ -1,9 +1,9 @@
 import React, { useState } from "react";
-import { registerUser } from "./User";
+import { registerUser } from "./UserLibrary";
 import { Alert } from "react-bootstrap";
 import "./UserRegistration.css";
 
-const UserRegistration = props => {
+const UserRegistration = (props) => {
   const [successMessage, setSuccessMessage] = useState("");
   const [errMessage, setErrMessage] = useState("");
 
@@ -11,14 +11,14 @@ const UserRegistration = props => {
     userName: "",
     email: "",
     password: "",
-    confirmPassword: ""
+    confirmPassword: "",
   });
 
-  const handleChange = e => {
+  const handleChange = (e) => {
     const { id, value } = e.target;
-    setState(prevState => ({
+    setState((prevState) => ({
       ...prevState,
-      [id]: value
+      [id]: value,
     }));
   };
 
@@ -32,14 +32,12 @@ const UserRegistration = props => {
           redirectToLogin();
         }, 2000);
       })
-      .catch(error => {
+      .catch((error) => {
         if (error.response) {
           setErrMessage(error.response.data.message);
-        }
-        else if (error.request) {
+        } else if (error.request) {
           setErrMessage(error.request.data.message);
-        }
-        else {
+        } else {
           console.log(error);
         }
       });
@@ -49,7 +47,7 @@ const UserRegistration = props => {
     props.history.push("/login");
   };
 
-  const handleSubmitClick = e => {
+  const onClickHandleSubmitClick = (e) => {
     e.preventDefault();
     if (state.password === state.confirmPassword) {
       registerUserServer();
@@ -124,7 +122,7 @@ const UserRegistration = props => {
         <button
           type="submit"
           className="btn btn-primary"
-          onClick={handleSubmitClick}
+          onClick={() => onClickHandleSubmitClick()}
         >
           Register
         </button>

@@ -1,8 +1,8 @@
 import React from "react";
 import { Redirect } from "react-router-dom";
-import { isLoggedIn } from "./User";
+import { isLoggedIn } from "./UserLibrary";
 
-const Auth = props =>
+const Auth = (props) =>
   isLoggedIn() ? props.children : <Redirect to={"/login"} />;
 
 export default Auth;

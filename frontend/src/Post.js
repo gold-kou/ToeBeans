@@ -19,7 +19,7 @@ const Post = forwardRef(
       uploadedAt,
       likedCount,
       liked,
-      loginUserName
+      loginUserName,
     },
     ref
   ) => {
@@ -29,33 +29,30 @@ const Post = forwardRef(
     const [errMessage, setErrMessage] = useState("");
     const history = useHistory();
 
-    const deletePost = async () => {
+    const onClickDeletePost = async () => {
       await axios
         .delete(`/postings/${postingID}`)
         .then(() => {
           setSuccessMessage("success delete post");
         })
-        .catch(error => {
+        .catch((error) => {
           if (error.response) {
             if (error.response.data.status === 401) {
               localStorage.removeItem("isLoggedIn");
               localStorage.removeItem("loginUserName");
               history.push({ pathname: "login" });
-            }
-            else {
+            } else {
               setErrMessage(error.response.data.message);
             }
-          }
-          else if (error.request) {
+          } else if (error.request) {
             setErrMessage(error.request.data.message);
-          }
-          else {
+          } else {
             console.log(error);
           }
         });
     };
 
-    const changeLiked = () => {
+    const onClickChangeLiked = () => {
       if (isLiked === false) {
         // POST
         axios
@@ -64,21 +61,18 @@ const Post = forwardRef(
             setCount(count + 1);
             toggleLiked(!isLiked);
           })
-          .catch(error => {
+          .catch((error) => {
             if (error.response) {
               if (error.response.data.status === 401) {
                 localStorage.removeItem("isLoggedIn");
                 localStorage.removeItem("loginUserName");
                 history.push({ pathname: "login" });
-              }
-              else {
+              } else {
                 setErrMessage(error.response.data.message);
               }
-            }
-            else if (error.request) {
+            } else if (error.request) {
               setErrMessage(error.request.data.message);
-            }
-            else {
+            } else {
               console.log(error);
             }
           });
@@ -90,21 +84,18 @@ const Post = forwardRef(
             setCount(count - 1);
             toggleLiked(!isLiked);
           })
-          .catch(error => {
+          .catch((error) => {
             if (error.response) {
               if (error.response.data.status === 401) {
                 localStorage.removeItem("isLoggedIn");
                 localStorage.removeItem("loginUserName");
                 history.push({ pathname: "login" });
-              }
-              else {
+              } else {
                 setErrMessage(error.response.data.message);
               }
-            }
-            else if (error.request) {
+            } else if (error.request) {
               setErrMessage(error.request.data.message);
-            }
-            else {
+            } else {
               console.log(error);
             }
           });
@@ -128,7 +119,7 @@ const Post = forwardRef(
                 variant="outline-danger"
                 size="sm"
                 className="float-right"
-                onClick={deletePost}
+                onClick={() => onClickDeletePost()}
               >
                 Delete
               </Button>
@@ -142,7 +133,7 @@ const Post = forwardRef(
           <img className="post__image" src={imageURL} alt="" />
 
           <div className="post__footer">
-            <IconButton onClick={changeLiked}>
+            <IconButton onClick={() => onClickChangeLiked()}>
               {isLiked ? (
                 <FavoriteIcon fontSize="small" color={"secondary"} />
               ) : (

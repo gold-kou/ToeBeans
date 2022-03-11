@@ -1,63 +1,57 @@
 import React, { useState } from "react";
 import { Form, Button, Alert } from "react-bootstrap";
 import { useHistory, withRouter } from "react-router-dom";
-import { login } from "./User";
+import { login } from "./UserLibrary";
 
 import "./Login.css";
 
-const Login = props => {
+const Login = (props) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [errMessage, setErrMessage] = useState("");
   const history = useHistory();
 
-  async function loginClick() {
+  async function onClickLogin() {
     login(email, password)
       .then(() => {
         localStorage.setItem("isLoggedIn", true);
         props.history.push({ pathname: "home" });
       })
-      .catch(error => {
+      .catch((error) => {
         if (error.response) {
           if (error.response.data.status === 401) {
             localStorage.removeItem("isLoggedIn");
             localStorage.removeItem("loginUserName");
             history.push({ pathname: "login" });
-          }
-          else {
+          } else {
             setErrMessage(error.response.data.message);
           }
-        }
-        else if (error.request) {
+        } else if (error.request) {
           setErrMessage(error.request.data.message);
-        }
-        else {
+        } else {
           console.log(error);
         }
       });
   }
 
-  async function guestUserLoginClick() {
+  async function onClickGuestUserLogin() {
     login("guestUser@example.com", "Guest1234")
       .then(() => {
         localStorage.setItem("isLoggedIn", true);
         props.history.push({ pathname: "home" });
       })
-      .catch(error => {
+      .catch((error) => {
         if (error.response) {
           if (error.response.data.status === 401) {
             localStorage.removeItem("isLoggedIn");
             localStorage.removeItem("loginUserName");
             history.push({ pathname: "login" });
-          }
-          else {
+          } else {
             setErrMessage(error.response.data.message);
           }
-        }
-        else if (error.request) {
+        } else if (error.request) {
           setErrMessage(error.request.data.message);
-        }
-        else {
+        } else {
           console.log(error);
         }
       });
@@ -77,7 +71,7 @@ const Login = props => {
         <Form.Control
           type="email"
           placeholder="Email"
-          onChange={e => {
+          onChange={(e) => {
             setEmail(e.target.value);
           }}
           value={email}
@@ -91,7 +85,7 @@ const Login = props => {
         <Form.Control
           type="password"
           placeholder="Password"
-          onChange={e => {
+          onChange={(e) => {
             setPassword(e.target.value);
           }}
           value={password}
@@ -102,7 +96,7 @@ const Login = props => {
         <Button
           variant="primary"
           type="button"
-          onClick={loginClick}
+          onClick={() => onClickLogin()}
           className="loginButton"
         >
           Login
@@ -117,13 +111,15 @@ const Login = props => {
         <Button
           variant="info"
           type="button"
-          onClick={guestUserLoginClick}
+          onClick={() => onClickGuestUserLogin()}
           className="loginButton"
         >
           Guest Login
         </Button>
       </div>
-      <div className="text-muted center">You can also login as a guest user.</div>
+      <div className="text-muted center">
+        You can also login as a guest user.
+      </div>
 
       <br />
       <br />
