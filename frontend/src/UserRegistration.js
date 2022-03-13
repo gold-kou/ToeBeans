@@ -60,11 +60,9 @@ const UserRegistration = (props) => {
       {successMessage && <Alert variant="success">{successMessage}</Alert>}
       {errMessage && <Alert variant="danger">{errMessage}</Alert>}
 
-      <p>
-        <div className="center">
-          <h2>User Registration</h2>
-        </div>
-      </p>
+      <div className="center">
+        <h2>User Registration</h2>
+      </div>
 
       <form>
         <div className="form-group text-left">

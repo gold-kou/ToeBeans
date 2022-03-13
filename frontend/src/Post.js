@@ -1,7 +1,7 @@
 import React, { useState, forwardRef } from "react";
 import { Link, useHistory } from "react-router-dom";
 import { Alert, Button } from "react-bootstrap";
-import { Avatar, IconButton } from "@material-ui/core";
+import { IconButton } from "@material-ui/core";
 import FavoriteIcon from "@material-ui/icons/Favorite";
 import FavoriteBorderIcon from "@material-ui/icons/FavoriteBorder";
 import axios from "axios";

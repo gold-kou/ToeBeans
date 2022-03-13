@@ -72,7 +72,7 @@ function ChangePassword() {
 
             <div className="change-password">
               <form onSubmit={updatePassword}>
-                <FormGroup bsSize="large" controlId="oldPassword">
+                <FormGroup bssize="large" controlId="oldPassword">
                   <FormLabel>Old Password</FormLabel>
                   <FormControl
                     type="password"
@@ -81,7 +81,7 @@ function ChangePassword() {
                   />
                 </FormGroup>
                 <hr />
-                <FormGroup bsSize="large" controlId="newPassword">
+                <FormGroup bssize="large" controlId="newPassword">
                   <FormLabel>New Password</FormLabel>
                   <FormControl
                     type="password"
@@ -89,7 +89,7 @@ function ChangePassword() {
                     value={fields.newPassword}
                   />
                 </FormGroup>
-                <FormGroup bsSize="large" controlId="confirmPassword">
+                <FormGroup bssize="large" controlId="confirmPassword">
                   <FormLabel>Confirm Password</FormLabel>
                   <FormControl
                     type="password"
@@ -100,7 +100,7 @@ function ChangePassword() {
                 <LoaderButton
                   block
                   type="submit"
-                  bsSize="large"
+                  bssize="large"
                   disabled={!validateForm()}
                   isLoading={isChanging}
                 >

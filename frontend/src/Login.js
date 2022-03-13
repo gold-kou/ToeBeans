@@ -60,11 +60,9 @@ const Login = (props) => {
   return (
     <Form className="registrationLoginForm">
       {errMessage && <Alert variant="danger">{errMessage}</Alert>}
-      <p>
-        <div className="center">
-          <h2>Login</h2>
-        </div>
-      </p>
+      <div className="center">
+        <h2>Login</h2>
+      </div>
 
       <Form.Group controlId="email">
         <Form.Label>Email</Form.Label>

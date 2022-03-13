@@ -58,7 +58,7 @@ const MyPage = () => {
           console.log(error);
         }
       });
-  }, [userName]);
+  }, [userName, history]);
 
   const getUserPosts = async () => {
     await axios
@@ -128,8 +128,7 @@ const MyPage = () => {
 
               <Container className="mt-3 mb-5 ml-2">
                 <Row>
-                  <Col className="ml-5">
-                    {/* <img src={avator} alt="" /> */}
+                  <Col className="ml-1">
                     {userName}
                     <div className="mini-character">
                       since {createdAt.split("T")[0]}
@@ -138,48 +137,48 @@ const MyPage = () => {
                 </Row>
 
                 <Row className="mt-5 userpage-data">
-                  <Col sm-3 md-5>
+                  <Col sm-3="true" md-5="true">
                     like count
                   </Col>
-                  <Col sm-3 md-5>
+                  <Col sm-3="true" md-5="true">
                     liked count
                   </Col>
                 </Row>
                 <Row className="mt-1 userpage-data">
-                  <Col sm-3 md-5>
+                  <Col sm-3="true" md-5="true">
                     {likeCount}
                   </Col>
-                  <Col sm-3 md-5>
+                  <Col sm-3="true" md-5="true">
                     {likedCount}
                   </Col>
                 </Row>
                 <Row className="mt-3 userpage-data">
-                  <Col sm-3 md-5>
+                  <Col sm-3="true" md-5="true">
                     follow count
                   </Col>
-                  <Col sm-3 md-5>
+                  <Col sm-3="true" md-5="true">
                     followed count
                   </Col>
                 </Row>
                 <Row className="mt-1 userpage-data">
-                  <Col sm-3 md-5>
+                  <Col sm-3="true" md-5="true">
                     {followCount}
                   </Col>
-                  <Col sm-3 md-5>
+                  <Col sm-3="true" md-5="true">
                     {followedCount}
                   </Col>
                 </Row>
                 <Row className="mt-3 userpage-data">
-                  <Col sm-3 md-5>
+                  <Col sm-3="true" md-5="true">
                     post count
                   </Col>
-                  <Col sm-3 md-5></Col>
+                  <Col sm-3="true" md-5="true"></Col>
                 </Row>
                 <Row className="mt-1 userpage-data">
-                  <Col sm-3 md-5>
+                  <Col sm-3="true" md-5="true">
                     {postingCount}
                   </Col>
-                  <Col sm-3 md-5></Col>
+                  <Col sm-3="true" md-5="true"></Col>
                 </Row>
 
                 <Form className="mt-5">
@@ -197,7 +196,7 @@ const MyPage = () => {
                     onClick={() => onClickUpdateSelfIntroduction()}
                     variant="contained"
                     color="primary"
-                    size="sm"
+                    size="small"
                     className="float-right"
                   >
                     Update

@@ -4,7 +4,6 @@ import { Icon } from "@iconify/react";
 import catIcon from "@iconify-icons/mdi/cat";
 import SidebarOption from "./SidebarOption";
 import HomeIcon from "@material-ui/icons/Home";
-import NotificationsNoneIcon from "@material-ui/icons/NotificationsNone";
 import PermIdentityIcon from "@material-ui/icons/PermIdentity";
 import SettingsIcon from "@material-ui/icons/Settings";
 
@@ -17,7 +16,6 @@ function Sidebar() {
       <Link to="/home">
         <SidebarOption Icon={HomeIcon} text="Home" />
       </Link>
-      {/* <SidebarOption Icon={NotificationsNoneIcon} text="Notifications" /> */}
       <Link to="/mypage">
         <SidebarOption Icon={PermIdentityIcon} text="My Page" />
       </Link>
