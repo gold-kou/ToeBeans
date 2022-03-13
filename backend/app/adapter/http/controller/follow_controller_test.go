@@ -9,7 +9,6 @@ import (
 	"testing"
 
 	httpContext "github.com/gold-kou/ToeBeans/backend/app/adapter/http/context"
-	"github.com/gold-kou/ToeBeans/backend/app/adapter/http/helper"
 
 	"github.com/gorilla/mux"
 
@@ -76,13 +75,6 @@ func TestRegisterFollow(t *testing.T) {
 			wantStatus: http.StatusBadRequest,
 		},
 		{
-			name:       "error forbidden guest user",
-			args:       args{followedUserName: dummy.User2.Name},
-			method:     http.MethodPost,
-			want:       testingHelper.ErrForbidden,
-			wantStatus: http.StatusForbidden,
-		},
-		{
 			name:         "error duplicate follow",
 			args:         args{followedUserName: dummy.User2.Name},
 			duplicateErr: true,
@@ -118,11 +110,7 @@ func TestRegisterFollow(t *testing.T) {
 			assert.NoError(t, err)
 			vars := map[string]string{"followed_user_name": tt.args.followedUserName}
 			req = mux.SetURLVars(req, vars)
-			if tt.name == "error forbidden guest user" {
-				req = req.WithContext(httpContext.SetTokenUserName(req.Context(), helper.GuestUserName))
-			} else {
-				req = req.WithContext(httpContext.SetTokenUserName(req.Context(), dummy.User1.Name))
-			}
+			req = req.WithContext(httpContext.SetTokenUserName(req.Context(), dummy.User1.Name))
 			resp := httptest.NewRecorder()
 
 			// test target
@@ -222,13 +210,6 @@ func TestGetFollowState(t *testing.T) {
 			wantStatus: http.StatusBadRequest,
 		},
 		{
-			name:       "error forbidden guest user",
-			args:       args{followedUserName: dummy.User2.Name},
-			method:     http.MethodGet,
-			want:       testingHelper.ErrForbidden,
-			wantStatus: http.StatusForbidden,
-		},
-		{
 			name:       "not allowed method",
 			args:       args{},
 			method:     http.MethodHead,
@@ -261,11 +242,7 @@ func TestGetFollowState(t *testing.T) {
 			assert.NoError(t, err)
 			vars := map[string]string{"followed_user_name": tt.args.followedUserName}
 			req = mux.SetURLVars(req, vars)
-			if tt.name == "error forbidden guest user" {
-				req = req.WithContext(httpContext.SetTokenUserName(req.Context(), helper.GuestUserName))
-			} else {
-				req = req.WithContext(httpContext.SetTokenUserName(req.Context(), dummy.User1.Name))
-			}
+			req = req.WithContext(httpContext.SetTokenUserName(req.Context(), dummy.User1.Name))
 			resp := httptest.NewRecorder()
 
 			// test target
@@ -327,13 +304,6 @@ func TestDeleteFollow(t *testing.T) {
 			wantStatus: http.StatusBadRequest,
 		},
 		{
-			name:       "error forbidden guest user",
-			args:       args{followedUserName: dummy.User2.Name},
-			method:     http.MethodDelete,
-			want:       testingHelper.ErrForbidden,
-			wantStatus: http.StatusForbidden,
-		},
-		{
 			name:       "error not existing followed user name",
 			args:       args{followedUserName: "notExisitngUser"},
 			method:     http.MethodDelete,
@@ -384,11 +354,7 @@ func TestDeleteFollow(t *testing.T) {
 			assert.NoError(t, err)
 			vars := map[string]string{"followed_user_name": tt.args.followedUserName}
 			req = mux.SetURLVars(req, vars)
-			if tt.name == "error forbidden guest user" {
-				req = req.WithContext(httpContext.SetTokenUserName(req.Context(), helper.GuestUserName))
-			} else {
-				req = req.WithContext(httpContext.SetTokenUserName(req.Context(), dummy.User1.Name))
-			}
+			req = req.WithContext(httpContext.SetTokenUserName(req.Context(), dummy.User1.Name))
 			resp := httptest.NewRecorder()
 
 			// test target
