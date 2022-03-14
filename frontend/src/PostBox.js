@@ -8,8 +8,7 @@ import { isCorrectSize, getBase64 } from "./libs/fileLibs";
 
 import "./PostBox.css";
 
-// TODO 優先度低（プレビュー、fileボタン）
-function PostBox(onFileSelect) {
+function PostBox() {
   const [title, setTitle] = useState("");
   const [image, setImage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
@@ -73,7 +72,7 @@ function PostBox(onFileSelect) {
         <Form.Group controlId="title">
           <Form.Control
             type="text"
-            placeholder="Title here"
+            placeholder="short message here"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             className="mt-2"

@@ -33,7 +33,6 @@ const UserPage = (props) => {
   useEffect(() => {
     getUserInfo({ userName })
       .then((response) => {
-        // setAvator(response.data.icon);
         setSelfIntroduction(response.data.self_introduction);
         setPostingCount(response.data.posting_count);
         setLikeCount(response.data.like_count);
@@ -52,7 +51,7 @@ const UserPage = (props) => {
             setErrMessage(error.response.data.message);
           }
         } else if (error.request) {
-          setErrMessage(error.request.data.message);
+          console.log(error.request);
         } else {
           console.log(error);
         }
@@ -83,7 +82,7 @@ const UserPage = (props) => {
 
   const onClickFollow = async () => {
     follow({ userName })
-      .then((response) => {
+      .then(() => {
         setIsFollow(true);
       })
       .catch((error) => {
@@ -96,7 +95,7 @@ const UserPage = (props) => {
             setErrMessage(error.response.data.message);
           }
         } else if (error.request) {
-          setErrMessage(error.request.data.message);
+          console.log(error.request);
         } else {
           console.log(error);
         }
@@ -118,7 +117,7 @@ const UserPage = (props) => {
             setErrMessage(error.response.data.message);
           }
         } else if (error.request) {
-          setErrMessage(error.request.data.message);
+          console.log(error.request);
         } else {
           console.log(error);
         }
@@ -147,7 +146,7 @@ const UserPage = (props) => {
             setErrMessage(error.response.data.message);
           }
         } else if (error.request) {
-          setErrMessage(error.request.data.message);
+          console.log(error.request);
         } else {
           console.log(error);
         }
@@ -169,7 +168,7 @@ const UserPage = (props) => {
             setErrMessage(error.response.data.message);
           }
         } else if (error.request) {
-          setErrMessage(error.request.data.message);
+          console.log(error.request);
         } else {
           console.log(error);
         }

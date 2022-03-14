@@ -27,7 +27,7 @@ const Login = (props) => {
             setErrMessage(error.response.data.message);
           }
         } else if (error.request) {
-          setErrMessage(error.request.data.message);
+          console.log(error.request);
         } else {
           console.log(error);
         }
@@ -50,7 +50,7 @@ const Login = (props) => {
             setErrMessage(error.response.data.message);
           }
         } else if (error.request) {
-          setErrMessage(error.request.data.message);
+          console.log(error.request);
         } else {
           console.log(error);
         }
@@ -101,11 +101,7 @@ const Login = (props) => {
         </Button>
       </div>
 
-      <br />
-      <br />
-      <br />
-
-      <div className="center">
+      <div className="center mt-4">
         <Button
           variant="info"
           type="button"

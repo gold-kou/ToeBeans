@@ -23,7 +23,6 @@ function Feed() {
     getMyUserInfo()
       .then((response) => {
         localStorage.setItem("loginUserName", response.data.user_name);
-        // setAvator(response.data.icon);
       })
       .catch((error) => {
         if (error.response) {
@@ -35,7 +34,7 @@ function Feed() {
             setErrMessage(error.response.data.message);
           }
         } else if (error.request) {
-          setErrMessage(error.request.data.message);
+          setErrMessage(error.request.data);
         } else {
           console.log(error);
         }
@@ -65,7 +64,7 @@ function Feed() {
             setErrMessage(error.response.data.message);
           }
         } else if (error.request) {
-          setErrMessage(error.request.data.message);
+          setErrMessage(error.request.data);
         } else {
           console.log(error);
         }
@@ -76,11 +75,11 @@ function Feed() {
     <div className="main">
       <Container className="background">
         <Row>
-          <Col xs={4} sm={4} md={3} lg={3}>
+          <Col xs={4} sm={4} md={3} lg={3} xl={3}>
             <Sidebar />
           </Col>
 
-          <Col xs={8} sm={8} md={6} lg={6}>
+          <Col xs={8} sm={8} md={6} lg={6} xl={6}>
             <div className="feed">
               <div className="content_header">
                 <h2>Home</h2>

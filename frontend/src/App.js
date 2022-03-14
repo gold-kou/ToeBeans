@@ -12,6 +12,7 @@ import Logout from "./Logout";
 import Main from "./Main";
 import Settings from "./Settings";
 import ChangePassword from "./ChangePassword";
+import UserDelete from "./UserDelete";
 
 axios.defaults.baseURL = process.env.REACT_APP_BACK_BASE_URL;
 axios.defaults.withCredentials = true;
@@ -43,6 +44,7 @@ function App() {
           ></Route>
           <Route exact path="/settings" component={Settings} />
           <Route exact path="/change_password" component={ChangePassword} />
+          <Route exact path="/delete_user" component={UserDelete} />
         </Auth>
       </Switch>
     </Router>

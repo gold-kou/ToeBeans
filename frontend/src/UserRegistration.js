@@ -36,7 +36,7 @@ const UserRegistration = (props) => {
         if (error.response) {
           setErrMessage(error.response.data.message);
         } else if (error.request) {
-          setErrMessage(error.request.data.message);
+          console.log(error.request);
         } else {
           console.log(error);
         }
