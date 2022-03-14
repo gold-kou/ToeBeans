@@ -27,7 +27,7 @@ const Login = (props) => {
             setErrMessage(error.response.data.message);
           }
         } else if (error.request) {
-          setErrMessage(error.request.data.message);
+          console.log(error.request);
         } else {
           console.log(error);
         }
@@ -50,7 +50,7 @@ const Login = (props) => {
             setErrMessage(error.response.data.message);
           }
         } else if (error.request) {
-          setErrMessage(error.request.data.message);
+          console.log(error.request);
         } else {
           console.log(error);
         }
@@ -60,11 +60,9 @@ const Login = (props) => {
   return (
     <Form className="registrationLoginForm">
       {errMessage && <Alert variant="danger">{errMessage}</Alert>}
-      <p>
-        <div className="center">
-          <h2>Login</h2>
-        </div>
-      </p>
+      <div className="center">
+        <h2>Login</h2>
+      </div>
 
       <Form.Group controlId="email">
         <Form.Label>Email</Form.Label>
@@ -103,11 +101,7 @@ const Login = (props) => {
         </Button>
       </div>
 
-      <br />
-      <br />
-      <br />
-
-      <div className="center">
+      <div className="center mt-4">
         <Button
           variant="info"
           type="button"

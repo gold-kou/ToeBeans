@@ -36,7 +36,7 @@ const UserRegistration = (props) => {
         if (error.response) {
           setErrMessage(error.response.data.message);
         } else if (error.request) {
-          setErrMessage(error.request.data.message);
+          console.log(error.request);
         } else {
           console.log(error);
         }
@@ -60,11 +60,9 @@ const UserRegistration = (props) => {
       {successMessage && <Alert variant="success">{successMessage}</Alert>}
       {errMessage && <Alert variant="danger">{errMessage}</Alert>}
 
-      <p>
-        <div className="center">
-          <h2>User Registration</h2>
-        </div>
-      </p>
+      <div className="center">
+        <h2>User Registration</h2>
+      </div>
 
       <form>
         <div className="form-group text-left">

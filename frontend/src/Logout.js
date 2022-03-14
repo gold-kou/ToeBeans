@@ -10,11 +10,19 @@ const Logout = () => {
     }
   }, []);
 
+  function onClickRefreshPage() {
+    setTimeout(() => {
+      window.location.reload(false);
+    }, 300);
+  }
+
   return (
     <div className="text-center">
       <h2>Logout Page</h2>
       <div>
-        <Link to="/login">Login</Link>
+        <Link to="/login" onClick={onClickRefreshPage}>
+          Login
+        </Link>
       </div>
     </div>
   );

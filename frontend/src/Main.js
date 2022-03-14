@@ -6,6 +6,8 @@ import UserPage from "./UserPage";
 import MyPage from "./MyPage";
 import Settings from "./Settings";
 import ChangePassword from "./ChangePassword";
+import UserDelete from "./UserDelete";
+import Logout from "./Logout";
 import "./Main.css";
 
 function Main() {
@@ -27,6 +29,8 @@ function Main() {
             path="/change_password"
             component={ChangePassword}
           ></Route>
+          <Route exact path="/delete_user" component={UserDelete} />
+          <Route exact path="/logout" component={Logout} />
         </Switch>
       </Router>
     </div>

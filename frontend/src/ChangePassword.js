@@ -8,7 +8,7 @@ import {
   Row,
   Col,
 } from "react-bootstrap";
-
+import { useHistory } from "react-router-dom";
 import Sidebar from "./Sidebar";
 import { changePassword } from "./UserLibrary";
 import LoaderButton from "./LoaderButton";
@@ -23,7 +23,7 @@ function ChangePassword() {
     confirmPassword: "",
   });
   const [isChanging, setIsChanging] = useState(false);
-
+  const history = useHistory();
   const [successMessage, setSuccessMessage] = useState("");
   const [errMessage, setErrMessage] = useState("");
 
@@ -47,9 +47,15 @@ function ChangePassword() {
       .catch((error) => {
         setIsChanging(false);
         if (error.response) {
-          setErrMessage(error.response.data.message);
+          if (error.response.data.status === 401) {
+            localStorage.removeItem("isLoggedIn");
+            localStorage.removeItem("loginUserName");
+            history.push({ pathname: "login" });
+          } else {
+            setErrMessage(error.response.data.message);
+          }
         } else if (error.request) {
-          setErrMessage(error.request.data.message);
+          console.log(error.request);
         } else {
           console.log(error);
         }
@@ -72,7 +78,7 @@ function ChangePassword() {
 
             <div className="change-password">
               <form onSubmit={updatePassword}>
-                <FormGroup bsSize="large" controlId="oldPassword">
+                <FormGroup bssize="large" controlId="oldPassword">
                   <FormLabel>Old Password</FormLabel>
                   <FormControl
                     type="password"
@@ -81,7 +87,7 @@ function ChangePassword() {
                   />
                 </FormGroup>
                 <hr />
-                <FormGroup bsSize="large" controlId="newPassword">
+                <FormGroup bssize="large" controlId="newPassword">
                   <FormLabel>New Password</FormLabel>
                   <FormControl
                     type="password"
@@ -89,7 +95,7 @@ function ChangePassword() {
                     value={fields.newPassword}
                   />
                 </FormGroup>
-                <FormGroup bsSize="large" controlId="confirmPassword">
+                <FormGroup bssize="large" controlId="confirmPassword">
                   <FormLabel>Confirm Password</FormLabel>
                   <FormControl
                     type="password"
@@ -100,7 +106,7 @@ function ChangePassword() {
                 <LoaderButton
                   block
                   type="submit"
-                  bsSize="large"
+                  bssize="large"
                   disabled={!validateForm()}
                   isLoading={isChanging}
                 >

@@ -22,11 +22,16 @@ export async function getUserInfo(userName) {
   return await axios.get(`/users?user_name=${userName.userName}`);
 }
 
-export async function updateUser(newPassword, avator, selfIntroduction, userName) {
+export async function updateUser(
+  newPassword,
+  avator,
+  selfIntroduction,
+  userName
+) {
   const reqBody = {
     password: newPassword,
     icon: avator,
-    self_introduction: selfIntroduction
+    self_introduction: selfIntroduction,
   };
   return await axios.put(`/users/${userName}`, reqBody);
 }
@@ -38,7 +43,7 @@ export async function deleteUser(userName) {
 export async function changePassword(oldPassword, newPassword) {
   const reqBody = {
     old_password: oldPassword,
-    new_password: newPassword
+    new_password: newPassword,
   };
   return await axios.put("/password", reqBody);
 }
