@@ -616,6 +616,22 @@ func TestDeleteUser(t *testing.T) {
 	}
 }
 
+var successRespUserActivationHTML = `<!DOCTYPE html>
+<html lang='en'>
+<head>
+    <meta charset='UTF-8'>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+    <title>User Activation</title>
+</head>
+<body>
+    <h1>Welcome to ToeBeans!</h1>
+    User activation is success!
+	<br>
+	<br>
+	<a href="http://localhost:3000/login">Login Page</a>
+</body>
+</html>`
+
 var errRespUserActivationWithoutUserName = `
 {
   "status": 400,
@@ -665,14 +681,13 @@ func TestUserActivation(t *testing.T) {
 		want       string
 		wantStatus int
 	}{
-		// メール飛んでしまうのでコメントアウト
-		//{
-		//	name:       "success",
-		//	args:       args{userName: dummy.User1.Name, activationKey: dummy.User1.ActivationKey},
-		//	method:     http.MethodGet,
-		//	want:       testingHelper.RespSimpleSuccess,
-		//	wantStatus: http.StatusOK,
-		//},
+		{
+			name:       "success",
+			args:       args{userName: dummy.User1.Name, activationKey: dummy.User1.ActivationKey},
+			method:     http.MethodGet,
+			want:       successRespUserActivationHTML,
+			wantStatus: http.StatusOK,
+		},
 		{
 			name:       "error user_name is empty",
 			args:       args{activationKey: dummy.User1.ActivationKey},
@@ -766,7 +781,11 @@ func TestUserActivation(t *testing.T) {
 			respBodyByte, err := ioutil.ReadAll(resp.Body)
 			assert.NoError(t, err)
 			respBody := string(respBodyByte)
-			assert.JSONEq(t, tt.want, respBody)
+			if tt.wantStatus == 200 {
+				assert.Equal(t, tt.want, respBody)
+			} else {
+				assert.JSONEq(t, tt.want, respBody)
+			}
 		})
 	}
 }
