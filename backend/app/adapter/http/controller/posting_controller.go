@@ -70,7 +70,7 @@ func PostingController(w http.ResponseWriter, r *http.Request) {
 				w.Header().Set(helper.HeaderKeyContentType, helper.HeaderValueApplicationJSON)
 				w.WriteHeader(http.StatusOK)
 				if err := json.NewEncoder(w).Encode(resp); err != nil {
-					panic(err.Error())
+					log.Println(err.Error())
 				}
 			case *helper.BadRequestError:
 				helper.ResponseBadRequest(w, err.Error())

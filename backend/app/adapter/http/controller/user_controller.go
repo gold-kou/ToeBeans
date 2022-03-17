@@ -2,6 +2,7 @@ package controller
 
 import (
 	"encoding/json"
+	"fmt"
 	"html/template"
 	"io/ioutil"
 	"log"
@@ -45,7 +46,7 @@ func UserController(w http.ResponseWriter, r *http.Request) {
 				w.Header().Set(helper.HeaderKeyContentType, helper.HeaderValueApplicationJSON)
 				w.WriteHeader(http.StatusOK)
 				if err := json.NewEncoder(w).Encode(resp); err != nil {
-					panic(err.Error())
+					log.Println(fmt.Errorf("error: " + err.Error()))
 				}
 			case *helper.BadRequestError:
 				helper.ResponseBadRequest(w, err.Error())
@@ -134,10 +135,10 @@ func UserController(w http.ResponseWriter, r *http.Request) {
 				w.Header().Set(helper.HeaderKeyContentType, helper.HeaderValueHTML)
 				t, err := template.ParseFiles("../template/user-activation.html")
 				if err != nil {
-					panic(err.Error())
+					log.Println(err.Error())
 				}
 				if err := t.Execute(w, params); err != nil {
-					panic(err.Error())
+					log.Println(err.Error())
 				}
 			case *helper.BadRequestError:
 				helper.ResponseBadRequest(w, err.Error())

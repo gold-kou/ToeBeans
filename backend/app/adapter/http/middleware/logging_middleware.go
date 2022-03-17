@@ -1,12 +1,13 @@
 package middleware
 
 import (
+	"log"
 	"net/http"
 	"time"
 
 	requestContext "github.com/gold-kou/ToeBeans/backend/app/adapter/http/context"
 	"github.com/gold-kou/ToeBeans/backend/app/adapter/http/helper"
-	"github.com/gold-kou/ToeBeans/backend/app/adapter/http/log"
+	httpLog "github.com/gold-kou/ToeBeans/backend/app/adapter/http/log"
 )
 
 type StatusResponseWriter struct {
@@ -20,16 +21,16 @@ func (w *StatusResponseWriter) WriteHeader(statusCode int) {
 }
 
 type LoggingMiddleware struct {
-	logger *log.Logger
+	logger *httpLog.Logger
 }
 
-func NewLoggingMiddleware(logger *log.Logger) LoggingMiddleware {
+func NewLoggingMiddleware(logger *httpLog.Logger) LoggingMiddleware {
 	return LoggingMiddleware{logger: logger}
 }
 
 func (mw LoggingMiddleware) Middleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		accessLog := &log.AccessLog{
+		accessLog := &httpLog.AccessLog{
 			Method:        r.Method,
 			Host:          r.Host,
 			Path:          r.URL.Path,
@@ -49,7 +50,7 @@ func (mw LoggingMiddleware) Middleware(next http.Handler) http.Handler {
 		accessLog.Status = sw.status
 		requestedAt, e := requestContext.GetRequestedAt(ctx)
 		if e != nil {
-			panic(e)
+			log.Println(e.Error())
 		} else {
 			accessLog.Latency = time.Since(requestedAt)
 		}

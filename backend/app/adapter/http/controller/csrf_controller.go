@@ -2,6 +2,7 @@ package controller
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
 
 	"github.com/gorilla/csrf"
@@ -22,7 +23,7 @@ func CSRFTokenController(w http.ResponseWriter, r *http.Request) {
 			CsrfToken: token,
 		}
 		if err := json.NewEncoder(w).Encode(resp); err != nil {
-			panic(err.Error())
+			log.Println(err.Error())
 		}
 	default:
 		methods := []string{http.MethodGet}

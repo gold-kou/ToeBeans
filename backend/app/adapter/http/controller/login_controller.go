@@ -40,7 +40,7 @@ func LoginController(w http.ResponseWriter, r *http.Request) {
 				IdToken: idToken,
 			}
 			if err := json.NewEncoder(w).Encode(resp); err != nil {
-				panic(err.Error())
+				log.Println(err.Error())
 			}
 		case *helper.BadRequestError:
 			helper.ResponseBadRequest(w, err.Error())
