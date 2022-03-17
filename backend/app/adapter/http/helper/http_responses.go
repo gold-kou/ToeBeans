@@ -14,10 +14,9 @@ func ResponseSimpleSuccess(w http.ResponseWriter) {
 		Message: "success",
 	}
 	w.Header().Set(HeaderKeyContentType, HeaderValueApplicationJSON)
-	// TODO superfluousでる件で、試しにコメントアウトしてみる
-	// w.WriteHeader(http.StatusOK)
+	// superfluousでるため、w.WriteHeader(http.StatusOK)はしない
 	if err := json.NewEncoder(w).Encode(resp); err != nil {
-		panic(err.Error())
+		log.Println(err.Error())
 	}
 }
 
@@ -30,7 +29,7 @@ func ResponseBadRequest(w http.ResponseWriter, message string) {
 	w.Header().Set(HeaderKeyCacheControl, HeaderValueNoStore)
 	w.WriteHeader(http.StatusBadRequest)
 	if err := json.NewEncoder(w).Encode(resp); err != nil {
-		panic(err.Error())
+		log.Println(err.Error())
 	}
 }
 
@@ -43,7 +42,7 @@ func ResponseUnauthorized(w http.ResponseWriter, message string) {
 	w.Header().Set(HeaderKeyCacheControl, HeaderValueNoStore)
 	w.WriteHeader(http.StatusUnauthorized)
 	if err := json.NewEncoder(w).Encode(resp); err != nil {
-		panic(err.Error())
+		log.Println(err.Error())
 	}
 }
 
@@ -56,7 +55,7 @@ func ResponseNotFound(w http.ResponseWriter, message string) {
 	w.Header().Set(HeaderKeyCacheControl, HeaderValueNoStore)
 	w.WriteHeader(http.StatusNotFound)
 	if err := json.NewEncoder(w).Encode(resp); err != nil {
-		panic(err.Error())
+		log.Println(err.Error())
 	}
 }
 
@@ -69,7 +68,7 @@ func ResponseForbidden(w http.ResponseWriter, message string) {
 	w.Header().Set(HeaderKeyCacheControl, HeaderValueNoStore)
 	w.WriteHeader(http.StatusForbidden)
 	if err := json.NewEncoder(w).Encode(resp); err != nil {
-		panic(err.Error())
+		log.Println(err.Error())
 	}
 }
 
@@ -85,7 +84,7 @@ func ResponseNotAllowedMethod(w http.ResponseWriter, message string, methods []s
 	}
 	w.WriteHeader(http.StatusMethodNotAllowed)
 	if err := json.NewEncoder(w).Encode(resp); err != nil {
-		panic(err.Error())
+		log.Println(err.Error())
 	}
 }
 
@@ -98,7 +97,7 @@ func ResponseConflictError(w http.ResponseWriter, message string) {
 	w.Header().Set(HeaderKeyCacheControl, HeaderValueNoStore)
 	w.WriteHeader(http.StatusConflict)
 	if err := json.NewEncoder(w).Encode(resp); err != nil {
-		panic(err.Error())
+		log.Println(err.Error())
 	}
 }
 
@@ -114,6 +113,6 @@ func ResponseInternalServerError(w http.ResponseWriter, message string) {
 	w.Header().Set(HeaderKeyCacheControl, HeaderValueNoStore)
 	w.WriteHeader(http.StatusInternalServerError)
 	if err := json.NewEncoder(w).Encode(resp); err != nil {
-		panic(err.Error())
+		log.Println(err.Error())
 	}
 }
