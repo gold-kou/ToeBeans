@@ -8,5 +8,6 @@ const (
 	HeaderKeyAuthorization = "Authorization"
 
 	HeaderValueApplicationJSON = "application/json; charset=UTF-8"
+	HeaderValueHTML            = "text/html"
 	HeaderValueNoStore         = "no-store"
 )
