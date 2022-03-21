@@ -78,7 +78,6 @@ func PasswordController(w http.ResponseWriter, r *http.Request) {
 	default:
 		helper.ResponseInternalServerError(w, errMsgControllerPath)
 	}
-
 }
 
 func changePassword(r *http.Request) (err error) {

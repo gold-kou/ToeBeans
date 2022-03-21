@@ -29,18 +29,18 @@ func UserController(w http.ResponseWriter, r *http.Request) {
 	case r.URL.Path == "/users":
 		switch r.Method {
 		case http.MethodGet:
-			user, err := getUser(r)
+			user, postingCount, likeCount, likedCount, followCount, followedCount, err := getUser(r)
 			switch err := err.(type) {
 			case nil:
 				resp := modelHTTP.ResponseGetUser{
 					UserName:         user.Name,
 					Icon:             user.Icon,
 					SelfIntroduction: user.SelfIntroduction,
-					PostingCount:     user.PostingCount,
-					LikeCount:        user.LikeCount,
-					LikedCount:       user.LikedCount,
-					FollowCount:      user.FollowCount,
-					FollowedCount:    user.FollowedCount,
+					PostingCount:     postingCount,
+					LikeCount:        likeCount,
+					LikedCount:       likedCount,
+					FollowCount:      followCount,
+					FollowedCount:    followedCount,
 					CreatedAt:        user.CreatedAt,
 				}
 				w.Header().Set(helper.HeaderKeyContentType, helper.HeaderValueApplicationJSON)
@@ -209,11 +209,12 @@ func registerUser(r *http.Request) error {
 	return err
 }
 
-func getUser(r *http.Request) (user model.User, err error) {
+func getUser(r *http.Request) (user model.User, postingCount, likeCount, likedCount, followCount, followedCount int64, err error) {
 	tokenUserName, err := context.GetTokenUserName(r.Context())
 	if err != nil {
 		log.Println(err)
-		return model.User{}, helper.NewInternalServerError(err.Error())
+		err = helper.NewInternalServerError(err.Error())
+		return
 	}
 
 	// get request parameter
@@ -223,7 +224,8 @@ func getUser(r *http.Request) (user model.User, err error) {
 	if userName != "" {
 		if err = validation.Validate(userName, validation.Length(modelHTTP.MinVarcharLength, modelHTTP.MaxVarcharLength), is.Alphanumeric); err != nil {
 			log.Println(err)
-			return model.User{}, helper.NewBadRequestError(err.Error())
+			err = helper.NewBadRequestError(err.Error())
+			return
 		}
 	} else {
 		// パラメータuser_nameが指定されていなければIDトークンのユーザ名を使う
@@ -234,25 +236,32 @@ func getUser(r *http.Request) (user model.User, err error) {
 	db, err := mysql.NewDB()
 	if err != nil {
 		log.Println(err)
-		return model.User{}, helper.NewInternalServerError(err.Error())
+		err = helper.NewInternalServerError(err.Error())
+		return
 	}
 	defer db.Close()
 	tx := mysql.NewDBTransaction(db)
 
 	// repository
 	userRepo := repository.NewUserRepository(db)
+	positngRepo := repository.NewPostingRepository(db)
+	likeRepo := repository.NewLikeRepository(db)
+	followRepo := repository.NewFollowRepository(db)
 
 	// UseCase
-	u := usecase.NewGetUser(r.Context(), tx, tokenUserName, userName, userRepo)
-	if user, err = u.GetUserUseCase(); err != nil {
+	u := usecase.NewGetUser(r.Context(), tx, tokenUserName, userName, userRepo, positngRepo, likeRepo, followRepo)
+	if user, postingCount, likeCount, likedCount, followCount, followedCount, err = u.GetUserUseCase(); err != nil {
 		log.Println(err)
 		if err == usecase.ErrNotExistsData {
-			return model.User{}, helper.NewNotFoundError(err.Error())
+			err = helper.NewNotFoundError(err.Error())
+			return
 		}
 		if err == usecase.ErrTokenInvalidNotExistingUserName {
-			return model.User{}, helper.NewAuthorizationError(err.Error())
+			err = helper.NewAuthorizationError(err.Error())
+			return
 		}
-		return model.User{}, helper.NewInternalServerError(err.Error())
+		err = helper.NewInternalServerError(err.Error())
+		return
 	}
 	return
 }

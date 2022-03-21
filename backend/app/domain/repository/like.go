@@ -14,6 +14,9 @@ type LikeRepositoryInterface interface {
 	Create(ctx context.Context, like *model.Like) (err error)
 	GetWhereUserName(ctx context.Context, userName string) (like model.Like, err error)
 	GetWhereUserNamePostingID(ctx context.Context, userName string, postingID int64) (like model.Like, err error)
+	GetLikeCountWhereUserName(ctx context.Context, userName string) (int64, err error)
+	GetLikedCountWhereUserName(ctx context.Context, userName string) (int64, err error)
+	GetLikedCountWherePostingID(ctx context.Context, postingID int64) (int64, err error)
 	DeleteWhereUserNamePostingID(ctx context.Context, userName string, postingID int64) (err error)
 	DeleteWhereUserName(ctx context.Context, userName string) (err error)
 	DeleteWhereInPosingIDs(ctx context.Context, userName string) (err error)
@@ -78,6 +81,24 @@ func (r *LikeRepository) GetWhereUserNamePostingID(ctx context.Context, userName
 		err = ErrNotExistsData
 		return
 	}
+	return
+}
+
+func (r *LikeRepository) GetLikeCountWhereUserName(ctx context.Context, userName string) (count int64, err error) {
+	q := "SELECT COUNT(*) FROM `likes` WHERE `user_name` = ?"
+	err = r.db.QueryRowContext(ctx, q, userName).Scan(&count)
+	return
+}
+
+func (r *LikeRepository) GetLikedCountWhereUserName(ctx context.Context, userName string) (count int64, err error) {
+	q := "SELECT COUNT(*) FROM `likes` WHERE `posting_id` IN(SELECT `id` FROM `postings` WHERE `user_name` = ?);"
+	err = r.db.QueryRowContext(ctx, q, userName).Scan(&count)
+	return
+}
+
+func (r *LikeRepository) GetLikedCountWherePostingID(ctx context.Context, postingID int64) (count int64, err error) {
+	q := "SELECT COUNT(*) FROM `likes` WHERE `posting_id` = ?;"
+	err = r.db.QueryRowContext(ctx, q, postingID).Scan(&count)
 	return
 }
 

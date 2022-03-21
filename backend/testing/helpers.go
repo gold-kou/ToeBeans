@@ -118,7 +118,7 @@ func TeardownDBTest(db *sql.DB) {
 }
 
 func FindAllUsers(ctx context.Context, db *sql.DB) ([]model.User, error) {
-	q := "SELECT `name`, `email`, `password`, `icon`, `self_introduction`, `posting_count`, `like_count`, `liked_count`, `follow_count`, `followed_count`, `activation_key`, `email_verified`, `password_reset_email_count`, `password_reset_key`, `password_reset_key_expires_at`, `created_at`, `updated_at` FROM `users`"
+	q := "SELECT `name`, `email`, `password`, `icon`, `self_introduction`, `activation_key`, `email_verified`, `password_reset_email_count`, `password_reset_key`, `password_reset_key_expires_at`, `created_at`, `updated_at` FROM `users`"
 	rows, err := db.QueryContext(ctx, q)
 	if err != nil {
 		return nil, err
@@ -128,7 +128,7 @@ func FindAllUsers(ctx context.Context, db *sql.DB) ([]model.User, error) {
 	result := []model.User{}
 	for rows.Next() {
 		var u model.User
-		if err := rows.Scan(&u.Name, &u.Email, &u.Password, &u.Icon, &u.SelfIntroduction, &u.PostingCount, &u.LikeCount, &u.LikedCount, &u.FollowCount, &u.FollowedCount, &u.ActivationKey, &u.EmailVerified, &u.PasswordResetEmailCount, &u.PasswordResetKey, &u.PasswordResetKeyExpiresAt, &u.CreatedAt, &u.UpdatedAt); err != nil {
+		if err := rows.Scan(&u.Name, &u.Email, &u.Password, &u.Icon, &u.SelfIntroduction, &u.ActivationKey, &u.EmailVerified, &u.PasswordResetEmailCount, &u.PasswordResetKey, &u.PasswordResetKeyExpiresAt, &u.CreatedAt, &u.UpdatedAt); err != nil {
 			return nil, err
 		}
 		result = append(result, u)
@@ -153,7 +153,7 @@ func CreateUserPasswordReset(db *sql.DB, expiresAt time.Time) error {
 }
 
 func FindAllPostings(ctx context.Context, db *sql.DB) ([]model.Posting, error) {
-	q := "SELECT `id`, `user_name`, `title`, `image_url`, `liked_count`, `created_at`, `updated_at` FROM `postings`"
+	q := "SELECT `id`, `user_name`, `title`, `image_url`, `created_at`, `updated_at` FROM `postings`"
 	rows, err := db.QueryContext(ctx, q)
 	if err != nil {
 		return nil, err
@@ -163,7 +163,7 @@ func FindAllPostings(ctx context.Context, db *sql.DB) ([]model.Posting, error) {
 	result := []model.Posting{}
 	for rows.Next() {
 		var p model.Posting
-		if err := rows.Scan(&p.ID, &p.UserName, &p.Title, &p.ImageURL, &p.LikedCount, &p.CreatedAt, &p.UpdatedAt); err != nil {
+		if err := rows.Scan(&p.ID, &p.UserName, &p.Title, &p.ImageURL, &p.CreatedAt, &p.UpdatedAt); err != nil {
 			return nil, err
 		}
 		result = append(result, p)

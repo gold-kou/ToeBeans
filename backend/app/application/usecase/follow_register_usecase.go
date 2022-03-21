@@ -61,16 +61,6 @@ func (follow *RegisterFollow) RegisterFollowUseCase() error {
 			return err
 		}
 
-		err = follow.userRepo.UpdateFollowCount(ctx, follow.tokenUserName, true)
-		if err != nil {
-			return err
-		}
-
-		err = follow.userRepo.UpdateFollowedCount(ctx, follow.followedUserName, true)
-		if err != nil {
-			return err
-		}
-
 		// TODO notification
 		// if follow.userName != follow.reqRegisterFollow.FollowedUserName {
 		// 	n := model.Notification{

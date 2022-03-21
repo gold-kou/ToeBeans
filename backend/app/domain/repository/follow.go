@@ -12,6 +12,8 @@ import (
 
 type FollowRepositoryInterface interface {
 	FindByBothUserNames(ctx context.Context, followingUserName, followedUserName string) (follow model.Follow, err error)
+	GetFollowCountWhereUserName(ctx context.Context, userName string) (int64, err error)
+	GetFollowedCountWhereUserName(ctx context.Context, userName string) (int64, err error)
 	Create(ctx context.Context, follow *model.Follow) (err error)
 	DeleteWhereFollowingFollowedUserName(ctx context.Context, followingUserName, followedUserName string) (err error)
 	DeleteWhereFollowingUserName(ctx context.Context, userName string) (err error)
@@ -26,6 +28,18 @@ func NewFollowRepository(db *sql.DB) *FollowRepository {
 	return &FollowRepository{
 		db: db,
 	}
+}
+
+func (r *FollowRepository) GetFollowCountWhereUserName(ctx context.Context, userName string) (count int64, err error) {
+	q := "SELECT COUNT(*) FROM `follows` WHERE `following_user_name` = ?"
+	err = r.db.QueryRowContext(ctx, q, userName).Scan(&count)
+	return
+}
+
+func (r *FollowRepository) GetFollowedCountWhereUserName(ctx context.Context, userName string) (count int64, err error) {
+	q := "SELECT COUNT(*) FROM `follows` WHERE `followed_user_name` = ?"
+	err = r.db.QueryRowContext(ctx, q, userName).Scan(&count)
+	return
 }
 
 func (r *FollowRepository) Create(ctx context.Context, follow *model.Follow) (err error) {

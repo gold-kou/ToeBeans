@@ -47,7 +47,7 @@ func (like *DeleteLike) DeleteLikeUseCase() error {
 		return err
 	}
 
-	l, err := like.likeRepo.GetWhereUserNamePostingID(like.ctx, like.tokenUserName, like.postingID)
+	_, err = like.likeRepo.GetWhereUserNamePostingID(like.ctx, like.tokenUserName, like.postingID)
 	if err != nil {
 		if err == repository.ErrNotExistsData {
 			return ErrDeleteNotExistsLike
@@ -57,17 +57,6 @@ func (like *DeleteLike) DeleteLikeUseCase() error {
 
 	err = like.tx.Do(like.ctx, func(ctx context.Context) error {
 		if err := like.likeRepo.DeleteWhereUserNamePostingID(ctx, like.tokenUserName, like.postingID); err != nil {
-			return err
-		}
-
-		// decrement
-		if err := like.userRepo.UpdateLikeCount(ctx, like.tokenUserName, false); err != nil {
-			return err
-		}
-		if err := like.userRepo.UpdateLikedCount(ctx, l.PostingID, false); err != nil {
-			return err
-		}
-		if err := like.postingRepo.UpdateLikedCount(ctx, l.PostingID, false); err != nil {
 			return err
 		}
 		return nil

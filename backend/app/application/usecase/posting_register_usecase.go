@@ -136,12 +136,6 @@ func (posting *RegisterPosting) RegisterPostingUseCase() error {
 		if err != nil {
 			return err
 		}
-
-		err = posting.userRepo.UpdatePostingCount(ctx, p.UserName, true)
-		if err != nil {
-			return err
-		}
-
 		return nil
 	})
 	if err != nil {

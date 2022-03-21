@@ -42,19 +42,19 @@ func PostingController(w http.ResponseWriter, r *http.Request) {
 				helper.ResponseInternalServerError(w, err.Error())
 			}
 		case http.MethodGet:
-			postings, likes, err := getPostings(r)
+			postings, likedCounts, likes, err := getPostings(r)
 			switch err := err.(type) {
 			case nil:
 				var httpPostings []modelHTTP.ResponseGetPosting
 				var resp modelHTTP.ResponseGetPostings
-				for _, p := range postings {
+				for i, p := range postings {
 					httpPosting := modelHTTP.ResponseGetPosting{
 						PostingId:  p.ID,
 						UserName:   p.UserName,
 						UploadedAt: p.CreatedAt,
 						Title:      p.Title,
 						ImageUrl:   p.ImageURL,
-						LikedCount: p.LikedCount,
+						LikedCount: likedCounts[i],
 						Liked:      false,
 					}
 					for _, l := range likes {
@@ -167,18 +167,20 @@ func registerPosting(r *http.Request) error {
 	return err
 }
 
-func getPostings(r *http.Request) (postings []model.Posting, likes []model.Like, err error) {
+func getPostings(r *http.Request) (postings []model.Posting, likedCounts []int64, likes []model.Like, err error) {
 	tokenUserName, err := context.GetTokenUserName(r.Context())
 	if err != nil {
 		log.Println(err)
-		return nil, nil, helper.NewInternalServerError(err.Error())
+		err = helper.NewInternalServerError(err.Error())
+		return
 	}
 
 	// get request parameter
 	sinceAt := r.URL.Query().Get("since_at")
 	if sinceAt == "" {
 		log.Println(err)
-		return nil, nil, helper.NewBadRequestError("since_at: cannot be blank.")
+		err = helper.NewBadRequestError("since_at: cannot be blank.")
+		return
 	}
 
 	jst, _ := time.LoadLocation("Asia/Tokyo")
@@ -186,32 +188,37 @@ func getPostings(r *http.Request) (postings []model.Posting, likes []model.Like,
 	sinceAtFormatted, err := time.ParseInLocation("2006-01-02T15:04:05+09:00", strings.Replace(sinceAt, " ", "+", 1), jst)
 	if err != nil {
 		log.Println(err)
-		return nil, nil, helper.NewBadRequestError(err.Error())
+		err = helper.NewBadRequestError(err.Error())
+		return
 	}
 
 	limit := r.URL.Query().Get("limit")
 	if limit == "" {
 		log.Println(err)
-		return nil, nil, helper.NewBadRequestError("limit: cannot be blank.")
+		err = helper.NewBadRequestError("limit: cannot be blank.")
+		return
 	}
 	limitInt, err := strconv.Atoi(limit)
 	if err != nil {
 		log.Println(err)
-		return nil, nil, helper.NewBadRequestError(err.Error())
+		err = helper.NewBadRequestError(err.Error())
+		return
 	}
 
 	// here user means selected user to see user profile
 	userName := r.URL.Query().Get("user_name")
-	if err := validation.Validate(userName, validation.Length(modelHTTP.MinVarcharLength, modelHTTP.MaxVarcharLength), is.Alphanumeric); err != nil {
+	if err = validation.Validate(userName, validation.Length(modelHTTP.MinVarcharLength, modelHTTP.MaxVarcharLength), is.Alphanumeric); err != nil {
 		log.Println(err)
-		return nil, nil, helper.NewBadRequestError(err.Error())
+		err = helper.NewBadRequestError(err.Error())
+		return
 	}
 
 	// db connect
 	db, err := mysql.NewDB()
 	if err != nil {
 		log.Println(err)
-		return nil, nil, helper.NewInternalServerError(err.Error())
+		err = helper.NewInternalServerError(err.Error())
+		return
 	}
 	defer db.Close()
 	tx := mysql.NewDBTransaction(db)
@@ -223,15 +230,18 @@ func getPostings(r *http.Request) (postings []model.Posting, likes []model.Like,
 
 	// UseCase
 	u := usecase.NewGetPostings(r.Context(), tx, tokenUserName, sinceAtFormatted, int8(limitInt), userName, userRepo, postingRepo, likeRepo)
-	if postings, likes, err = u.GetPostingsUseCase(); err != nil {
+	if postings, likedCounts, likes, err = u.GetPostingsUseCase(); err != nil {
 		log.Println(err)
 		if err == usecase.ErrDecodeImage {
-			return nil, nil, helper.NewBadRequestError(err.Error())
+			err = helper.NewBadRequestError(err.Error())
+			return
 		}
 		if err == usecase.ErrNotExistsData {
-			return nil, nil, helper.NewBadRequestError(err.Error())
+			err = helper.NewBadRequestError(err.Error())
+			return
 		}
-		return nil, nil, helper.NewInternalServerError(err.Error())
+		err = helper.NewInternalServerError(err.Error())
+		return
 	}
 	return
 }
