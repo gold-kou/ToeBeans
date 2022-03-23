@@ -4,7 +4,7 @@ module "bastion_sg" {
   name        = "bastion-sg"
   vpc_id      = aws_vpc.toebeans.id
   port        = 22
-  cidr_blocks = ["0.0.0.0/0"]
+  cidr_blocks = ["3.112.23.0/29"] // https://ip-ranges.amazonaws.com/ip-ranges.json
 }
 
 resource "aws_key_pair" "toebeans-ssh-key-pair" {
