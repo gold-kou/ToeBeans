@@ -68,16 +68,6 @@ func (follow *DeleteFollow) DeleteFollowUseCase() error {
 		if err != nil {
 			return err
 		}
-
-		err = follow.userRepo.UpdateFollowCount(ctx, follow.followUserName, false)
-		if err != nil {
-			return err
-		}
-
-		err = follow.userRepo.UpdateFollowedCount(ctx, follow.followedUserName, false)
-		if err != nil {
-			return err
-		}
 		return nil
 	})
 	if err != nil {

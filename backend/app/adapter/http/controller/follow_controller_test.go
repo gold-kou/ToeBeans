@@ -344,10 +344,6 @@ func TestDeleteFollow(t *testing.T) {
 			followRepo := repository.NewFollowRepository(db)
 			err = followRepo.Create(context.Background(), &dummy.Follow1to2)
 			assert.NoError(t, err)
-			err = userRepo.UpdateFollowCount(context.Background(), dummy.User1.Name, true)
-			assert.NoError(t, err)
-			err = userRepo.UpdateFollowedCount(context.Background(), dummy.User2.Name, true)
-			assert.NoError(t, err)
 
 			// http request
 			req, err := http.NewRequest(tt.method, fmt.Sprintf("/follows/%s", tt.args.followedUserName), nil)
@@ -366,19 +362,6 @@ func TestDeleteFollow(t *testing.T) {
 				follows, err := testingHelper.FindAllFollows(context.Background(), db)
 				assert.NoError(t, err)
 				assert.Equal(t, 0, len(follows))
-
-				users, err := testingHelper.FindAllUsers(context.Background(), db)
-				assert.NoError(t, err)
-				for _, user := range users {
-					if user.Name == dummy.User1.Name {
-						// following
-						assert.Equal(t, int64(0), users[0].FollowCount)
-					}
-					if user.Name == dummy.User2.Name {
-						// followed
-						assert.Equal(t, int64(0), users[1].FollowedCount)
-					}
-				}
 			}
 
 			// assert http

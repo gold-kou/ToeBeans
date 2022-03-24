@@ -60,12 +60,6 @@ func (posting *DeletePosting) DeletePostingUseCase() error {
 		if err != nil {
 			return err
 		}
-
-		err = posting.userRepo.UpdatePostingCount(ctx, p.UserName, false)
-		if err != nil {
-			return err
-		}
-
 		return nil
 	})
 	if err != nil {

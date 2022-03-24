@@ -234,14 +234,14 @@ func TestRegisterUser(t *testing.T) {
 
 var successRespGetUser = `
 {
-  "user_name": "testUser2",
+  "user_name": "testUser1",
   "icon": "UNKNOWN",
   "self_introduction": "UNKNOWN",
-  "posting_count": 0,
-  "like_count": 0,
-  "liked_count": 0,
-  "follow_count": 0,
-  "followed_count": 0,
+  "posting_count": 1,
+  "like_count": 1,
+  "liked_count": 1,
+  "follow_count": 1,
+  "followed_count": 1,
   "created_at": "2020-01-01T00:00:00+09:00"
 }
 `
@@ -277,7 +277,7 @@ func TestGetUser(t *testing.T) {
 	}{
 		{
 			name:       "success",
-			args:       args{userName: dummy.User2.Name},
+			args:       args{userName: dummy.User1.Name},
 			method:     http.MethodGet,
 			want:       successRespGetUser,
 			wantStatus: http.StatusOK,
@@ -314,9 +314,24 @@ func TestGetUser(t *testing.T) {
 
 			// insert dummy data
 			userRepo := repository.NewUserRepository(db)
+			postingRepo := repository.NewPostingRepository(db)
+			likeRepo := repository.NewLikeRepository(db)
+			followRepo := repository.NewFollowRepository(db)
 			err := userRepo.Create(context.Background(), &dummy.User1)
 			assert.NoError(t, err)
 			err = userRepo.Create(context.Background(), &dummy.User2)
+			assert.NoError(t, err)
+			err = postingRepo.Create(context.Background(), &dummy.Posting1)
+			assert.NoError(t, err)
+			err = postingRepo.Create(context.Background(), &dummy.Posting2)
+			assert.NoError(t, err)
+			err = likeRepo.Create(context.Background(), &dummy.Like1to2)
+			assert.NoError(t, err)
+			err = likeRepo.Create(context.Background(), &dummy.Like2to1)
+			assert.NoError(t, err)
+			err = followRepo.Create(context.Background(), &dummy.Follow1to2)
+			assert.NoError(t, err)
+			err = followRepo.Create(context.Background(), &dummy.Follow2to1)
 			assert.NoError(t, err)
 
 			// http request
@@ -548,15 +563,7 @@ func TestDeleteUser(t *testing.T) {
 			followRepo := repository.NewFollowRepository(db)
 			err = followRepo.Create(context.Background(), &dummy.Follow1to2)
 			assert.NoError(t, err)
-			err = userRepo.UpdateFollowCount(context.Background(), dummy.User1.Name, true)
-			assert.NoError(t, err)
-			err = userRepo.UpdateFollowedCount(context.Background(), dummy.User2.Name, true)
-			assert.NoError(t, err)
 			err = followRepo.Create(context.Background(), &dummy.Follow2to1)
-			assert.NoError(t, err)
-			err = userRepo.UpdateFollowCount(context.Background(), dummy.User2.Name, true)
-			assert.NoError(t, err)
-			err = userRepo.UpdateFollowedCount(context.Background(), dummy.User1.Name, true)
 			assert.NoError(t, err)
 			commentRepo := repository.NewCommentRepository(db)
 			err = commentRepo.Create(context.Background(), &dummy.Comment1)
@@ -564,15 +571,7 @@ func TestDeleteUser(t *testing.T) {
 			likeRepo := repository.NewLikeRepository(db)
 			err = likeRepo.Create(context.Background(), &dummy.Like1to2)
 			assert.NoError(t, err)
-			err = userRepo.UpdateLikedCount(context.Background(), dummy.Posting2.ID, true)
-			assert.NoError(t, err)
-			err = postingRepo.UpdateLikedCount(context.Background(), dummy.Posting1.ID, true)
-			assert.NoError(t, err)
 			err = likeRepo.Create(context.Background(), &dummy.Like2to1)
-			assert.NoError(t, err)
-			err = userRepo.UpdateLikedCount(context.Background(), dummy.Posting1.ID, true)
-			assert.NoError(t, err)
-			err = postingRepo.UpdateLikedCount(context.Background(), dummy.Posting2.ID, true)
 			assert.NoError(t, err)
 
 			// http request
@@ -596,14 +595,6 @@ func TestDeleteUser(t *testing.T) {
 				users, err := testingHelper.FindAllUsers(context.Background(), db)
 				assert.NoError(t, err)
 				assert.Equal(t, 1, len(users)) // user2がいるため
-
-				assert.Equal(t, int64(0), users[0].LikedCount)
-				assert.Equal(t, int64(0), users[0].FollowCount)
-				assert.Equal(t, int64(0), users[0].FollowedCount)
-
-				postings, err := testingHelper.FindAllPostings(context.Background(), db)
-				assert.NoError(t, err)
-				assert.Equal(t, int64(0), postings[0].LikedCount)
 			}
 
 			// assert http

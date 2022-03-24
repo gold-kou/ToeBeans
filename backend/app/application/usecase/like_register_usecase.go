@@ -71,17 +71,6 @@ func (like *RegisterLike) RegisterLikeUseCase() error {
 			return err
 		}
 
-		// increment
-		if err := like.userRepo.UpdateLikeCount(ctx, like.tokenUserName, true); err != nil {
-			return err
-		}
-		if err := like.userRepo.UpdateLikedCount(ctx, int64(like.postingID), true); err != nil {
-			return err
-		}
-		if err := like.postingRepo.UpdateLikedCount(ctx, int64(like.postingID), true); err != nil {
-			return err
-		}
-
 		// TODO notification
 		// if like.userName != p.UserName {
 		// 	n := model.Notification{

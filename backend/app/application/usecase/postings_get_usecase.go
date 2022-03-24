@@ -39,14 +39,15 @@ func NewGetPostings(ctx context.Context, tx mysql.DBTransaction, tokenUserName s
 	}
 }
 
-func (p *GetPostings) GetPostingsUseCase() (postings []model.Posting, likes []model.Like, err error) {
+func (p *GetPostings) GetPostingsUseCase() (postings []model.Posting, likedCounts []int64, likes []model.Like, err error) {
 	// check userName in token exists
 	_, err = p.userRepo.GetUserWhereName(p.ctx, p.tokenUserName)
 	if err != nil {
 		if err == repository.ErrNotExistsData {
-			return nil, nil, ErrTokenInvalidNotExistingUserName
+			err = ErrTokenInvalidNotExistingUserName
+			return
 		}
-		return nil, nil, err
+		return
 	}
 
 	// check userName exists
@@ -54,7 +55,8 @@ func (p *GetPostings) GetPostingsUseCase() (postings []model.Posting, likes []mo
 		_, err = p.userRepo.GetUserWhereName(p.ctx, p.userName)
 		if err != nil {
 			if err == repository.ErrNotExistsData {
-				return nil, nil, ErrNotExistsData
+				err = ErrNotExistsData
+				return
 			}
 			return
 		}
@@ -64,7 +66,7 @@ func (p *GetPostings) GetPostingsUseCase() (postings []model.Posting, likes []mo
 	if err != nil {
 		if err == repository.ErrNotExistsData {
 			// not error
-			return nil, nil, nil
+			err = nil
 		}
 		return
 	}
@@ -73,9 +75,18 @@ func (p *GetPostings) GetPostingsUseCase() (postings []model.Posting, likes []mo
 	if err != nil {
 		if err == repository.ErrNotExistsData {
 			// not error
-			return nil, nil, nil
+			err = nil
 		}
 		return
+	}
+
+	var likedCount int64
+	for _, posting := range postings {
+		likedCount, err = p.likeRepo.GetLikedCountWherePostingID(p.ctx, posting.ID)
+		if err != nil {
+			return
+		}
+		likedCounts = append(likedCounts, likedCount)
 	}
 	return
 }

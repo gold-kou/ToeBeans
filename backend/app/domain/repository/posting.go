@@ -14,8 +14,7 @@ type PostingRepositoryInterface interface {
 	GetPostings(ctx context.Context, sinceAt time.Time, limit int8) (postings []model.Posting, err error)
 	GetWhereID(ctx context.Context, id int64) (posting model.Posting, err error)
 	GetWhereIDUserName(ctx context.Context, id int64, userName string) (posting model.Posting, err error)
-	UpdateLikedCount(ctx context.Context, id int64, increment bool) (err error)
-	UpdateLikedCountDecrementWhenUserDelete(ctx context.Context, userName string) (err error)
+	GetCountWhereUserName(ctx context.Context, userName string) (int64, err error)
 	DeleteWhereID(ctx context.Context, id int64) (err error)
 	DeleteWhereUserName(ctx context.Context, userName string) (err error)
 }
@@ -45,10 +44,10 @@ func (r *PostingRepository) GetPostings(ctx context.Context, sinceAt time.Time, 
 	var q string
 	var rows *sql.Rows
 	if userName == "" {
-		q = "SELECT `id`, `user_name`, `title`, `image_url`, `liked_count`, `created_at`, `updated_at` FROM `postings` WHERE `created_at` < ? ORDER BY `created_at` DESC LIMIT ?"
+		q = "SELECT `id`, `user_name`, `title`, `image_url`, `created_at`, `updated_at` FROM `postings` WHERE `created_at` < ? ORDER BY `created_at` DESC LIMIT ?"
 		rows, err = r.db.QueryContext(ctx, q, sinceAt, limit)
 	} else {
-		q = "SELECT `id`, `user_name`, `title`, `image_url`, `liked_count`, `created_at`, `updated_at` FROM `postings` WHERE `created_at` < ? AND `user_name` = ? ORDER BY `created_at` DESC LIMIT ?"
+		q = "SELECT `id`, `user_name`, `title`, `image_url`, `created_at`, `updated_at` FROM `postings` WHERE `created_at` < ? AND `user_name` = ? ORDER BY `created_at` DESC LIMIT ?"
 		rows, err = r.db.QueryContext(ctx, q, sinceAt, userName, limit)
 	}
 	if err == sql.ErrNoRows {
@@ -62,7 +61,7 @@ func (r *PostingRepository) GetPostings(ctx context.Context, sinceAt time.Time, 
 
 	var p model.Posting
 	for rows.Next() {
-		if err = rows.Scan(&p.ID, &p.UserName, &p.Title, &p.ImageURL, &p.LikedCount, &p.CreatedAt, &p.UpdatedAt); err != nil {
+		if err = rows.Scan(&p.ID, &p.UserName, &p.Title, &p.ImageURL, &p.CreatedAt, &p.UpdatedAt); err != nil {
 			return
 		}
 		postings = append(postings, p)
@@ -76,8 +75,8 @@ func (r *PostingRepository) GetPostings(ctx context.Context, sinceAt time.Time, 
 }
 
 func (r *PostingRepository) GetWhereID(ctx context.Context, id int64) (posting model.Posting, err error) {
-	q := "SELECT `id`, `user_name`, `title`, `image_url`, `liked_count`, `created_at`, `updated_at` FROM `postings` WHERE `id` = ?"
-	err = r.db.QueryRowContext(ctx, q, id).Scan(&posting.ID, &posting.UserName, &posting.Title, &posting.ImageURL, &posting.LikedCount, &posting.CreatedAt, &posting.UpdatedAt)
+	q := "SELECT `id`, `user_name`, `title`, `image_url`, `created_at`, `updated_at` FROM `postings` WHERE `id` = ?"
+	err = r.db.QueryRowContext(ctx, q, id).Scan(&posting.ID, &posting.UserName, &posting.Title, &posting.ImageURL, &posting.CreatedAt, &posting.UpdatedAt)
 	if err == sql.ErrNoRows {
 		err = ErrNotExistsData
 		return
@@ -86,8 +85,8 @@ func (r *PostingRepository) GetWhereID(ctx context.Context, id int64) (posting m
 }
 
 func (r *PostingRepository) GetWhereIDUserName(ctx context.Context, id int64, userName string) (posting model.Posting, err error) {
-	q := "SELECT `id`, `user_name`, `title`, `image_url`, `liked_count`, `created_at`, `updated_at` FROM `postings` WHERE `id` = ? AND `user_name` = ?"
-	err = r.db.QueryRowContext(ctx, q, id, userName).Scan(&posting.ID, &posting.UserName, &posting.Title, &posting.ImageURL, &posting.LikedCount, &posting.CreatedAt, &posting.UpdatedAt)
+	q := "SELECT `id`, `user_name`, `title`, `image_url`, `created_at`, `updated_at` FROM `postings` WHERE `id` = ? AND `user_name` = ?"
+	err = r.db.QueryRowContext(ctx, q, id, userName).Scan(&posting.ID, &posting.UserName, &posting.Title, &posting.ImageURL, &posting.CreatedAt, &posting.UpdatedAt)
 	if err == sql.ErrNoRows {
 		err = ErrNotExistsData
 		return
@@ -95,30 +94,9 @@ func (r *PostingRepository) GetWhereIDUserName(ctx context.Context, id int64, us
 	return
 }
 
-func (r *PostingRepository) UpdateLikedCount(ctx context.Context, id int64, increment bool) (err error) {
-	var q string
-	if increment {
-		q = "UPDATE `postings` SET `liked_count` = `liked_count` + 1 WHERE `id` = ?"
-	} else {
-		q = "UPDATE `postings` SET `liked_count` = `liked_count` - 1 WHERE `id` = ?"
-	}
-	tx := m.GetTransaction(ctx)
-	if tx != nil {
-		_, err = tx.ExecContext(ctx, q, id)
-	} else {
-		_, err = r.db.ExecContext(ctx, q, id)
-	}
-	return
-}
-
-func (r *PostingRepository) UpdateLikedCountDecrementWhenUserDelete(ctx context.Context, userName string) (err error) {
-	q := "UPDATE `postings` SET `liked_count` = `liked_count` - 1 WHERE `id` IN (SELECT `posting_id` FROM `likes` WHERE `user_name` = ?)"
-	tx := m.GetTransaction(ctx)
-	if tx != nil {
-		_, err = tx.ExecContext(ctx, q, userName)
-	} else {
-		_, err = r.db.ExecContext(ctx, q, userName)
-	}
+func (r *PostingRepository) GetCountWhereUserName(ctx context.Context, userName string) (count int64, err error) {
+	q := "SELECT COUNT(*) FROM `postings` WHERE `user_name` = ?"
+	err = r.db.QueryRowContext(ctx, q, userName).Scan(&count)
 	return
 }
 

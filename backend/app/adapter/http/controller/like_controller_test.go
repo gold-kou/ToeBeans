@@ -154,15 +154,6 @@ func TestRegisterLike(t *testing.T) {
 				likes[0].CreatedAt = lib.NowFunc()
 				likes[0].UpdatedAt = lib.NowFunc()
 				assert.Equal(t, dummy.Like1to2, likes[0])
-
-				// increment check
-				users, err := testingHelper.FindAllUsers(context.Background(), db)
-				assert.NoError(t, err)
-				assert.Equal(t, int64(1), users[0].LikeCount)
-				assert.Equal(t, int64(1), users[1].LikedCount)
-				postings, err := testingHelper.FindAllPostings(context.Background(), db)
-				assert.NoError(t, err)
-				assert.Equal(t, int64(1), postings[1].LikedCount)
 			}
 
 			// assert http
@@ -281,23 +272,6 @@ func TestDeleteLike(t *testing.T) {
 				likes, err := testingHelper.FindAllLikes(context.Background(), db)
 				assert.NoError(t, err)
 				assert.Equal(t, 0, len(likes))
-
-				users, err := testingHelper.FindAllUsers(context.Background(), db)
-				assert.NoError(t, err)
-				for _, user := range users {
-					if user.Name == dummy.User1.Name {
-						// like
-						assert.Equal(t, int64(0), users[0].LikeCount)
-					}
-					if user.Name == dummy.User2.Name {
-						// liked
-						assert.Equal(t, int64(0), users[1].LikedCount)
-					}
-				}
-
-				postings, err := testingHelper.FindAllPostings(context.Background(), db)
-				assert.NoError(t, err)
-				assert.Equal(t, int64(0), postings[0].LikedCount)
 			}
 		})
 	}

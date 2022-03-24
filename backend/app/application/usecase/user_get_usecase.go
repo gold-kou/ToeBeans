@@ -18,33 +18,64 @@ type GetUser struct {
 	tokenUserName string
 	userName      string
 	userRepo      *repository.UserRepository
+	postingRepo   *repository.PostingRepository
+	likeRepo      *repository.LikeRepository
+	followRepo    *repository.FollowRepository
 }
 
-func NewGetUser(ctx context.Context, tx mysql.DBTransaction, tokenUserName, userName string, userRepo *repository.UserRepository) *GetUser {
+func NewGetUser(ctx context.Context, tx mysql.DBTransaction, tokenUserName, userName string, userRepo *repository.UserRepository, postingRepo *repository.PostingRepository, likeRepo *repository.LikeRepository, followRepo *repository.FollowRepository) *GetUser {
 	return &GetUser{
 		ctx:           ctx,
 		tx:            tx,
 		tokenUserName: tokenUserName,
 		userName:      userName,
 		userRepo:      userRepo,
+		postingRepo:   postingRepo,
+		likeRepo:      likeRepo,
+		followRepo:    followRepo,
 	}
 }
 
-func (user *GetUser) GetUserUseCase() (u model.User, err error) {
+func (user *GetUser) GetUserUseCase() (u model.User, postingCount, likeCount, likedCount, followCount, followedCount int64, err error) {
 	// check userName in token exists
 	_, err = user.userRepo.GetUserWhereName(user.ctx, user.tokenUserName)
 	if err != nil {
 		if err == repository.ErrNotExistsData {
-			return model.User{}, ErrTokenInvalidNotExistingUserName
+			err = ErrTokenInvalidNotExistingUserName
 		}
-		return model.User{}, err
+		return
 	}
 
 	u, err = user.userRepo.GetUserWhereName(user.ctx, user.userName)
 	if err != nil {
 		if err == repository.ErrNotExistsData {
-			return model.User{}, ErrNotExistsData
+			err = ErrNotExistsData
 		}
+		return
+	}
+
+	postingCount, err = user.postingRepo.GetCountWhereUserName(user.ctx, user.userName)
+	if err != nil {
+		return
+	}
+
+	likeCount, err = user.likeRepo.GetLikeCountWhereUserName(user.ctx, user.userName)
+	if err != nil {
+		return
+	}
+
+	likedCount, err = user.likeRepo.GetLikedCountWhereUserName(user.ctx, user.userName)
+	if err != nil {
+		return
+	}
+
+	followCount, err = user.followRepo.GetFollowCountWhereUserName(user.ctx, user.userName)
+	if err != nil {
+		return
+	}
+
+	followedCount, err = user.followRepo.GetFollowedCountWhereUserName(user.ctx, user.userName)
+	if err != nil {
 		return
 	}
 	return

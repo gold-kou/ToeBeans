@@ -50,18 +50,6 @@ func (user *DeleteUser) DeleteUserUseCase() error {
 	err = user.tx.Do(user.ctx, func(ctx context.Context) error {
 		// TODO notification delete
 
-		// 削除対象ユーザがいいねした投稿のユーザのいいねカウントをデクリメントする
-		err := user.userRepo.UpdateLikedCountDecrementWhenUserDelete(ctx, user.userName)
-		if err != nil {
-			return err
-		}
-
-		// 削除対象ユーザがいいねした投稿のいいねカウントをデクリメントする
-		err = user.postingRepo.UpdateLikedCountDecrementWhenUserDelete(ctx, user.userName)
-		if err != nil {
-			return err
-		}
-
 		err = user.likeRepo.DeleteWhereUserName(ctx, user.userName)
 		if err != nil {
 			return err
@@ -74,18 +62,6 @@ func (user *DeleteUser) DeleteUserUseCase() error {
 		}
 
 		err = user.commentRepo.DeleteWhereUserName(ctx, user.userName)
-		if err != nil {
-			return err
-		}
-
-		// 削除対象ユーザをフォローしていたユーザのfollow_countをデクリメントする
-		err = user.userRepo.UpdateFollowedCountDecrementWhereFollowingUserName(ctx, user.userName)
-		if err != nil {
-			return err
-		}
-
-		// 削除対象ユーザにフォローされていたユーザのfollowed_countをデクリメントする
-		err = user.userRepo.UpdateFollowCountDecrementWhereFollowedUserName(ctx, user.userName)
 		if err != nil {
 			return err
 		}
