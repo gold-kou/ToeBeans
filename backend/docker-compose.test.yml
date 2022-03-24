@@ -36,7 +36,7 @@ services:
     image: mysql:5.7
     volumes:
       - ./toebeans-sql/mysql/my.cnf:/etc/mysql/conf.d/my.cnf
-      - ./toebeans-sql/mysql/sql:/docker-entrypoint-initdb.d
+      - ./toebeans-sql/mysql/entrypoint:/docker-entrypoint-initdb.d
       - db-test:/var/lib/mysql
     tmpfs:
       - /var/lib/mysql,mode=755
