@@ -142,9 +142,9 @@ adminユーザのパスワード変更、テーブルマイグレーション、
 3. `SET PASSWORD = PASSWORD('XXXXX');` を実行してadminユーザのパスワードを変更する。パスワード値は任意の値。
 4. `CREATE DATABASE toebeansdb DEFAULT CHARACTER SET utf8;` を実行する。
 5. `USE toebeansdb;` を実行する。
-6. `backend/toebeans-sql/mysql/sql/001_create_tables.sql` の内容を実行する。
-7. `backend/toebeans-sql/mysql/sql/002_create_users.sql` の内容を実行する。パスワード値は任意の値。
-8. `backend/toebeans-sql/mysql/sql/003_insert_dummy_data.sql` の内容を実行する。ゲストユーザのみでよい。
+6. `backend/toebeans-sql/mysql/entrypoint/001_create_tables.sql` の内容を実行する。
+7. `backend/toebeans-sql/mysql/create_user.sql` の内容を実行する。パスワード値は任意の値。
+8. `backend/toebeans-sql/mysql/entrypoint/002_insert_dummy_data.sql` の内容を実行する。ゲストユーザのみでよい。
 9. exitする。
 
 ## CloudFront修正
