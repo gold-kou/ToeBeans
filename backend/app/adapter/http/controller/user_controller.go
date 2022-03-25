@@ -198,8 +198,8 @@ func registerUser(r *http.Request) error {
 	userRepo := repository.NewUserRepository(db)
 
 	// UseCase
-	u := usecase.NewRegisterUser(r.Context(), tx, userName, reqRegisterUser, userRepo)
-	if err = u.RegisterUserUseCase(); err != nil {
+	u := usecase.NewRegisterUser(tx, userName, reqRegisterUser, userRepo)
+	if err = u.RegisterUserUseCase(r.Context()); err != nil {
 		log.Println(err)
 		if err == usecase.ErrDuplicateData {
 			return helper.NewBadRequestError(err.Error() + ", the user name or email have been already used.")
@@ -249,8 +249,8 @@ func getUser(r *http.Request) (user model.User, postingCount, likeCount, likedCo
 	followRepo := repository.NewFollowRepository(db)
 
 	// UseCase
-	u := usecase.NewGetUser(r.Context(), tx, tokenUserName, userName, userRepo, positngRepo, likeRepo, followRepo)
-	if user, postingCount, likeCount, likedCount, followCount, followedCount, err = u.GetUserUseCase(); err != nil {
+	u := usecase.NewGetUser(tx, tokenUserName, userName, userRepo, positngRepo, likeRepo, followRepo)
+	if user, postingCount, likeCount, likedCount, followCount, followedCount, err = u.GetUserUseCase(r.Context()); err != nil {
 		log.Println(err)
 		if err == usecase.ErrNotExistsData {
 			err = helper.NewNotFoundError(err.Error())
@@ -324,8 +324,8 @@ func updateUser(r *http.Request) (err error) {
 	userRepo := repository.NewUserRepository(db)
 
 	// UseCase
-	u := usecase.NewUpdateUser(r.Context(), tx, userName, reqUpdateUser, userRepo)
-	if err = u.UpdateUserUseCase(); err != nil {
+	u := usecase.NewUpdateUser(tx, userName, reqUpdateUser, userRepo)
+	if err = u.UpdateUserUseCase(r.Context()); err != nil {
 		log.Println(err)
 		if err == usecase.ErrNotExistsData || err == usecase.ErrDecodeImage {
 			return helper.NewBadRequestError(err.Error())
@@ -377,8 +377,8 @@ func deleteUser(r *http.Request) (err error) {
 	followRepo := repository.NewFollowRepository(db)
 
 	// UseCase
-	u := usecase.NewDeleteUser(r.Context(), tx, userName, userRepo, postingRepo, likeRepo, commentRepo, followRepo)
-	if err = u.DeleteUserUseCase(); err != nil {
+	u := usecase.NewDeleteUser(tx, userName, userRepo, postingRepo, likeRepo, commentRepo, followRepo)
+	if err = u.DeleteUserUseCase(r.Context()); err != nil {
 		log.Println(err)
 		if err == usecase.ErrNotExitsUser {
 			return helper.NewConflictError(err.Error())
@@ -417,8 +417,8 @@ func activateUser(r *http.Request) (err error) {
 	userRepo := repository.NewUserRepository(db)
 
 	// UseCase
-	u := usecase.NewUserActivation(r.Context(), tx, userName, activationKey, userRepo)
-	if err = u.UserActivationUseCase(); err != nil {
+	u := usecase.NewUserActivation(tx, userName, activationKey, userRepo)
+	if err = u.UserActivationUseCase(r.Context()); err != nil {
 		log.Println(err)
 		if err == repository.ErrUserActivationNotFound {
 			return helper.NewBadRequestError(err.Error())

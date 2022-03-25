@@ -156,8 +156,8 @@ func registerPosting(r *http.Request) error {
 	postingRepo := repository.NewPostingRepository(db)
 
 	// UseCase
-	u := usecase.NewRegisterPosting(r.Context(), tx, tokenUserName, reqRegisterPosting, userRepo, postingRepo)
-	if err = u.RegisterPostingUseCase(); err != nil {
+	u := usecase.NewRegisterPosting(tx, tokenUserName, reqRegisterPosting, userRepo, postingRepo)
+	if err = u.RegisterPostingUseCase(r.Context()); err != nil {
 		log.Println(err)
 		if err == usecase.ErrDecodeImage || err == usecase.ErrNotCatImage {
 			return helper.NewBadRequestError(err.Error())
@@ -229,8 +229,8 @@ func getPostings(r *http.Request) (postings []model.Posting, likedCounts []int64
 	likeRepo := repository.NewLikeRepository(db)
 
 	// UseCase
-	u := usecase.NewGetPostings(r.Context(), tx, tokenUserName, sinceAtFormatted, int8(limitInt), userName, userRepo, postingRepo, likeRepo)
-	if postings, likedCounts, likes, err = u.GetPostingsUseCase(); err != nil {
+	u := usecase.NewGetPostings(tx, tokenUserName, sinceAtFormatted, int8(limitInt), userName, userRepo, postingRepo, likeRepo)
+	if postings, likedCounts, likes, err = u.GetPostingsUseCase(r.Context()); err != nil {
 		log.Println(err)
 		if err == usecase.ErrDecodeImage {
 			err = helper.NewBadRequestError(err.Error())
@@ -286,8 +286,8 @@ func deletePosting(r *http.Request) error {
 	postingRepo := repository.NewPostingRepository(db)
 
 	// UseCase
-	u := usecase.NewDeletePosting(r.Context(), tx, int64(postingID), tokenUserName, userRepo, postingRepo)
-	if err = u.DeletePostingUseCase(); err != nil {
+	u := usecase.NewDeletePosting(tx, int64(postingID), tokenUserName, userRepo, postingRepo)
+	if err = u.DeletePostingUseCase(r.Context()); err != nil {
 		log.Println(err)
 		if err == usecase.ErrNotExistsData {
 			return helper.NewBadRequestError(err.Error())

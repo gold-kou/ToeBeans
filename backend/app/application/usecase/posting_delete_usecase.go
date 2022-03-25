@@ -13,7 +13,6 @@ type DeletePostingUseCaseInterface interface {
 }
 
 type DeletePosting struct {
-	ctx           context.Context
 	tx            mysql.DBTransaction
 	postingID     int64
 	tokenUserName string
@@ -21,9 +20,8 @@ type DeletePosting struct {
 	postingRepo   *repository.PostingRepository
 }
 
-func NewDeletePosting(ctx context.Context, tx mysql.DBTransaction, postingID int64, tokenUserName string, userRepo *repository.UserRepository, postingRepo *repository.PostingRepository) *DeletePosting {
+func NewDeletePosting(tx mysql.DBTransaction, postingID int64, tokenUserName string, userRepo *repository.UserRepository, postingRepo *repository.PostingRepository) *DeletePosting {
 	return &DeletePosting{
-		ctx:           ctx,
 		tx:            tx,
 		postingID:     postingID,
 		tokenUserName: tokenUserName,
@@ -32,9 +30,9 @@ func NewDeletePosting(ctx context.Context, tx mysql.DBTransaction, postingID int
 	}
 }
 
-func (posting *DeletePosting) DeletePostingUseCase() error {
+func (posting *DeletePosting) DeletePostingUseCase(ctx context.Context) error {
 	// check userName in token exists
-	_, err := posting.userRepo.GetUserWhereName(posting.ctx, posting.tokenUserName)
+	_, err := posting.userRepo.GetUserWhereName(ctx, posting.tokenUserName)
 	if err != nil {
 		if err == repository.ErrNotExistsData {
 			return ErrTokenInvalidNotExistingUserName
@@ -42,7 +40,7 @@ func (posting *DeletePosting) DeletePostingUseCase() error {
 		return err
 	}
 
-	p, err := posting.postingRepo.GetWhereIDUserName(posting.ctx, posting.postingID, posting.tokenUserName)
+	p, err := posting.postingRepo.GetWhereIDUserName(ctx, posting.postingID, posting.tokenUserName)
 	if err != nil {
 		if err == repository.ErrNotExistsData {
 			return ErrNotExistsData
@@ -55,7 +53,7 @@ func (posting *DeletePosting) DeletePostingUseCase() error {
 		return err
 	}
 
-	err = posting.tx.Do(posting.ctx, func(ctx context.Context) error {
+	err = posting.tx.Do(ctx, func(ctx context.Context) error {
 		err := posting.postingRepo.DeleteWhereID(ctx, posting.postingID)
 		if err != nil {
 			return err

@@ -14,7 +14,6 @@ type GetPostingsUseCaseInterface interface {
 }
 
 type GetPostings struct {
-	ctx           context.Context
 	tx            mysql.DBTransaction
 	tokenUserName string
 	sinceAt       time.Time
@@ -25,9 +24,8 @@ type GetPostings struct {
 	likeRepo      *repository.LikeRepository
 }
 
-func NewGetPostings(ctx context.Context, tx mysql.DBTransaction, tokenUserName string, sinceAt time.Time, limit int8, userName string, userRepo *repository.UserRepository, postingRepo *repository.PostingRepository, likeRepo *repository.LikeRepository) *GetPostings {
+func NewGetPostings(tx mysql.DBTransaction, tokenUserName string, sinceAt time.Time, limit int8, userName string, userRepo *repository.UserRepository, postingRepo *repository.PostingRepository, likeRepo *repository.LikeRepository) *GetPostings {
 	return &GetPostings{
-		ctx:           ctx,
 		tx:            tx,
 		tokenUserName: tokenUserName,
 		sinceAt:       sinceAt,
@@ -39,9 +37,9 @@ func NewGetPostings(ctx context.Context, tx mysql.DBTransaction, tokenUserName s
 	}
 }
 
-func (p *GetPostings) GetPostingsUseCase() (postings []model.Posting, likedCounts []int64, likes []model.Like, err error) {
+func (p *GetPostings) GetPostingsUseCase(ctx context.Context) (postings []model.Posting, likedCounts []int64, likes []model.Like, err error) {
 	// check userName in token exists
-	_, err = p.userRepo.GetUserWhereName(p.ctx, p.tokenUserName)
+	_, err = p.userRepo.GetUserWhereName(ctx, p.tokenUserName)
 	if err != nil {
 		if err == repository.ErrNotExistsData {
 			err = ErrTokenInvalidNotExistingUserName
@@ -52,7 +50,7 @@ func (p *GetPostings) GetPostingsUseCase() (postings []model.Posting, likedCount
 
 	// check userName exists
 	if p.userName != "" {
-		_, err = p.userRepo.GetUserWhereName(p.ctx, p.userName)
+		_, err = p.userRepo.GetUserWhereName(ctx, p.userName)
 		if err != nil {
 			if err == repository.ErrNotExistsData {
 				err = ErrNotExistsData
@@ -62,7 +60,7 @@ func (p *GetPostings) GetPostingsUseCase() (postings []model.Posting, likedCount
 		}
 	}
 
-	likes, err = p.likeRepo.GetWhereUserName(p.ctx, p.tokenUserName)
+	likes, err = p.likeRepo.GetWhereUserName(ctx, p.tokenUserName)
 	if err != nil {
 		if err == repository.ErrNotExistsData {
 			// not error
@@ -71,7 +69,7 @@ func (p *GetPostings) GetPostingsUseCase() (postings []model.Posting, likedCount
 		return
 	}
 
-	postings, err = p.postingRepo.GetPostings(p.ctx, p.sinceAt, p.limit, p.userName)
+	postings, err = p.postingRepo.GetPostings(ctx, p.sinceAt, p.limit, p.userName)
 	if err != nil {
 		if err == repository.ErrNotExistsData {
 			// not error
@@ -82,7 +80,7 @@ func (p *GetPostings) GetPostingsUseCase() (postings []model.Posting, likedCount
 
 	var likedCount int64
 	for _, posting := range postings {
-		likedCount, err = p.likeRepo.GetLikedCountWherePostingID(p.ctx, posting.ID)
+		likedCount, err = p.likeRepo.GetLikedCountWherePostingID(ctx, posting.ID)
 		if err != nil {
 			return
 		}

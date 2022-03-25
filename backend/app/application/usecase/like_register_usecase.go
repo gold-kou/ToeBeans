@@ -17,7 +17,6 @@ type RegisterLikeUseCaseInterface interface {
 }
 
 type RegisterLike struct {
-	ctx              context.Context
 	tx               mysql.DBTransaction
 	tokenUserName    string
 	postingID        int
@@ -27,9 +26,8 @@ type RegisterLike struct {
 	notificationRepo *repository.NotificationRepository
 }
 
-func NewRegisterLike(ctx context.Context, tx mysql.DBTransaction, tokenUserName string, postingID int, userRepo *repository.UserRepository, postingRepo *repository.PostingRepository, likeRepo *repository.LikeRepository, notificationRepo *repository.NotificationRepository) *RegisterLike {
+func NewRegisterLike(tx mysql.DBTransaction, tokenUserName string, postingID int, userRepo *repository.UserRepository, postingRepo *repository.PostingRepository, likeRepo *repository.LikeRepository, notificationRepo *repository.NotificationRepository) *RegisterLike {
 	return &RegisterLike{
-		ctx:              ctx,
 		tx:               tx,
 		tokenUserName:    tokenUserName,
 		postingID:        postingID,
@@ -40,9 +38,9 @@ func NewRegisterLike(ctx context.Context, tx mysql.DBTransaction, tokenUserName 
 	}
 }
 
-func (like *RegisterLike) RegisterLikeUseCase() error {
+func (like *RegisterLike) RegisterLikeUseCase(ctx context.Context) error {
 	// check userName in token exists
-	_, err := like.userRepo.GetUserWhereName(like.ctx, like.tokenUserName)
+	_, err := like.userRepo.GetUserWhereName(ctx, like.tokenUserName)
 	if err != nil {
 		if err == repository.ErrNotExistsData {
 			return ErrTokenInvalidNotExistingUserName
@@ -50,7 +48,7 @@ func (like *RegisterLike) RegisterLikeUseCase() error {
 		return err
 	}
 
-	p, err := like.postingRepo.GetWhereID(like.ctx, int64(like.postingID))
+	p, err := like.postingRepo.GetWhereID(ctx, int64(like.postingID))
 	if err != nil {
 		return err
 	}
@@ -59,7 +57,7 @@ func (like *RegisterLike) RegisterLikeUseCase() error {
 		return ErrLikeYourPosting
 	}
 
-	err = like.tx.Do(like.ctx, func(ctx context.Context) error {
+	err = like.tx.Do(ctx, func(ctx context.Context) error {
 		l := model.Like{
 			UserName:  like.tokenUserName,
 			PostingID: int64(like.postingID),

@@ -35,7 +35,6 @@ type RegisterPostingUseCaseInterface interface {
 }
 
 type RegisterPosting struct {
-	ctx                context.Context
 	tx                 mysql.DBTransaction
 	tokenUserName      string
 	reqRegisterPosting *modelHTTP.RequestRegisterPosting
@@ -43,9 +42,8 @@ type RegisterPosting struct {
 	postingRepo        *repository.PostingRepository
 }
 
-func NewRegisterPosting(ctx context.Context, tx mysql.DBTransaction, tokenUserName string, reqRegisterPosting *modelHTTP.RequestRegisterPosting, userRepo *repository.UserRepository, postingRepo *repository.PostingRepository) *RegisterPosting {
+func NewRegisterPosting(tx mysql.DBTransaction, tokenUserName string, reqRegisterPosting *modelHTTP.RequestRegisterPosting, userRepo *repository.UserRepository, postingRepo *repository.PostingRepository) *RegisterPosting {
 	return &RegisterPosting{
-		ctx:                ctx,
 		tx:                 tx,
 		tokenUserName:      tokenUserName,
 		reqRegisterPosting: reqRegisterPosting,
@@ -54,9 +52,9 @@ func NewRegisterPosting(ctx context.Context, tx mysql.DBTransaction, tokenUserNa
 	}
 }
 
-func (posting *RegisterPosting) RegisterPostingUseCase() error {
+func (posting *RegisterPosting) RegisterPostingUseCase(ctx context.Context) error {
 	// check userName in token exists
-	_, err := posting.userRepo.GetUserWhereName(posting.ctx, posting.tokenUserName)
+	_, err := posting.userRepo.GetUserWhereName(ctx, posting.tokenUserName)
 	if err != nil {
 		if err == repository.ErrNotExistsData {
 			return ErrTokenInvalidNotExistingUserName
@@ -125,7 +123,7 @@ func (posting *RegisterPosting) RegisterPostingUseCase() error {
 	if app.IsLocal() {
 		o.Location = strings.Replace(o.Location, "minio", "localhost", 1)
 	}
-	err = posting.tx.Do(posting.ctx, func(ctx context.Context) error {
+	err = posting.tx.Do(ctx, func(ctx context.Context) error {
 		p := model.Posting{
 			UserName: posting.tokenUserName,
 			Title:    posting.reqRegisterPosting.Title,

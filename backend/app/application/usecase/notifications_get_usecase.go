@@ -13,7 +13,6 @@ type GetNotificationsUseCaseInterface interface {
 }
 
 type GetNotifications struct {
-	ctx              context.Context
 	tx               mysql.DBTransaction
 	tokenUserName    string
 	visitedName      string
@@ -21,9 +20,8 @@ type GetNotifications struct {
 	notificationRepo *repository.NotificationRepository
 }
 
-func NewGetNotifications(ctx context.Context, tx mysql.DBTransaction, tokenUserName, visitedName string, userRepo *repository.UserRepository, notificationRepo *repository.NotificationRepository) *GetNotifications {
+func NewGetNotifications(tx mysql.DBTransaction, tokenUserName, visitedName string, userRepo *repository.UserRepository, notificationRepo *repository.NotificationRepository) *GetNotifications {
 	return &GetNotifications{
-		ctx:              ctx,
 		tx:               tx,
 		tokenUserName:    tokenUserName,
 		visitedName:      visitedName,
@@ -32,8 +30,8 @@ func NewGetNotifications(ctx context.Context, tx mysql.DBTransaction, tokenUserN
 	}
 }
 
-func (n *GetNotifications) GetNotificationsUseCase() (notifications []model.Notification, err error) {
-	notifications, err = n.notificationRepo.GetNotifications(n.ctx, n.visitedName)
+func (n *GetNotifications) GetNotificationsUseCase(ctx context.Context) (notifications []model.Notification, err error) {
+	notifications, err = n.notificationRepo.GetNotifications(ctx, n.visitedName)
 	if err != nil {
 		if err == repository.ErrNotExistsData {
 			return nil, ErrNotExistsData

@@ -17,7 +17,6 @@ type RegisterFollowUseCaseInterface interface {
 }
 
 type RegisterFollow struct {
-	ctx              context.Context
 	tx               mysql.DBTransaction
 	tokenUserName    string
 	followedUserName string
@@ -26,9 +25,8 @@ type RegisterFollow struct {
 	notificationRepo *repository.NotificationRepository
 }
 
-func NewRegisterFollow(ctx context.Context, tx mysql.DBTransaction, tokenUserName string, followedUserName string, userRepo *repository.UserRepository, followRepo *repository.FollowRepository, notificationRepo *repository.NotificationRepository) *RegisterFollow {
+func NewRegisterFollow(tx mysql.DBTransaction, tokenUserName string, followedUserName string, userRepo *repository.UserRepository, followRepo *repository.FollowRepository, notificationRepo *repository.NotificationRepository) *RegisterFollow {
 	return &RegisterFollow{
-		ctx:              ctx,
 		tx:               tx,
 		tokenUserName:    tokenUserName,
 		followedUserName: followedUserName,
@@ -38,9 +36,9 @@ func NewRegisterFollow(ctx context.Context, tx mysql.DBTransaction, tokenUserNam
 	}
 }
 
-func (follow *RegisterFollow) RegisterFollowUseCase() error {
+func (follow *RegisterFollow) RegisterFollowUseCase(ctx context.Context) error {
 	// check userName in token exists
-	_, err := follow.userRepo.GetUserWhereName(follow.ctx, follow.tokenUserName)
+	_, err := follow.userRepo.GetUserWhereName(ctx, follow.tokenUserName)
 	if err != nil {
 		if err == repository.ErrNotExistsData {
 			return ErrTokenInvalidNotExistingUserName
@@ -48,7 +46,7 @@ func (follow *RegisterFollow) RegisterFollowUseCase() error {
 		return err
 	}
 
-	err = follow.tx.Do(follow.ctx, func(ctx context.Context) error {
+	err = follow.tx.Do(ctx, func(ctx context.Context) error {
 		u := model.Follow{
 			FollowingUserName: follow.tokenUserName,
 			FollowedUserName:  follow.followedUserName,

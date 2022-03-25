@@ -13,7 +13,6 @@ type GetUserUseCaseInterface interface {
 }
 
 type GetUser struct {
-	ctx           context.Context
 	tx            mysql.DBTransaction
 	tokenUserName string
 	userName      string
@@ -23,9 +22,8 @@ type GetUser struct {
 	followRepo    *repository.FollowRepository
 }
 
-func NewGetUser(ctx context.Context, tx mysql.DBTransaction, tokenUserName, userName string, userRepo *repository.UserRepository, postingRepo *repository.PostingRepository, likeRepo *repository.LikeRepository, followRepo *repository.FollowRepository) *GetUser {
+func NewGetUser(tx mysql.DBTransaction, tokenUserName, userName string, userRepo *repository.UserRepository, postingRepo *repository.PostingRepository, likeRepo *repository.LikeRepository, followRepo *repository.FollowRepository) *GetUser {
 	return &GetUser{
-		ctx:           ctx,
 		tx:            tx,
 		tokenUserName: tokenUserName,
 		userName:      userName,
@@ -36,9 +34,9 @@ func NewGetUser(ctx context.Context, tx mysql.DBTransaction, tokenUserName, user
 	}
 }
 
-func (user *GetUser) GetUserUseCase() (u model.User, postingCount, likeCount, likedCount, followCount, followedCount int64, err error) {
+func (user *GetUser) GetUserUseCase(ctx context.Context) (u model.User, postingCount, likeCount, likedCount, followCount, followedCount int64, err error) {
 	// check userName in token exists
-	_, err = user.userRepo.GetUserWhereName(user.ctx, user.tokenUserName)
+	_, err = user.userRepo.GetUserWhereName(ctx, user.tokenUserName)
 	if err != nil {
 		if err == repository.ErrNotExistsData {
 			err = ErrTokenInvalidNotExistingUserName
@@ -46,7 +44,7 @@ func (user *GetUser) GetUserUseCase() (u model.User, postingCount, likeCount, li
 		return
 	}
 
-	u, err = user.userRepo.GetUserWhereName(user.ctx, user.userName)
+	u, err = user.userRepo.GetUserWhereName(ctx, user.userName)
 	if err != nil {
 		if err == repository.ErrNotExistsData {
 			err = ErrNotExistsData
@@ -54,27 +52,27 @@ func (user *GetUser) GetUserUseCase() (u model.User, postingCount, likeCount, li
 		return
 	}
 
-	postingCount, err = user.postingRepo.GetCountWhereUserName(user.ctx, user.userName)
+	postingCount, err = user.postingRepo.GetCountWhereUserName(ctx, user.userName)
 	if err != nil {
 		return
 	}
 
-	likeCount, err = user.likeRepo.GetLikeCountWhereUserName(user.ctx, user.userName)
+	likeCount, err = user.likeRepo.GetLikeCountWhereUserName(ctx, user.userName)
 	if err != nil {
 		return
 	}
 
-	likedCount, err = user.likeRepo.GetLikedCountWhereUserName(user.ctx, user.userName)
+	likedCount, err = user.likeRepo.GetLikedCountWhereUserName(ctx, user.userName)
 	if err != nil {
 		return
 	}
 
-	followCount, err = user.followRepo.GetFollowCountWhereUserName(user.ctx, user.userName)
+	followCount, err = user.followRepo.GetFollowCountWhereUserName(ctx, user.userName)
 	if err != nil {
 		return
 	}
 
-	followedCount, err = user.followRepo.GetFollowedCountWhereUserName(user.ctx, user.userName)
+	followedCount, err = user.followRepo.GetFollowedCountWhereUserName(ctx, user.userName)
 	if err != nil {
 		return
 	}

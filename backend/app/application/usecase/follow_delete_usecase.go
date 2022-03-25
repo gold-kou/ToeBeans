@@ -16,7 +16,6 @@ type DeleteFollowUseCaseInterface interface {
 }
 
 type DeleteFollow struct {
-	ctx              context.Context
 	tx               mysql.DBTransaction
 	followUserName   string
 	followedUserName string
@@ -24,9 +23,8 @@ type DeleteFollow struct {
 	followRepo       *repository.FollowRepository
 }
 
-func NewDeleteFollow(ctx context.Context, tx mysql.DBTransaction, followUserName, followedUserName string, userRepo *repository.UserRepository, followRepo *repository.FollowRepository) *DeleteFollow {
+func NewDeleteFollow(tx mysql.DBTransaction, followUserName, followedUserName string, userRepo *repository.UserRepository, followRepo *repository.FollowRepository) *DeleteFollow {
 	return &DeleteFollow{
-		ctx:              ctx,
 		tx:               tx,
 		followUserName:   followUserName,
 		followedUserName: followedUserName,
@@ -35,9 +33,9 @@ func NewDeleteFollow(ctx context.Context, tx mysql.DBTransaction, followUserName
 	}
 }
 
-func (follow *DeleteFollow) DeleteFollowUseCase() error {
+func (follow *DeleteFollow) DeleteFollowUseCase(ctx context.Context) error {
 	// check userName in token exists
-	_, err := follow.userRepo.GetUserWhereName(follow.ctx, follow.followUserName)
+	_, err := follow.userRepo.GetUserWhereName(ctx, follow.followUserName)
 	if err != nil {
 		if err == repository.ErrNotExistsData {
 			return ErrTokenInvalidNotExistingUserName
@@ -46,7 +44,7 @@ func (follow *DeleteFollow) DeleteFollowUseCase() error {
 	}
 
 	// 存在しないユーザのフォロー削除はConflictエラー
-	_, err = follow.userRepo.GetUserWhereName(follow.ctx, follow.followedUserName)
+	_, err = follow.userRepo.GetUserWhereName(ctx, follow.followedUserName)
 	if err != nil {
 		if err == repository.ErrNotExistsData {
 			return ErrNotExitsUser
@@ -55,7 +53,7 @@ func (follow *DeleteFollow) DeleteFollowUseCase() error {
 	}
 
 	// 存在しないフォローの削除はConflictエラー
-	_, err = follow.followRepo.FindByBothUserNames(follow.ctx, follow.followUserName, follow.followedUserName)
+	_, err = follow.followRepo.FindByBothUserNames(ctx, follow.followUserName, follow.followedUserName)
 	if err != nil {
 		if err == repository.ErrNotExistsData {
 			return ErrDeleteNotExistsFollow
@@ -63,7 +61,7 @@ func (follow *DeleteFollow) DeleteFollowUseCase() error {
 		return err
 	}
 
-	err = follow.tx.Do(follow.ctx, func(ctx context.Context) error {
+	err = follow.tx.Do(ctx, func(ctx context.Context) error {
 		err := follow.followRepo.DeleteWhereFollowingFollowedUserName(ctx, follow.followUserName, follow.followedUserName)
 		if err != nil {
 			return err
