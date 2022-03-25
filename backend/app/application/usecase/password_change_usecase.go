@@ -17,16 +17,14 @@ type ChangePasswordUseCaseInterface interface {
 }
 
 type ChangePassword struct {
-	ctx               context.Context
 	tx                mysql.DBTransaction
 	tokenUserName     string
 	reqChangePassword *modelHTTP.RequestChangePassword
 	userRepo          *repository.UserRepository
 }
 
-func NewChangePassword(ctx context.Context, tx mysql.DBTransaction, tokenUserName string, reqChangePassword *modelHTTP.RequestChangePassword, userRepo *repository.UserRepository) *ChangePassword {
+func NewChangePassword(tx mysql.DBTransaction, tokenUserName string, reqChangePassword *modelHTTP.RequestChangePassword, userRepo *repository.UserRepository) *ChangePassword {
 	return &ChangePassword{
-		ctx:               ctx,
 		tx:                tx,
 		tokenUserName:     tokenUserName,
 		reqChangePassword: reqChangePassword,
@@ -34,9 +32,9 @@ func NewChangePassword(ctx context.Context, tx mysql.DBTransaction, tokenUserNam
 	}
 }
 
-func (user *ChangePassword) ChangePasswordUseCase() error {
+func (user *ChangePassword) ChangePasswordUseCase(ctx context.Context) error {
 	// check user exists
-	dbUser, err := user.userRepo.GetUserWhereName(user.ctx, user.tokenUserName)
+	dbUser, err := user.userRepo.GetUserWhereName(ctx, user.tokenUserName)
 	if err != nil {
 		if err == repository.ErrNotExistsData {
 			return ErrTokenInvalidNotExistingUserName
@@ -54,7 +52,7 @@ func (user *ChangePassword) ChangePasswordUseCase() error {
 	if err != nil {
 		return err
 	}
-	err = user.userRepo.UpdatePasswordWhereName(user.ctx, string(hashedNewPassword), user.tokenUserName)
+	err = user.userRepo.UpdatePasswordWhereName(ctx, string(hashedNewPassword), user.tokenUserName)
 	if err != nil {
 		return err
 	}

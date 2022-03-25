@@ -23,24 +23,22 @@ type PasswordResetEmailUseCaseInterface interface {
 }
 
 type PasswordResetEmail struct {
-	ctx                   context.Context
 	tx                    mysql.DBTransaction
 	reqPasswordResetEmail *modelHTTP.Email
 	userRepo              *repository.UserRepository
 }
 
-func NewPasswordResetEmail(ctx context.Context, tx mysql.DBTransaction, reqPasswordResetEmail *modelHTTP.Email, userRepo *repository.UserRepository) *PasswordResetEmail {
+func NewPasswordResetEmail(tx mysql.DBTransaction, reqPasswordResetEmail *modelHTTP.Email, userRepo *repository.UserRepository) *PasswordResetEmail {
 	return &PasswordResetEmail{
-		ctx:                   ctx,
 		tx:                    tx,
 		reqPasswordResetEmail: reqPasswordResetEmail,
 		userRepo:              userRepo,
 	}
 }
 
-func (re *PasswordResetEmail) PasswordResetEmailUseCase() (err error) {
+func (re *PasswordResetEmail) PasswordResetEmailUseCase(ctx context.Context) (err error) {
 	// email exists check
-	u, err := re.userRepo.GetUserWhereEmail(re.ctx, re.reqPasswordResetEmail.Email)
+	u, err := re.userRepo.GetUserWhereEmail(ctx, re.reqPasswordResetEmail.Email)
 	if err != nil {
 		if err == repository.ErrNotExistsData {
 			return ErrNotExistsData
@@ -57,7 +55,7 @@ func (re *PasswordResetEmail) PasswordResetEmailUseCase() (err error) {
 	if err != nil {
 		return err
 	}
-	err = re.userRepo.UpdatePasswordResetWhereEmail(re.ctx, u.PasswordResetEmailCount+1, resetKey.String(), lib.NowFunc().Add(24*time.Hour), re.reqPasswordResetEmail.Email)
+	err = re.userRepo.UpdatePasswordResetWhereEmail(ctx, u.PasswordResetEmailCount+1, resetKey.String(), lib.NowFunc().Add(24*time.Hour), re.reqPasswordResetEmail.Email)
 	if err != nil {
 		return
 	}

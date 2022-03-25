@@ -13,7 +13,6 @@ type GetCommentsUseCaseInterface interface {
 }
 
 type GetComments struct {
-	ctx           context.Context
 	tx            mysql.DBTransaction
 	tokenUserName string
 	postingID     int64
@@ -22,9 +21,8 @@ type GetComments struct {
 	commentRepo   *repository.CommentRepository
 }
 
-func NewGetComments(ctx context.Context, tx mysql.DBTransaction, tokenUserName string, postingID int64, userRepo *repository.UserRepository, postingRepo *repository.PostingRepository, commentRepo *repository.CommentRepository) *GetComments {
+func NewGetComments(tx mysql.DBTransaction, tokenUserName string, postingID int64, userRepo *repository.UserRepository, postingRepo *repository.PostingRepository, commentRepo *repository.CommentRepository) *GetComments {
 	return &GetComments{
-		ctx:           ctx,
 		tx:            tx,
 		tokenUserName: tokenUserName,
 		postingID:     postingID,
@@ -34,9 +32,9 @@ func NewGetComments(ctx context.Context, tx mysql.DBTransaction, tokenUserName s
 	}
 }
 
-func (c *GetComments) GetCommentsUseCase() (comments []model.Comment, err error) {
+func (c *GetComments) GetCommentsUseCase(ctx context.Context) (comments []model.Comment, err error) {
 	// check userName in token exists
-	_, err = c.userRepo.GetUserWhereName(c.ctx, c.tokenUserName)
+	_, err = c.userRepo.GetUserWhereName(ctx, c.tokenUserName)
 	if err != nil {
 		if err == repository.ErrNotExistsData {
 			return nil, ErrTokenInvalidNotExistingUserName
@@ -45,7 +43,7 @@ func (c *GetComments) GetCommentsUseCase() (comments []model.Comment, err error)
 	}
 
 	// check postingID exists
-	_, err = c.postingRepo.GetWhereID(c.ctx, c.postingID)
+	_, err = c.postingRepo.GetWhereID(ctx, c.postingID)
 	if err != nil {
 		if err == repository.ErrNotExistsData {
 			return nil, ErrNotExistsData
@@ -53,7 +51,7 @@ func (c *GetComments) GetCommentsUseCase() (comments []model.Comment, err error)
 		return
 	}
 
-	comments, err = c.commentRepo.GetCommentsWherePostingID(c.ctx, c.postingID)
+	comments, err = c.commentRepo.GetCommentsWherePostingID(ctx, c.postingID)
 	if err != nil {
 		if err == repository.ErrNotExistsData {
 			// not error

@@ -14,7 +14,6 @@ type DeleteUserUseCaseInterface interface {
 }
 
 type DeleteUser struct {
-	ctx         context.Context
 	tx          mysql.DBTransaction
 	userName    string
 	userRepo    *repository.UserRepository
@@ -24,9 +23,8 @@ type DeleteUser struct {
 	followRepo  *repository.FollowRepository
 }
 
-func NewDeleteUser(ctx context.Context, tx mysql.DBTransaction, userName string, userRepo *repository.UserRepository, postingRepo *repository.PostingRepository, likeRepo *repository.LikeRepository, commentRepo *repository.CommentRepository, followRepo *repository.FollowRepository) *DeleteUser {
+func NewDeleteUser(tx mysql.DBTransaction, userName string, userRepo *repository.UserRepository, postingRepo *repository.PostingRepository, likeRepo *repository.LikeRepository, commentRepo *repository.CommentRepository, followRepo *repository.FollowRepository) *DeleteUser {
 	return &DeleteUser{
-		ctx:         ctx,
 		tx:          tx,
 		userName:    userName,
 		userRepo:    userRepo,
@@ -37,9 +35,9 @@ func NewDeleteUser(ctx context.Context, tx mysql.DBTransaction, userName string,
 	}
 }
 
-func (user *DeleteUser) DeleteUserUseCase() error {
+func (user *DeleteUser) DeleteUserUseCase(ctx context.Context) error {
 	// check user exists
-	_, err := user.userRepo.GetUserWhereName(user.ctx, user.userName)
+	_, err := user.userRepo.GetUserWhereName(ctx, user.userName)
 	if err != nil {
 		if err == repository.ErrNotExistsData {
 			return ErrNotExitsUser
@@ -47,7 +45,7 @@ func (user *DeleteUser) DeleteUserUseCase() error {
 		return err
 	}
 
-	err = user.tx.Do(user.ctx, func(ctx context.Context) error {
+	err = user.tx.Do(ctx, func(ctx context.Context) error {
 		// TODO notification delete
 
 		err = user.likeRepo.DeleteWhereUserName(ctx, user.userName)

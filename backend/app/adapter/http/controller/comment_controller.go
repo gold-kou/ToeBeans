@@ -167,8 +167,8 @@ func registerComment(r *http.Request) error {
 	notificationRepo := repository.NewNotificationRepository(db)
 
 	// UseCase
-	u := usecase.NewRegisterComment(r.Context(), tx, tokenUserName, postingID, reqRegisterComment, userRepo, postingRepo, commentRepo, notificationRepo)
-	if err = u.RegisterCommentUseCase(); err != nil {
+	u := usecase.NewRegisterComment(tx, tokenUserName, postingID, reqRegisterComment, userRepo, postingRepo, commentRepo, notificationRepo)
+	if err = u.RegisterCommentUseCase(r.Context()); err != nil {
 		log.Println(err)
 		if err == usecase.ErrNotExistsData {
 			return helper.NewBadRequestError(err.Error())
@@ -214,8 +214,8 @@ func getComments(r *http.Request) (comments []model.Comment, err error) {
 		log.Println(err)
 		return nil, helper.NewInternalServerError(err.Error())
 	}
-	u := usecase.NewGetComments(r.Context(), tx, tokenUserName, int64(id), userRepo, postingRepo, commentRepo)
-	if comments, err = u.GetCommentsUseCase(); err != nil {
+	u := usecase.NewGetComments(tx, tokenUserName, int64(id), userRepo, postingRepo, commentRepo)
+	if comments, err = u.GetCommentsUseCase(r.Context()); err != nil {
 		log.Println(err)
 		if err == usecase.ErrNotExistsData {
 			return nil, helper.NewBadRequestError(err.Error())
@@ -265,8 +265,8 @@ func deleteComment(r *http.Request) error {
 	commentRepo := repository.NewCommentRepository(db)
 
 	// UseCase
-	u := usecase.NewDeleteComment(r.Context(), tx, tokenUserName, int64(commentID), userRepo, commentRepo)
-	if err = u.DeleteCommentUseCase(); err != nil {
+	u := usecase.NewDeleteComment(tx, tokenUserName, int64(commentID), userRepo, commentRepo)
+	if err = u.DeleteCommentUseCase(r.Context()); err != nil {
 		log.Println(err)
 		if err == usecase.ErrNotExistsData {
 			return helper.NewBadRequestError(err.Error())

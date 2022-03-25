@@ -14,7 +14,6 @@ type RegisterCommentUseCaseInterface interface {
 }
 
 type RegisterComment struct {
-	ctx                context.Context
 	tx                 mysql.DBTransaction
 	tokenUserName      string
 	postingID          int
@@ -25,9 +24,8 @@ type RegisterComment struct {
 	notificationRepo   *repository.NotificationRepository
 }
 
-func NewRegisterComment(ctx context.Context, tx mysql.DBTransaction, tokenUserName string, postingID int, reqRegisterComment *modelHTTP.Comment, userRepo *repository.UserRepository, postingRepo *repository.PostingRepository, commentRepo *repository.CommentRepository, notificationRepo *repository.NotificationRepository) *RegisterComment {
+func NewRegisterComment(tx mysql.DBTransaction, tokenUserName string, postingID int, reqRegisterComment *modelHTTP.Comment, userRepo *repository.UserRepository, postingRepo *repository.PostingRepository, commentRepo *repository.CommentRepository, notificationRepo *repository.NotificationRepository) *RegisterComment {
 	return &RegisterComment{
-		ctx:                ctx,
 		tx:                 tx,
 		tokenUserName:      tokenUserName,
 		postingID:          postingID,
@@ -39,9 +37,9 @@ func NewRegisterComment(ctx context.Context, tx mysql.DBTransaction, tokenUserNa
 	}
 }
 
-func (comment *RegisterComment) RegisterCommentUseCase() error {
+func (comment *RegisterComment) RegisterCommentUseCase(ctx context.Context) error {
 	// check userName in token exists
-	_, err := comment.userRepo.GetUserWhereName(comment.ctx, comment.tokenUserName)
+	_, err := comment.userRepo.GetUserWhereName(ctx, comment.tokenUserName)
 	if err != nil {
 		if err == repository.ErrNotExistsData {
 			return ErrTokenInvalidNotExistingUserName
@@ -49,14 +47,14 @@ func (comment *RegisterComment) RegisterCommentUseCase() error {
 		return err
 	}
 
-	_, err = comment.postingRepo.GetWhereID(comment.ctx, int64(comment.postingID))
+	_, err = comment.postingRepo.GetWhereID(ctx, int64(comment.postingID))
 	if err != nil {
 		if err == repository.ErrNotExistsData {
 			return ErrNotExistsData
 		}
 		return err
 	}
-	err = comment.tx.Do(comment.ctx, func(ctx context.Context) error {
+	err = comment.tx.Do(ctx, func(ctx context.Context) error {
 		c := model.Comment{
 			UserName:  comment.tokenUserName,
 			PostingID: int64(comment.postingID),

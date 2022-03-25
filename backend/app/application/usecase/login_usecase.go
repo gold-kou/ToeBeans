@@ -18,23 +18,21 @@ type LoginUseCaseInterface interface {
 }
 
 type Login struct {
-	ctx      context.Context
 	tx       mysql.DBTransaction
 	reqLogin *modelHTTP.RequestLogin
 	userRepo *repository.UserRepository
 }
 
-func NewLogin(ctx context.Context, tx mysql.DBTransaction, reqLogin *modelHTTP.RequestLogin, userRepo *repository.UserRepository) *Login {
+func NewLogin(tx mysql.DBTransaction, reqLogin *modelHTTP.RequestLogin, userRepo *repository.UserRepository) *Login {
 	return &Login{
-		ctx:      ctx,
 		tx:       tx,
 		reqLogin: reqLogin,
 		userRepo: userRepo,
 	}
 }
 
-func (l *Login) LoginUseCase() (idToken string, err error) {
-	user, err := l.userRepo.GetUserWhereEmail(l.ctx, l.reqLogin.Email)
+func (l *Login) LoginUseCase(ctx context.Context) (idToken string, err error) {
+	user, err := l.userRepo.GetUserWhereEmail(ctx, l.reqLogin.Email)
 	if err != nil {
 		if err == repository.ErrNotExistsData {
 			return "", ErrNotExistsData

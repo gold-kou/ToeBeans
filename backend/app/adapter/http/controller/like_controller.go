@@ -100,8 +100,8 @@ func registerLike(r *http.Request) error {
 	notificationRepo := repository.NewNotificationRepository(db)
 
 	// UseCase
-	u := usecase.NewRegisterLike(r.Context(), tx, tokenUserName, postingID, userRepo, postingRepo, likeRepo, notificationRepo)
-	if err = u.RegisterLikeUseCase(); err != nil {
+	u := usecase.NewRegisterLike(tx, tokenUserName, postingID, userRepo, postingRepo, likeRepo, notificationRepo)
+	if err = u.RegisterLikeUseCase(r.Context()); err != nil {
 		log.Println(err)
 		if err == usecase.ErrLikeYourPosting {
 			return helper.NewConflictError(err.Error())
@@ -149,8 +149,8 @@ func deleteLike(r *http.Request) error {
 	likeRepo := repository.NewLikeRepository(db)
 
 	// UseCase
-	u := usecase.NewDeleteLike(r.Context(), tx, tokenUserName, int64(postingID), userRepo, postingRepo, likeRepo)
-	if err = u.DeleteLikeUseCase(); err != nil {
+	u := usecase.NewDeleteLike(tx, tokenUserName, int64(postingID), userRepo, postingRepo, likeRepo)
+	if err = u.DeleteLikeUseCase(r.Context()); err != nil {
 		log.Println(err)
 		if err == usecase.ErrDeleteNotExistsLike {
 			return helper.NewConflictError(err.Error())

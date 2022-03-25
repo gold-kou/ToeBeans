@@ -32,16 +32,14 @@ type UpdateUserUseCaseInterface interface {
 }
 
 type UpdateUser struct {
-	ctx           context.Context
 	tx            mysql.DBTransaction
 	userName      string
 	reqUpdateUser *modelHTTP.RequestUpdateUser
 	userRepo      *repository.UserRepository
 }
 
-func NewUpdateUser(ctx context.Context, tx mysql.DBTransaction, userName string, reqUpdateUser *modelHTTP.RequestUpdateUser, userRepo *repository.UserRepository) *UpdateUser {
+func NewUpdateUser(tx mysql.DBTransaction, userName string, reqUpdateUser *modelHTTP.RequestUpdateUser, userRepo *repository.UserRepository) *UpdateUser {
 	return &UpdateUser{
-		ctx:           ctx,
 		tx:            tx,
 		userName:      userName,
 		reqUpdateUser: reqUpdateUser,
@@ -49,9 +47,9 @@ func NewUpdateUser(ctx context.Context, tx mysql.DBTransaction, userName string,
 	}
 }
 
-func (user *UpdateUser) UpdateUserUseCase() error {
+func (user *UpdateUser) UpdateUserUseCase(ctx context.Context) error {
 	// check user exists
-	_, err := user.userRepo.GetUserWhereName(user.ctx, user.userName)
+	_, err := user.userRepo.GetUserWhereName(ctx, user.userName)
 	if err != nil {
 		if err == repository.ErrNotExistsData {
 			return ErrNotExitsUser
@@ -65,7 +63,7 @@ func (user *UpdateUser) UpdateUserUseCase() error {
 		if err != nil {
 			return err
 		}
-		err = user.userRepo.UpdatePasswordWhereName(user.ctx, string(hashedPassword), user.userName)
+		err = user.userRepo.UpdatePasswordWhereName(ctx, string(hashedPassword), user.userName)
 		if err != nil {
 			return err
 		}
@@ -113,14 +111,14 @@ func (user *UpdateUser) UpdateUserUseCase() error {
 		if app.IsLocal() {
 			o.Location = strings.Replace(o.Location, "minio", "localhost", 1)
 		}
-		err = user.userRepo.UpdateIconWhereName(user.ctx, o.Location, user.userName)
+		err = user.userRepo.UpdateIconWhereName(ctx, o.Location, user.userName)
 		if err != nil {
 			return err
 		}
 	}
 	// the case of self introduction
 	if user.reqUpdateUser.SelfIntroduction != "" {
-		err := user.userRepo.UpdateSelfIntroductionWhereName(user.ctx, user.reqUpdateUser.SelfIntroduction, user.userName)
+		err := user.userRepo.UpdateSelfIntroductionWhereName(ctx, user.reqUpdateUser.SelfIntroduction, user.userName)
 		if err != nil {
 			return err
 		}

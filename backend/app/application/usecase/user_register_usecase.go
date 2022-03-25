@@ -31,16 +31,14 @@ type RegisterUserUseCaseInterface interface {
 }
 
 type RegisterUser struct {
-	ctx             context.Context
 	tx              mysql.DBTransaction
 	userName        string
 	reqRegisterUser *modelHTTP.RequestRegisterUser
 	userRepo        *repository.UserRepository
 }
 
-func NewRegisterUser(ctx context.Context, tx mysql.DBTransaction, userName string, reqRegisterUser *modelHTTP.RequestRegisterUser, userRepo *repository.UserRepository) *RegisterUser {
+func NewRegisterUser(tx mysql.DBTransaction, userName string, reqRegisterUser *modelHTTP.RequestRegisterUser, userRepo *repository.UserRepository) *RegisterUser {
 	return &RegisterUser{
-		ctx:             ctx,
 		tx:              tx,
 		userName:        userName,
 		reqRegisterUser: reqRegisterUser,
@@ -48,7 +46,7 @@ func NewRegisterUser(ctx context.Context, tx mysql.DBTransaction, userName strin
 	}
 }
 
-func (user *RegisterUser) RegisterUserUseCase() error {
+func (user *RegisterUser) RegisterUserUseCase(ctx context.Context) error {
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.reqRegisterUser.Password), bcrypt.DefaultCost)
 	if err != nil {
 		return err
@@ -60,7 +58,7 @@ func (user *RegisterUser) RegisterUserUseCase() error {
 		return err
 	}
 
-	err = user.tx.Do(user.ctx, func(ctx context.Context) error {
+	err = user.tx.Do(ctx, func(ctx context.Context) error {
 		u := model.User{
 			Name:          user.userName,
 			Email:         user.reqRegisterUser.Email,

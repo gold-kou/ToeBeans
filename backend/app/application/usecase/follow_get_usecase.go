@@ -13,7 +13,6 @@ type GetFollowStateUseCaseInterface interface {
 }
 
 type GetFollowState struct {
-	ctx              context.Context
 	tx               mysql.DBTransaction
 	tokenUserName    string
 	followedUserName string
@@ -21,9 +20,8 @@ type GetFollowState struct {
 	followRepo       *repository.FollowRepository
 }
 
-func NewGetFollowState(ctx context.Context, tx mysql.DBTransaction, tokenUserName string, followedUserName string, userRepo *repository.UserRepository, followRepo *repository.FollowRepository) *GetFollowState {
+func NewGetFollowState(tx mysql.DBTransaction, tokenUserName string, followedUserName string, userRepo *repository.UserRepository, followRepo *repository.FollowRepository) *GetFollowState {
 	return &GetFollowState{
-		ctx:              ctx,
 		tx:               tx,
 		tokenUserName:    tokenUserName,
 		followedUserName: followedUserName,
@@ -32,9 +30,9 @@ func NewGetFollowState(ctx context.Context, tx mysql.DBTransaction, tokenUserNam
 	}
 }
 
-func (follow *GetFollowState) GetFollowStateUseCase() error {
+func (follow *GetFollowState) GetFollowStateUseCase(ctx context.Context) error {
 	// check userName in token exists
-	_, err := follow.userRepo.GetUserWhereName(follow.ctx, follow.tokenUserName)
+	_, err := follow.userRepo.GetUserWhereName(ctx, follow.tokenUserName)
 	if err != nil {
 		if err == repository.ErrNotExistsData {
 			return ErrTokenInvalidNotExistingUserName
@@ -42,7 +40,7 @@ func (follow *GetFollowState) GetFollowStateUseCase() error {
 		return err
 	}
 
-	_, err = follow.followRepo.FindByBothUserNames(follow.ctx, follow.tokenUserName, follow.followedUserName)
+	_, err = follow.followRepo.FindByBothUserNames(ctx, follow.tokenUserName, follow.followedUserName)
 	if err != nil {
 		if err == repository.ErrNotExistsData {
 			return ErrNotExistsData

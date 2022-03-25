@@ -13,7 +13,6 @@ type DeleteCommentUseCaseInterface interface {
 }
 
 type DeleteComment struct {
-	ctx           context.Context
 	tx            mysql.DBTransaction
 	tokenUserName string
 	commentID     int64
@@ -21,9 +20,8 @@ type DeleteComment struct {
 	commentRepo   *repository.CommentRepository
 }
 
-func NewDeleteComment(ctx context.Context, tx mysql.DBTransaction, tokenUserName string, commentID int64, userRepo *repository.UserRepository, commentRepo *repository.CommentRepository) *DeleteComment {
+func NewDeleteComment(tx mysql.DBTransaction, tokenUserName string, commentID int64, userRepo *repository.UserRepository, commentRepo *repository.CommentRepository) *DeleteComment {
 	return &DeleteComment{
-		ctx:           ctx,
 		tx:            tx,
 		tokenUserName: tokenUserName,
 		commentID:     commentID,
@@ -32,9 +30,9 @@ func NewDeleteComment(ctx context.Context, tx mysql.DBTransaction, tokenUserName
 	}
 }
 
-func (comment *DeleteComment) DeleteCommentUseCase() error {
+func (comment *DeleteComment) DeleteCommentUseCase(ctx context.Context) error {
 	// check userName in token exists
-	_, err := comment.userRepo.GetUserWhereName(comment.ctx, comment.tokenUserName)
+	_, err := comment.userRepo.GetUserWhereName(ctx, comment.tokenUserName)
 	if err != nil {
 		if err == repository.ErrNotExistsData {
 			return ErrTokenInvalidNotExistingUserName
@@ -42,7 +40,7 @@ func (comment *DeleteComment) DeleteCommentUseCase() error {
 		return err
 	}
 
-	if err := comment.commentRepo.DeleteWhereID(comment.ctx, comment.commentID); err != nil {
+	if err := comment.commentRepo.DeleteWhereID(ctx, comment.commentID); err != nil {
 		if err == repository.ErrNotExistsData {
 			return ErrNotExistsData
 		}

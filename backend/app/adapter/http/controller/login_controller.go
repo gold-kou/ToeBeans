@@ -93,8 +93,8 @@ func login(r *http.Request) (idToken string, err error) {
 	userRepo := repository.NewUserRepository(db)
 
 	// UseCase
-	l := usecase.NewLogin(r.Context(), tx, reqLogin, userRepo)
-	if idToken, err = l.LoginUseCase(); err != nil {
+	l := usecase.NewLogin(tx, reqLogin, userRepo)
+	if idToken, err = l.LoginUseCase(r.Context()); err != nil {
 		log.Println(err)
 		if err == usecase.ErrNotExistsData || err == usecase.ErrNotCorrectPassword {
 			return "", helper.NewBadRequestError(errMsgWrongUserNameOrPassword)

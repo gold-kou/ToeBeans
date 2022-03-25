@@ -125,8 +125,8 @@ func changePassword(r *http.Request) (err error) {
 	userRepo := repository.NewUserRepository(db)
 
 	// UseCase
-	u := usecase.NewChangePassword(r.Context(), tx, tokenUserName, reqChangePassword, userRepo)
-	if err = u.ChangePasswordUseCase(); err != nil {
+	u := usecase.NewChangePassword(tx, tokenUserName, reqChangePassword, userRepo)
+	if err = u.ChangePasswordUseCase(r.Context()); err != nil {
 		log.Println(err)
 		if err == usecase.ErrNotCorrectPassword {
 			return helper.NewBadRequestError(err.Error())
@@ -173,8 +173,8 @@ func passwordResetEmail(r *http.Request) error {
 	userRepo := repository.NewUserRepository(db)
 
 	// UseCase
-	re := usecase.NewPasswordResetEmail(r.Context(), tx, reqPasswordResetEmail, userRepo)
-	if err = re.PasswordResetEmailUseCase(); err != nil {
+	re := usecase.NewPasswordResetEmail(tx, reqPasswordResetEmail, userRepo)
+	if err = re.PasswordResetEmailUseCase(r.Context()); err != nil {
 		log.Println(err)
 		if err == usecase.ErrNotExistsData {
 			return helper.NewBadRequestError(err.Error())
@@ -221,8 +221,8 @@ func passwordReset(r *http.Request) error {
 	userRepo := repository.NewUserRepository(db)
 
 	// UseCase
-	re := usecase.NewPasswordReset(r.Context(), tx, reqResetPassword, userRepo)
-	if err = re.PasswordResetUseCase(); err != nil {
+	re := usecase.NewPasswordReset(tx, reqResetPassword, userRepo)
+	if err = re.PasswordResetUseCase(r.Context()); err != nil {
 		log.Println(err)
 		if err == usecase.ErrNotExistsData {
 			return helper.NewBadRequestError(errMsgUserNameResetKeyNotExistsResetKeyExpired)
