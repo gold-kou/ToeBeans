@@ -3,7 +3,6 @@ package repository
 import (
 	"context"
 	"database/sql"
-	"time"
 
 	"github.com/go-sql-driver/mysql"
 
@@ -15,13 +14,11 @@ type UserRepositoryInterface interface {
 	Create(ctx context.Context, user *model.User) (err error)
 	GetUserWhereEmail(ctx context.Context, email string) (user model.User, err error)
 	GetUserWhereName(ctx context.Context, userName string) (user model.User, err error)
-	GetUserWhereNameResetKey(ctx context.Context, userName string, resetKey string, requestedAt time.Time) (user model.User, err error)
 	UpdatePasswordWhereName(ctx context.Context, password string, userName string) (err error)
 	UpdateIconWhereName(ctx context.Context, iconURL string, userName string) (err error)
 	UpdateSelfIntroductionWhereName(ctx context.Context, selfIntroduction string, userName string) (err error)
 	UpdateEmailVerifiedWhereNameActivationKey(ctx context.Context, emailVerified bool, userName string, activationKey string) (err error)
-	UpdatePasswordResetWhereEmail(ctx context.Context, count uint16, resetKey string, expiresAt time.Time, email string) (err error)
-	ResetPassword(ctx context.Context, password string, userName string, resetKey string) (err error)
+	ResetPassword(ctx context.Context, password string, userName string) (err error)
 	DeleteWhereName(ctx context.Context, userName string) (err error)
 }
 
@@ -51,8 +48,8 @@ func (r *UserRepository) Create(ctx context.Context, user *model.User) (err erro
 }
 
 func (r *UserRepository) GetUserWhereEmail(ctx context.Context, email string) (user model.User, err error) {
-	q := "SELECT `name`, `email`, `password`, `icon`, `self_introduction`, `activation_key`, `email_verified`, `password_reset_email_count`, `password_reset_key`, `password_reset_key_expires_at`, `created_at`, `updated_at` FROM `users` WHERE `email` = ?"
-	err = r.db.QueryRowContext(ctx, q, email).Scan(&user.Name, &user.Email, &user.Password, &user.Icon, &user.SelfIntroduction, &user.ActivationKey, &user.EmailVerified, &user.PasswordResetEmailCount, &user.PasswordResetKey, &user.PasswordResetKeyExpiresAt, &user.CreatedAt, &user.UpdatedAt)
+	q := "SELECT `id`, `name`, `email`, `password`, `icon`, `self_introduction`, `activation_key`, `email_verified`, `created_at`, `updated_at` FROM `users` WHERE `email` = ?"
+	err = r.db.QueryRowContext(ctx, q, email).Scan(&user.ID, &user.Name, &user.Email, &user.Password, &user.Icon, &user.SelfIntroduction, &user.ActivationKey, &user.EmailVerified, &user.CreatedAt, &user.UpdatedAt)
 	if err == sql.ErrNoRows {
 		err = ErrNotExistsData
 		return
@@ -61,18 +58,8 @@ func (r *UserRepository) GetUserWhereEmail(ctx context.Context, email string) (u
 }
 
 func (r *UserRepository) GetUserWhereName(ctx context.Context, userName string) (user model.User, err error) {
-	q := "SELECT `name`, `email`, `password`, `icon`, `self_introduction`, `activation_key`, `email_verified`, `password_reset_email_count`, `password_reset_key`, `password_reset_key_expires_at`, `created_at`, `updated_at` FROM `users` WHERE `name` = ?"
-	err = r.db.QueryRowContext(ctx, q, userName).Scan(&user.Name, &user.Email, &user.Password, &user.Icon, &user.SelfIntroduction, &user.ActivationKey, &user.EmailVerified, &user.PasswordResetEmailCount, &user.PasswordResetKey, &user.PasswordResetKeyExpiresAt, &user.CreatedAt, &user.UpdatedAt)
-	if err == sql.ErrNoRows {
-		err = ErrNotExistsData
-		return
-	}
-	return
-}
-
-func (r *UserRepository) GetUserWhereNameResetKey(ctx context.Context, userName, resetKey string, requestedAt time.Time) (user model.User, err error) {
-	q := "SELECT `name`, `email`, `password`, `icon`, `self_introduction`, `activation_key`, `email_verified`, `password_reset_email_count`, `password_reset_key`, `password_reset_key_expires_at`, `created_at`, `updated_at` FROM `users` WHERE `name` = ? AND `password_reset_key` = ? AND `password_reset_key_expires_at` >= ?"
-	err = r.db.QueryRowContext(ctx, q, userName, resetKey, requestedAt).Scan(&user.Name, &user.Email, &user.Password, &user.Icon, &user.SelfIntroduction, &user.ActivationKey, &user.EmailVerified, &user.PasswordResetEmailCount, &user.PasswordResetKey, &user.PasswordResetKeyExpiresAt, &user.CreatedAt, &user.UpdatedAt)
+	q := "SELECT `id`, `name`, `email`, `password`, `icon`, `self_introduction`, `activation_key`, `email_verified`, `created_at`, `updated_at` FROM `users` WHERE `name` = ?"
+	err = r.db.QueryRowContext(ctx, q, userName).Scan(&user.ID, &user.Name, &user.Email, &user.Password, &user.Icon, &user.SelfIntroduction, &user.ActivationKey, &user.EmailVerified, &user.CreatedAt, &user.UpdatedAt)
 	if err == sql.ErrNoRows {
 		err = ErrNotExistsData
 		return
@@ -135,24 +122,13 @@ func (r *UserRepository) UpdateEmailVerifiedWhereNameActivationKey(ctx context.C
 	return
 }
 
-func (r *UserRepository) UpdatePasswordResetWhereEmail(ctx context.Context, count uint8, resetKey string, expiresAt time.Time, email string) (err error) {
-	q := "UPDATE `users` SET `password_reset_email_count` = ?, `password_reset_key` = ?, `password_reset_key_expires_at` = ? WHERE `email` = ?"
+func (r *UserRepository) ResetPassword(ctx context.Context, password, userName string) (err error) {
+	q := "UPDATE `users` SET `password` = ? WHERE `name` = ?"
 	tx := m.GetTransaction(ctx)
 	if tx != nil {
-		_, err = tx.ExecContext(ctx, q, count, resetKey, expiresAt, email)
+		_, err = tx.ExecContext(ctx, q, password, userName)
 	} else {
-		_, err = r.db.ExecContext(ctx, q, count, resetKey, expiresAt, email)
-	}
-	return
-}
-
-func (r *UserRepository) ResetPassword(ctx context.Context, password, userName, resetKey string) (err error) {
-	q := "UPDATE `users` SET `password` = ? WHERE `name` = ? AND `password_reset_key` = ?"
-	tx := m.GetTransaction(ctx)
-	if tx != nil {
-		_, err = tx.ExecContext(ctx, q, password, userName, resetKey)
-	} else {
-		_, err = r.db.ExecContext(ctx, q, password, userName, resetKey)
+		_, err = r.db.ExecContext(ctx, q, password, userName)
 	}
 	return
 }

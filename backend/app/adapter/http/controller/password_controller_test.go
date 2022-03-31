@@ -277,6 +277,8 @@ func TestPasswordResetEmail(t *testing.T) {
 			userRepo := repository.NewUserRepository(db)
 			err := userRepo.Create(context.Background(), &dummy.User1)
 			assert.NoError(t, err)
+			err = testingHelper.CreatePasswordReset(db, lib.NowFunc())
+			assert.NoError(t, err)
 			if tt.name == "error over password reset limit count" {
 				err = testingHelper.UpdatePasswordResetEmailCount(db)
 				assert.NoError(t, err)
@@ -415,7 +417,19 @@ var errRespPasswordResetKeyNotUUID = `
 var errRespPasswordResetNotExists = `
 {
   "status": 400,
-  "message": "the user name doesn't exist or the password reset key doesn't exist or the password reset key is expired"
+  "message": "not exists"
+}
+`
+var errRespPasswordResetWrongKey = `
+{
+  "status": 400,
+  "message": "password reset key is wrong"
+}
+`
+var errRespPasswordExpiredKey = `
+{
+  "status": 400,
+  "message": "password reset key is expired"
 }
 `
 
@@ -497,14 +511,14 @@ func TestPasswordReset(t *testing.T) {
 			name:       "error request body wrong password_reset_key",
 			args:       args{reqBody: errReqPasswordResetWrongResetKey},
 			method:     http.MethodPost,
-			want:       errRespPasswordResetNotExists,
+			want:       errRespPasswordResetWrongKey,
 			wantStatus: http.StatusBadRequest,
 		},
 		{
 			name:       "error password_reset_key is expired",
 			args:       args{reqBody: successReqPasswordReset},
 			method:     http.MethodPost,
-			want:       errRespPasswordResetNotExists,
+			want:       errRespPasswordExpiredKey,
 			wantStatus: http.StatusBadRequest,
 		},
 		{
@@ -527,10 +541,10 @@ func TestPasswordReset(t *testing.T) {
 			userRepo := repository.NewUserRepository(db)
 			err := userRepo.Create(context.Background(), &dummy.User1)
 			assert.NoError(t, err)
+			err = testingHelper.CreatePasswordReset(db, lib.NowFunc())
+			assert.NoError(t, err)
 			if tt.name == "error password_reset_key is expired" {
-				err = testingHelper.UpdateResetKeyExpiresAt(db, dummy.User1.PasswordResetKey, lib.NowFunc().Add(-time.Second))
-			} else {
-				err = testingHelper.UpdateResetKeyExpiresAt(db, dummy.User1.PasswordResetKey, lib.NowFunc())
+				err = testingHelper.UpdatePasswordResetExpiresAt(db, lib.NowFunc().Add(-time.Second))
 			}
 			assert.NoError(t, err)
 

@@ -68,6 +68,17 @@ On app
 # kill -9 <process>
 ```
 
+## table migration
+`docker-compose.test.yml` のvolumesで `./toebeans-sql/mysql/entrypoint:/docker-entrypoint-initdb.d` としているため、コンテナ起動時に自動でマイグレーションが実行される。ただし、volumeは削除する必要がある。
+
+```
+$ docker volume ls |grep db-test
+local     backend_db-test
+
+$ docker volume rm backend_db-test
+backend_db-test
+```
+
 ## UT
 
 ```

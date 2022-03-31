@@ -1,17 +1,26 @@
 CREATE TABLE `users` (
-    `name` VARCHAR(255) PRIMARY KEY,
+    `id` INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    `name` VARCHAR(255) UNIQUE NOT NULL,
     `email` VARCHAR(255) UNIQUE NOT NULL,
     `password` CHAR(128) NOT NULL,
     `icon` VARCHAR(255) NOT NULL DEFAULT 'UNKNOWN',
     `self_introduction` VARCHAR(255) NOT NULL DEFAULT 'UNKNOWN',
     `activation_key` VARCHAR(255) NOT NULL,
     `email_verified` BOOLEAN NOT NULL DEFAULT FALSE,
+    `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP on UPDATE CURRENT_TIMESTAMP,
+    INDEX idx_users_name(name)
+);
+
+CREATE TABLE `password_resets` (
+    `id` INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    `user_id` INT UNIQUE NOT NULL,
     `password_reset_email_count` INT NOT NULL DEFAULT 0,
     `password_reset_key` VARCHAR(255) NOT NULL DEFAULT 'UNKNOWN',
     `password_reset_key_expires_at` DATETIME NOT NULL DEFAULT '1000-01-01 00:00:00',
     `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     `updated_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP on UPDATE CURRENT_TIMESTAMP,
-    INDEX idx_users_name(name)
+    CONSTRAINT `password_resets_user_id` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`)
 );
 
 CREATE TABLE `postings` (

@@ -131,6 +131,7 @@ func TestRegisterComment(t *testing.T) {
 				assert.NoError(t, err)
 				dummy.Comment1.CreatedAt = lib.NowFunc()
 				dummy.Comment1.UpdatedAt = lib.NowFunc()
+				fmt.Println(comments)
 				comments[0].CreatedAt = lib.NowFunc()
 				comments[0].UpdatedAt = lib.NowFunc()
 				assert.Equal(t, dummy.Comment1, comments[0])
