@@ -34,6 +34,7 @@ services:
 
   db-test:
     image: mysql:5.7
+    platform: linux/amd64
     volumes:
       - ./toebeans-sql/mysql/my.cnf:/etc/mysql/conf.d/my.cnf
       - ./toebeans-sql/mysql/entrypoint:/docker-entrypoint-initdb.d
