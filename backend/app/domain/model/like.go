@@ -4,7 +4,7 @@ import "time"
 
 type Like struct {
 	ID        int64
-	UserName  string
+	UserID    int64
 	PostingID int64
 	CreatedAt time.Time
 	UpdatedAt time.Time

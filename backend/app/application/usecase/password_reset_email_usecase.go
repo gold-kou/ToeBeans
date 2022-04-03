@@ -26,13 +26,15 @@ type PasswordResetEmail struct {
 	tx                    mysql.DBTransaction
 	reqPasswordResetEmail *modelHTTP.Email
 	userRepo              *repository.UserRepository
+	passwordResetRepo     *repository.PasswordResetRepository
 }
 
-func NewPasswordResetEmail(tx mysql.DBTransaction, reqPasswordResetEmail *modelHTTP.Email, userRepo *repository.UserRepository) *PasswordResetEmail {
+func NewPasswordResetEmail(tx mysql.DBTransaction, reqPasswordResetEmail *modelHTTP.Email, userRepo *repository.UserRepository, passwordResetRepo *repository.PasswordResetRepository) *PasswordResetEmail {
 	return &PasswordResetEmail{
 		tx:                    tx,
 		reqPasswordResetEmail: reqPasswordResetEmail,
 		userRepo:              userRepo,
+		passwordResetRepo:     passwordResetRepo,
 	}
 }
 
@@ -46,7 +48,20 @@ func (re *PasswordResetEmail) PasswordResetEmailUseCase(ctx context.Context) (er
 		return
 	}
 
-	if u.PasswordResetEmailCount >= model.MaxLimitPasswordResetPerDay {
+	// count over check
+	var count uint8
+	pr, err := re.passwordResetRepo.FindByUserID(ctx, u.ID)
+	if err != nil {
+		if err == repository.ErrNotExistsData {
+			count = 0
+		} else {
+			return err
+		}
+	}
+	if pr.PasswordResetEmailCount != 0 {
+		count = pr.PasswordResetEmailCount
+	}
+	if count >= model.MaxLimitPasswordResetPerDay {
 		return ErrOverPasswordResetCount
 	}
 
@@ -55,7 +70,7 @@ func (re *PasswordResetEmail) PasswordResetEmailUseCase(ctx context.Context) (er
 	if err != nil {
 		return err
 	}
-	err = re.userRepo.UpdatePasswordResetWhereEmail(ctx, u.PasswordResetEmailCount+1, resetKey.String(), lib.NowFunc().Add(24*time.Hour), re.reqPasswordResetEmail.Email)
+	err = re.passwordResetRepo.UpdateWhereUserID(ctx, count+1, resetKey.String(), lib.NowFunc().Add(24*time.Hour), u.ID)
 	if err != nil {
 		return
 	}

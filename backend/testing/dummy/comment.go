@@ -6,7 +6,7 @@ import (
 
 var Comment1 = model.Comment{
 	ID:        1,
-	UserName:  User1.Name,
+	UserID:    User1.ID,
 	PostingID: Posting1.ID,
 	Comment:   "test comment",
 }

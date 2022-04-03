@@ -100,7 +100,12 @@ func registerLike(r *http.Request) error {
 	notificationRepo := repository.NewNotificationRepository(db)
 
 	// UseCase
-	u := usecase.NewRegisterLike(tx, tokenUserName, postingID, userRepo, postingRepo, likeRepo, notificationRepo)
+	tokenUserID, err := context.GetTokenUserID(r.Context())
+	if err != nil {
+		log.Println(err)
+		return helper.NewInternalServerError(err.Error())
+	}
+	u := usecase.NewRegisterLike(tx, tokenUserID, tokenUserName, postingID, userRepo, postingRepo, likeRepo, notificationRepo)
 	if err = u.RegisterLikeUseCase(r.Context()); err != nil {
 		log.Println(err)
 		if err == usecase.ErrLikeYourPosting {

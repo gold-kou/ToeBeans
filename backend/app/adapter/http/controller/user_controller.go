@@ -218,18 +218,18 @@ func getUser(r *http.Request) (user model.User, postingCount, likeCount, likedCo
 	}
 
 	// get request parameter
-	userName := r.URL.Query().Get("user_name")
+	targetUserName := r.URL.Query().Get("user_name")
 
 	// validation check
-	if userName != "" {
-		if err = validation.Validate(userName, validation.Length(modelHTTP.MinVarcharLength, modelHTTP.MaxVarcharLength), is.Alphanumeric); err != nil {
+	if targetUserName != "" {
+		if err = validation.Validate(targetUserName, validation.Length(modelHTTP.MinVarcharLength, modelHTTP.MaxVarcharLength), is.Alphanumeric); err != nil {
 			log.Println(err)
 			err = helper.NewBadRequestError(err.Error())
 			return
 		}
 	} else {
 		// パラメータuser_nameが指定されていなければIDトークンのユーザ名を使う
-		userName = tokenUserName
+		targetUserName = tokenUserName
 	}
 
 	// db connect
@@ -249,7 +249,7 @@ func getUser(r *http.Request) (user model.User, postingCount, likeCount, likedCo
 	followRepo := repository.NewFollowRepository(db)
 
 	// UseCase
-	u := usecase.NewGetUser(tx, tokenUserName, userName, userRepo, positngRepo, likeRepo, followRepo)
+	u := usecase.NewGetUser(tx, tokenUserName, targetUserName, userRepo, positngRepo, likeRepo, followRepo)
 	if user, postingCount, likeCount, likedCount, followCount, followedCount, err = u.GetUserUseCase(r.Context()); err != nil {
 		log.Println(err)
 		if err == usecase.ErrNotExistsData {
@@ -371,13 +371,14 @@ func deleteUser(r *http.Request) (err error) {
 
 	// repository
 	userRepo := repository.NewUserRepository(db)
+	passwordResetRepo := repository.NewPasswordResetRepository(db)
 	postingRepo := repository.NewPostingRepository(db)
 	likeRepo := repository.NewLikeRepository(db)
 	commentRepo := repository.NewCommentRepository(db)
 	followRepo := repository.NewFollowRepository(db)
 
 	// UseCase
-	u := usecase.NewDeleteUser(tx, userName, userRepo, postingRepo, likeRepo, commentRepo, followRepo)
+	u := usecase.NewDeleteUser(tx, userName, userRepo, passwordResetRepo, postingRepo, likeRepo, commentRepo, followRepo)
 	if err = u.DeleteUserUseCase(r.Context()); err != nil {
 		log.Println(err)
 		if err == usecase.ErrNotExitsUser {

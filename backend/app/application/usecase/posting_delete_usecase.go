@@ -32,7 +32,7 @@ func NewDeletePosting(tx mysql.DBTransaction, postingID int64, tokenUserName str
 
 func (posting *DeletePosting) DeletePostingUseCase(ctx context.Context) error {
 	// check userName in token exists
-	_, err := posting.userRepo.GetUserWhereName(ctx, posting.tokenUserName)
+	user, err := posting.userRepo.GetUserWhereName(ctx, posting.tokenUserName)
 	if err != nil {
 		if err == repository.ErrNotExistsData {
 			return ErrTokenInvalidNotExistingUserName
@@ -40,7 +40,7 @@ func (posting *DeletePosting) DeletePostingUseCase(ctx context.Context) error {
 		return err
 	}
 
-	p, err := posting.postingRepo.GetWhereIDUserName(ctx, posting.postingID, posting.tokenUserName)
+	p, err := posting.postingRepo.GetWhereIDUserID(ctx, posting.postingID, user.ID)
 	if err != nil {
 		if err == repository.ErrNotExistsData {
 			return ErrNotExistsData

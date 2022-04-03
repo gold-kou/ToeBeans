@@ -21,20 +21,20 @@ import (
 func NotificationsController(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodGet:
-		notifications, err := getNotifications(r)
+		notifications, visitorUserNames, visitedUserName, err := getNotifications(r)
 		switch err := err.(type) {
 		case nil:
 			var httpNotifications []modelHTTP.ResponseGetNotification
-			for _, n := range notifications {
+			for i, n := range notifications {
 				httpNotification := modelHTTP.ResponseGetNotification{
-					VisitorName: n.VisitorName,
+					VisitorName: visitorUserNames[i],
 					ActionType:  n.Action,
 					CreatedAt:   n.CreatedAt,
 				}
 				httpNotifications = append(httpNotifications, httpNotification)
 			}
 			resp := modelHTTP.ResponseGetNotifications{
-				VisitedName: notifications[0].VisitedName,
+				VisitedName: visitedUserName,
 				Actions:     httpNotifications,
 			}
 			w.Header().Set(helper.HeaderKeyContentType, helper.HeaderValueApplicationJSON)
@@ -57,27 +57,30 @@ func NotificationsController(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func getNotifications(r *http.Request) (notifications []model.Notification, err error) {
+func getNotifications(r *http.Request) (notifications []model.Notification, visitorUserNames []string, visitedUserName string, err error) {
 	tokenUserName, err := context.GetTokenUserName(r.Context())
 	if err != nil {
 		log.Println(err)
-		return nil, helper.NewInternalServerError(err.Error())
+		err = helper.NewInternalServerError(err.Error())
+		return
 	}
 
 	// get request parameter
-	visitedName := r.URL.Query().Get("user_name")
+	visitedUserName = r.URL.Query().Get("user_name")
 
 	// validation check
-	if err = validation.Validate(visitedName, validation.Required, validation.Length(modelHTTP.MinVarcharLength, modelHTTP.MaxVarcharLength), is.Alphanumeric); err != nil {
+	if err = validation.Validate(visitedUserName, validation.Required, validation.Length(modelHTTP.MinVarcharLength, modelHTTP.MaxVarcharLength), is.Alphanumeric); err != nil {
 		log.Println(err)
-		return nil, helper.NewBadRequestError(err.Error())
+		err = helper.NewBadRequestError(err.Error())
+		return
 	}
 
 	// db connect
 	db, err := mysql.NewDB()
 	if err != nil {
 		log.Println(err)
-		return nil, helper.NewInternalServerError(err.Error())
+		err = helper.NewInternalServerError(err.Error())
+		return
 	}
 	defer db.Close()
 	tx := mysql.NewDBTransaction(db)
@@ -87,13 +90,15 @@ func getNotifications(r *http.Request) (notifications []model.Notification, err 
 	notificationRepo := repository.NewNotificationRepository(db)
 
 	// UseCase
-	u := usecase.NewGetNotifications(tx, tokenUserName, visitedName, userRepo, notificationRepo)
-	if notifications, err = u.GetNotificationsUseCase(r.Context()); err != nil {
+	u := usecase.NewGetNotifications(tx, tokenUserName, visitedUserName, userRepo, notificationRepo)
+	if notifications, visitorUserNames, err = u.GetNotificationsUseCase(r.Context()); err != nil {
 		log.Println(err)
 		if err == usecase.ErrNotExistsData {
-			return nil, helper.NewBadRequestError(err.Error())
+			err = helper.NewBadRequestError(err.Error())
+			return
 		}
-		return nil, helper.NewInternalServerError(err.Error())
+		err = helper.NewInternalServerError(err.Error())
+		return
 	}
 	return
 }

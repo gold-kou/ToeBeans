@@ -15,6 +15,9 @@ import (
 	"github.com/gold-kou/ToeBeans/backend/app/domain/repository"
 )
 
+var errMsgPasswordResetKeyWrong = "password reset key is wrong"
+var errMsgPasswordResetKeyExpired = "password reset key is expired"
+
 func PasswordController(w http.ResponseWriter, r *http.Request) {
 	switch r.URL.Path {
 	case "/password":
@@ -171,9 +174,10 @@ func passwordResetEmail(r *http.Request) error {
 
 	// repository
 	userRepo := repository.NewUserRepository(db)
+	passwordResetRepo := repository.NewPasswordResetRepository(db)
 
 	// UseCase
-	re := usecase.NewPasswordResetEmail(tx, reqPasswordResetEmail, userRepo)
+	re := usecase.NewPasswordResetEmail(tx, reqPasswordResetEmail, userRepo, passwordResetRepo)
 	if err = re.PasswordResetEmailUseCase(r.Context()); err != nil {
 		log.Println(err)
 		if err == usecase.ErrNotExistsData {
@@ -219,15 +223,22 @@ func passwordReset(r *http.Request) error {
 
 	// repository
 	userRepo := repository.NewUserRepository(db)
+	passwordResetRepo := repository.NewPasswordResetRepository(db)
 
 	// UseCase
-	re := usecase.NewPasswordReset(tx, reqResetPassword, userRepo)
+	re := usecase.NewPasswordReset(tx, reqResetPassword, userRepo, passwordResetRepo)
 	if err = re.PasswordResetUseCase(r.Context()); err != nil {
 		log.Println(err)
-		if err == usecase.ErrNotExistsData {
-			return helper.NewBadRequestError(errMsgUserNameResetKeyNotExistsResetKeyExpired)
+		switch err {
+		case usecase.ErrNotExistsData:
+			return helper.NewBadRequestError(errMsgNotExists)
+		case usecase.ErrPasswordResetKeyWrong:
+			return helper.NewBadRequestError(errMsgPasswordResetKeyWrong)
+		case usecase.ErrPasswordResetKeyExpired:
+			return helper.NewBadRequestError(errMsgPasswordResetKeyExpired)
+		default:
+			return helper.NewInternalServerError(err.Error())
 		}
-		return helper.NewInternalServerError(err.Error())
 	}
 	return err
 }

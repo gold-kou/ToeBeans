@@ -36,15 +36,17 @@ type RegisterPostingUseCaseInterface interface {
 
 type RegisterPosting struct {
 	tx                 mysql.DBTransaction
+	tokenUserID        int64
 	tokenUserName      string
 	reqRegisterPosting *modelHTTP.RequestRegisterPosting
 	userRepo           *repository.UserRepository
 	postingRepo        *repository.PostingRepository
 }
 
-func NewRegisterPosting(tx mysql.DBTransaction, tokenUserName string, reqRegisterPosting *modelHTTP.RequestRegisterPosting, userRepo *repository.UserRepository, postingRepo *repository.PostingRepository) *RegisterPosting {
+func NewRegisterPosting(tx mysql.DBTransaction, tokenUserID int64, tokenUserName string, reqRegisterPosting *modelHTTP.RequestRegisterPosting, userRepo *repository.UserRepository, postingRepo *repository.PostingRepository) *RegisterPosting {
 	return &RegisterPosting{
 		tx:                 tx,
+		tokenUserID:        tokenUserID,
 		tokenUserName:      tokenUserName,
 		reqRegisterPosting: reqRegisterPosting,
 		userRepo:           userRepo,
@@ -125,7 +127,7 @@ func (posting *RegisterPosting) RegisterPostingUseCase(ctx context.Context) erro
 	}
 	err = posting.tx.Do(ctx, func(ctx context.Context) error {
 		p := model.Posting{
-			UserName: posting.tokenUserName,
+			UserID:   posting.tokenUserID,
 			Title:    posting.reqRegisterPosting.Title,
 			ImageURL: o.Location,
 			// ImageURL: "http://localhost:9000/toebeans-postings/20200101000000_testUser1",

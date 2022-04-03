@@ -52,7 +52,7 @@ func (l *Login) LoginUseCase(ctx context.Context) (idToken string, err error) {
 	}
 
 	// generate token
-	idToken, err = helper.GenerateToken(user.Name)
+	idToken, err = helper.GenerateToken(user.ID, user.Name)
 	if err != nil {
 		return
 	}

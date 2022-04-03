@@ -4,7 +4,7 @@ import "time"
 
 type Posting struct {
 	ID        int64
-	UserName  string
+	UserID    int64
 	Title     string
 	ImageURL  string
 	CreatedAt time.Time

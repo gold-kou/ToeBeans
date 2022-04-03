@@ -169,6 +169,7 @@ func TestRegisterPosting(t *testing.T) {
 			// http request
 			req, err := http.NewRequest(tt.method, "/postings", strings.NewReader(tt.args.reqBody))
 			assert.NoError(t, err)
+			req = req.WithContext(httpContext.SetTokenUserID(req.Context(), dummy.User1.ID))
 			req = req.WithContext(httpContext.SetTokenUserName(req.Context(), dummy.User1.Name))
 			resp := httptest.NewRecorder()
 

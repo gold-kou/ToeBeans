@@ -11,13 +11,13 @@ import (
 )
 
 type FollowRepositoryInterface interface {
-	FindByBothUserNames(ctx context.Context, followingUserName, followedUserName string) (follow model.Follow, err error)
-	GetFollowCountWhereUserName(ctx context.Context, userName string) (int64, err error)
-	GetFollowedCountWhereUserName(ctx context.Context, userName string) (int64, err error)
+	FindByBothUserIDs(ctx context.Context, followingUserID, followedUserID int64) (follow model.Follow, err error)
+	GetFollowCountWhereUserID(ctx context.Context, userID int64) (int64, err error)
+	GetFollowedCountWhereUserID(ctx context.Context, userID int64) (int64, err error)
 	Create(ctx context.Context, follow *model.Follow) (err error)
-	DeleteWhereFollowingFollowedUserName(ctx context.Context, followingUserName, followedUserName string) (err error)
-	DeleteWhereFollowingUserName(ctx context.Context, userName string) (err error)
-	DeleteWhereFollowedUserName(ctx context.Context, userName string) (err error)
+	DeleteWhereBothUserIDs(ctx context.Context, followingUserID, followedUserID int64) (err error)
+	DeleteWhereFollowingUserID(ctx context.Context, userID int64) (err error)
+	DeleteWhereFollowedUserID(ctx context.Context, userID int64) (err error)
 }
 
 type FollowRepository struct {
@@ -30,25 +30,25 @@ func NewFollowRepository(db *sql.DB) *FollowRepository {
 	}
 }
 
-func (r *FollowRepository) GetFollowCountWhereUserName(ctx context.Context, userName string) (count int64, err error) {
-	q := "SELECT COUNT(*) FROM `follows` WHERE `following_user_name` = ?"
-	err = r.db.QueryRowContext(ctx, q, userName).Scan(&count)
+func (r *FollowRepository) GetFollowCountWhereUserID(ctx context.Context, userID int64) (count int64, err error) {
+	q := "SELECT COUNT(*) FROM `follows` WHERE `following_user_id` = ?"
+	err = r.db.QueryRowContext(ctx, q, userID).Scan(&count)
 	return
 }
 
-func (r *FollowRepository) GetFollowedCountWhereUserName(ctx context.Context, userName string) (count int64, err error) {
-	q := "SELECT COUNT(*) FROM `follows` WHERE `followed_user_name` = ?"
-	err = r.db.QueryRowContext(ctx, q, userName).Scan(&count)
+func (r *FollowRepository) GetFollowedCountWhereUserID(ctx context.Context, userID int64) (count int64, err error) {
+	q := "SELECT COUNT(*) FROM `follows` WHERE `followed_user_id` = ?"
+	err = r.db.QueryRowContext(ctx, q, userID).Scan(&count)
 	return
 }
 
 func (r *FollowRepository) Create(ctx context.Context, follow *model.Follow) (err error) {
-	q := "INSERT INTO `follows` (`following_user_name`, `followed_user_name`) VALUES (?, ?)"
+	q := "INSERT INTO `follows` (`following_user_id`, `followed_user_id`) VALUES (?, ?)"
 	tx := m.GetTransaction(ctx)
 	if tx != nil {
-		_, err = tx.ExecContext(ctx, q, follow.FollowingUserName, follow.FollowedUserName)
+		_, err = tx.ExecContext(ctx, q, follow.FollowingUserID, follow.FollowedUserID)
 	} else {
-		_, err = r.db.ExecContext(ctx, q, follow.FollowingUserName, follow.FollowedUserName)
+		_, err = r.db.ExecContext(ctx, q, follow.FollowingUserID, follow.FollowedUserID)
 	}
 	mysqlErr, ok := err.(*mysql.MySQLError)
 	if ok && mysqlErr.Number == 1062 {
@@ -57,9 +57,9 @@ func (r *FollowRepository) Create(ctx context.Context, follow *model.Follow) (er
 	return
 }
 
-func (r *FollowRepository) FindByBothUserNames(ctx context.Context, followingUserName, followedUserName string) (follow model.Follow, err error) {
-	q := "SELECT `id`, `following_user_name`, `followed_user_name`, `created_at`, `updated_at` FROM `follows` WHERE `following_user_name` = ? AND `followed_user_name` = ?"
-	err = r.db.QueryRowContext(ctx, q, followingUserName, followedUserName).Scan(&follow.ID, &follow.FollowingUserName, &follow.FollowedUserName, &follow.CreatedAt, &follow.UpdatedAt)
+func (r *FollowRepository) FindByBothUserIDs(ctx context.Context, followingUserID, followedUserID int64) (follow model.Follow, err error) {
+	q := "SELECT `id`, `following_user_id`, `followed_user_id`, `created_at`, `updated_at` FROM `follows` WHERE `following_user_id` = ? AND `followed_user_id` = ?"
+	err = r.db.QueryRowContext(ctx, q, followingUserID, followedUserID).Scan(&follow.ID, &follow.FollowingUserID, &follow.FollowedUserID, &follow.CreatedAt, &follow.UpdatedAt)
 	if err == sql.ErrNoRows {
 		err = ErrNotExistsData
 		return
@@ -67,35 +67,35 @@ func (r *FollowRepository) FindByBothUserNames(ctx context.Context, followingUse
 	return
 }
 
-func (r *FollowRepository) DeleteWhereFollowingFollowedUserName(ctx context.Context, followingUserName, followedUserName string) (err error) {
-	q := "DELETE FROM `follows` WHERE `following_user_name` = ? AND `followed_user_name` = ?"
+func (r *FollowRepository) DeleteWhereBothUserIDs(ctx context.Context, followingUserID, followedUserID int64) (err error) {
+	q := "DELETE FROM `follows` WHERE `following_user_id` = ? AND `followed_user_id` = ?"
 	tx := m.GetTransaction(ctx)
 	if tx != nil {
-		_, err = tx.ExecContext(ctx, q, followingUserName, followedUserName)
+		_, err = tx.ExecContext(ctx, q, followingUserID, followedUserID)
 	} else {
-		_, err = r.db.ExecContext(ctx, q, followingUserName, followedUserName)
+		_, err = r.db.ExecContext(ctx, q, followingUserID, followedUserID)
 	}
 	return
 }
 
-func (r *FollowRepository) DeleteWhereFollowingUserName(ctx context.Context, userName string) (err error) {
-	q := "DELETE FROM `follows` WHERE `following_user_name` = ?"
+func (r *FollowRepository) DeleteWhereFollowingUserID(ctx context.Context, userID int64) (err error) {
+	q := "DELETE FROM `follows` WHERE `following_user_id` = ?"
 	tx := m.GetTransaction(ctx)
 	if tx != nil {
-		_, err = tx.ExecContext(ctx, q, userName)
+		_, err = tx.ExecContext(ctx, q, userID)
 	} else {
-		_, err = r.db.ExecContext(ctx, q, userName)
+		_, err = r.db.ExecContext(ctx, q, userID)
 	}
 	return
 }
 
-func (r *FollowRepository) DeleteWhereFollowedUserName(ctx context.Context, userName string) (err error) {
-	q := "DELETE FROM `follows` WHERE `followed_user_name` = ?"
+func (r *FollowRepository) DeleteWhereFollowedUserID(ctx context.Context, userID int64) (err error) {
+	q := "DELETE FROM `follows` WHERE `followed_user_id` = ?"
 	tx := m.GetTransaction(ctx)
 	if tx != nil {
-		_, err = tx.ExecContext(ctx, q, userName)
+		_, err = tx.ExecContext(ctx, q, userID)
 	} else {
-		_, err = r.db.ExecContext(ctx, q, userName)
+		_, err = r.db.ExecContext(ctx, q, userID)
 	}
 	return
 }

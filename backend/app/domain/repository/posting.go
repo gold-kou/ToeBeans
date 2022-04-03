@@ -13,10 +13,10 @@ type PostingRepositoryInterface interface {
 	Create(ctx context.Context, posting *model.Posting) (err error)
 	GetPostings(ctx context.Context, sinceAt time.Time, limit int8) (postings []model.Posting, err error)
 	GetWhereID(ctx context.Context, id int64) (posting model.Posting, err error)
-	GetWhereIDUserName(ctx context.Context, id int64, userName string) (posting model.Posting, err error)
-	GetCountWhereUserName(ctx context.Context, userName string) (int64, err error)
+	GetWhereIDUserID(ctx context.Context, id int64, userID int64) (posting model.Posting, err error)
+	GetCountWhereUserID(ctx context.Context, userID int64) (int64, err error)
 	DeleteWhereID(ctx context.Context, id int64) (err error)
-	DeleteWhereUserName(ctx context.Context, userName string) (err error)
+	DeleteWhereUserID(ctx context.Context, userID int64) (err error)
 }
 
 type PostingRepository struct {
@@ -30,25 +30,25 @@ func NewPostingRepository(db *sql.DB) *PostingRepository {
 }
 
 func (r *PostingRepository) Create(ctx context.Context, posting *model.Posting) (err error) {
-	q := "INSERT INTO `postings` (`user_name`, `title`, `image_url`) VALUES (?, ?, ?)"
+	q := "INSERT INTO `postings` (`user_id`, `title`, `image_url`) VALUES (?, ?, ?)"
 	tx := m.GetTransaction(ctx)
 	if tx != nil {
-		_, err = tx.ExecContext(ctx, q, posting.UserName, posting.Title, posting.ImageURL)
+		_, err = tx.ExecContext(ctx, q, posting.UserID, posting.Title, posting.ImageURL)
 	} else {
-		_, err = r.db.ExecContext(ctx, q, posting.UserName, posting.Title, posting.ImageURL)
+		_, err = r.db.ExecContext(ctx, q, posting.UserID, posting.Title, posting.ImageURL)
 	}
 	return
 }
 
-func (r *PostingRepository) GetPostings(ctx context.Context, sinceAt time.Time, limit int8, userName string) (postings []model.Posting, err error) {
+func (r *PostingRepository) GetPostings(ctx context.Context, sinceAt time.Time, limit int8, userID int64) (postings []model.Posting, err error) {
 	var q string
 	var rows *sql.Rows
-	if userName == "" {
-		q = "SELECT `id`, `user_name`, `title`, `image_url`, `created_at`, `updated_at` FROM `postings` WHERE `created_at` < ? ORDER BY `created_at` DESC LIMIT ?"
+	if userID == 0 {
+		q = "SELECT `id`, `user_id`, `title`, `image_url`, `created_at`, `updated_at` FROM `postings` WHERE `created_at` < ? ORDER BY `created_at` DESC LIMIT ?"
 		rows, err = r.db.QueryContext(ctx, q, sinceAt, limit)
 	} else {
-		q = "SELECT `id`, `user_name`, `title`, `image_url`, `created_at`, `updated_at` FROM `postings` WHERE `created_at` < ? AND `user_name` = ? ORDER BY `created_at` DESC LIMIT ?"
-		rows, err = r.db.QueryContext(ctx, q, sinceAt, userName, limit)
+		q = "SELECT `id`, `user_id`, `title`, `image_url`, `created_at`, `updated_at` FROM `postings` WHERE `created_at` < ? AND `user_id` = ? ORDER BY `created_at` DESC LIMIT ?"
+		rows, err = r.db.QueryContext(ctx, q, sinceAt, userID, limit)
 	}
 	if err == sql.ErrNoRows {
 		err = ErrNotExistsData
@@ -61,7 +61,7 @@ func (r *PostingRepository) GetPostings(ctx context.Context, sinceAt time.Time, 
 
 	var p model.Posting
 	for rows.Next() {
-		if err = rows.Scan(&p.ID, &p.UserName, &p.Title, &p.ImageURL, &p.CreatedAt, &p.UpdatedAt); err != nil {
+		if err = rows.Scan(&p.ID, &p.UserID, &p.Title, &p.ImageURL, &p.CreatedAt, &p.UpdatedAt); err != nil {
 			return
 		}
 		postings = append(postings, p)
@@ -75,8 +75,8 @@ func (r *PostingRepository) GetPostings(ctx context.Context, sinceAt time.Time, 
 }
 
 func (r *PostingRepository) GetWhereID(ctx context.Context, id int64) (posting model.Posting, err error) {
-	q := "SELECT `id`, `user_name`, `title`, `image_url`, `created_at`, `updated_at` FROM `postings` WHERE `id` = ?"
-	err = r.db.QueryRowContext(ctx, q, id).Scan(&posting.ID, &posting.UserName, &posting.Title, &posting.ImageURL, &posting.CreatedAt, &posting.UpdatedAt)
+	q := "SELECT `id`, `user_id`, `title`, `image_url`, `created_at`, `updated_at` FROM `postings` WHERE `id` = ?"
+	err = r.db.QueryRowContext(ctx, q, id).Scan(&posting.ID, &posting.UserID, &posting.Title, &posting.ImageURL, &posting.CreatedAt, &posting.UpdatedAt)
 	if err == sql.ErrNoRows {
 		err = ErrNotExistsData
 		return
@@ -84,9 +84,9 @@ func (r *PostingRepository) GetWhereID(ctx context.Context, id int64) (posting m
 	return
 }
 
-func (r *PostingRepository) GetWhereIDUserName(ctx context.Context, id int64, userName string) (posting model.Posting, err error) {
-	q := "SELECT `id`, `user_name`, `title`, `image_url`, `created_at`, `updated_at` FROM `postings` WHERE `id` = ? AND `user_name` = ?"
-	err = r.db.QueryRowContext(ctx, q, id, userName).Scan(&posting.ID, &posting.UserName, &posting.Title, &posting.ImageURL, &posting.CreatedAt, &posting.UpdatedAt)
+func (r *PostingRepository) GetWhereIDUserID(ctx context.Context, id int64, userID int64) (posting model.Posting, err error) {
+	q := "SELECT `id`, `user_id`, `title`, `image_url`, `created_at`, `updated_at` FROM `postings` WHERE `id` = ? AND `user_id` = ?"
+	err = r.db.QueryRowContext(ctx, q, id, userID).Scan(&posting.ID, &posting.UserID, &posting.Title, &posting.ImageURL, &posting.CreatedAt, &posting.UpdatedAt)
 	if err == sql.ErrNoRows {
 		err = ErrNotExistsData
 		return
@@ -94,9 +94,9 @@ func (r *PostingRepository) GetWhereIDUserName(ctx context.Context, id int64, us
 	return
 }
 
-func (r *PostingRepository) GetCountWhereUserName(ctx context.Context, userName string) (count int64, err error) {
-	q := "SELECT COUNT(*) FROM `postings` WHERE `user_name` = ?"
-	err = r.db.QueryRowContext(ctx, q, userName).Scan(&count)
+func (r *PostingRepository) GetCountWhereUserID(ctx context.Context, userID int64) (count int64, err error) {
+	q := "SELECT COUNT(*) FROM `postings` WHERE `user_id` = ?"
+	err = r.db.QueryRowContext(ctx, q, userID).Scan(&count)
 	return
 }
 
@@ -111,13 +111,13 @@ func (r *PostingRepository) DeleteWhereID(ctx context.Context, id int64) (err er
 	return
 }
 
-func (r *PostingRepository) DeleteWhereUserName(ctx context.Context, userName string) (err error) {
-	q := "DELETE FROM `postings` WHERE `user_name` = ?"
+func (r *PostingRepository) DeleteWhereUserID(ctx context.Context, userID int64) (err error) {
+	q := "DELETE FROM `postings` WHERE `user_id` = ?"
 	tx := m.GetTransaction(ctx)
 	if tx != nil {
-		_, err = tx.ExecContext(ctx, q, userName)
+		_, err = tx.ExecContext(ctx, q, userID)
 	} else {
-		_, err = r.db.ExecContext(ctx, q, userName)
+		_, err = r.db.ExecContext(ctx, q, userID)
 	}
 	return
 }

@@ -115,6 +115,7 @@ func TestRegisterComment(t *testing.T) {
 			assert.NoError(t, err)
 			vars := map[string]string{"posting_id": strconv.Itoa(int(tt.args.postingID))}
 			req = mux.SetURLVars(req, vars)
+			req = req.WithContext(httpContext.SetTokenUserID(req.Context(), dummy.User1.ID))
 			if tt.name == "error forbidden guest user" {
 				req = req.WithContext(httpContext.SetTokenUserName(req.Context(), helper.GuestUserName))
 			} else {
@@ -131,6 +132,7 @@ func TestRegisterComment(t *testing.T) {
 				assert.NoError(t, err)
 				dummy.Comment1.CreatedAt = lib.NowFunc()
 				dummy.Comment1.UpdatedAt = lib.NowFunc()
+				fmt.Println(comments)
 				comments[0].CreatedAt = lib.NowFunc()
 				comments[0].UpdatedAt = lib.NowFunc()
 				assert.Equal(t, dummy.Comment1, comments[0])

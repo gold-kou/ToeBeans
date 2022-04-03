@@ -4,7 +4,7 @@ import "time"
 
 type Comment struct {
 	ID        int64
-	UserName  string
+	UserID    int64
 	PostingID int64
 	Comment   string
 	CreatedAt time.Time

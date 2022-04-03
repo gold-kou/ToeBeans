@@ -30,13 +30,29 @@ func NewGetNotifications(tx mysql.DBTransaction, tokenUserName, visitedName stri
 	}
 }
 
-func (n *GetNotifications) GetNotificationsUseCase(ctx context.Context) (notifications []model.Notification, err error) {
-	notifications, err = n.notificationRepo.GetNotifications(ctx, n.visitedName)
+func (n *GetNotifications) GetNotificationsUseCase(ctx context.Context) (notifications []model.Notification, visitorUserNames []string, err error) {
+	visitedUser, err := n.userRepo.GetUserWhereName(ctx, n.visitedName)
+	if err == repository.ErrNotExistsData {
+		err = ErrNotExistsData
+		return
+	}
+
+	notifications, err = n.notificationRepo.GetNotifications(ctx, visitedUser.ID)
 	if err != nil {
 		if err == repository.ErrNotExistsData {
-			return nil, ErrNotExistsData
+			err = ErrNotExistsData
+			return
 		}
 		return
+	}
+	for _, notification := range notifications {
+		var visitorUser model.User
+		visitorUser, err = n.userRepo.GetUserWhereID(ctx, notification.VisitorUserID)
+		if err != nil {
+			// ここでのnot exists errorは500エラー
+			return
+		}
+		visitorUserNames = append(visitorUserNames, visitorUser.Name)
 	}
 	return
 }

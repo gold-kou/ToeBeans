@@ -96,29 +96,32 @@ func SetupDBTest() *sql.DB {
 }
 
 func TeardownDBTest(db *sql.DB) {
-	if err := DeleteAllData(db, "notifications"); err != nil {
+	if err := DeleteAllTableData(db, "notifications"); err != nil {
 		panic(err)
 	}
-	if err := DeleteAllData(db, "likes"); err != nil {
+	if err := DeleteAllTableData(db, "likes"); err != nil {
 		panic(err)
 	}
-	if err := DeleteAllData(db, "comments"); err != nil {
+	if err := DeleteAllTableData(db, "comments"); err != nil {
 		panic(err)
 	}
-	if err := DeleteAllData(db, "follows"); err != nil {
+	if err := DeleteAllTableData(db, "follows"); err != nil {
 		panic(err)
 	}
-	if err := DeleteAllData(db, "postings"); err != nil {
+	if err := DeleteAllTableData(db, "postings"); err != nil {
 		panic(err)
 	}
-	if err := DeleteAllData(db, "users"); err != nil {
+	if err := DeleteAllTableData(db, "password_resets"); err != nil {
+		panic(err)
+	}
+	if err := DeleteAllTableData(db, "users"); err != nil {
 		panic(err)
 	}
 	db.Close()
 }
 
 func FindAllUsers(ctx context.Context, db *sql.DB) ([]model.User, error) {
-	q := "SELECT `name`, `email`, `password`, `icon`, `self_introduction`, `activation_key`, `email_verified`, `password_reset_email_count`, `password_reset_key`, `password_reset_key_expires_at`, `created_at`, `updated_at` FROM `users`"
+	q := "SELECT `id`, `name`, `email`, `password`, `icon`, `self_introduction`, `activation_key`, `email_verified`, `created_at`, `updated_at` FROM `users`"
 	rows, err := db.QueryContext(ctx, q)
 	if err != nil {
 		return nil, err
@@ -128,7 +131,7 @@ func FindAllUsers(ctx context.Context, db *sql.DB) ([]model.User, error) {
 	result := []model.User{}
 	for rows.Next() {
 		var u model.User
-		if err := rows.Scan(&u.Name, &u.Email, &u.Password, &u.Icon, &u.SelfIntroduction, &u.ActivationKey, &u.EmailVerified, &u.PasswordResetEmailCount, &u.PasswordResetKey, &u.PasswordResetKeyExpiresAt, &u.CreatedAt, &u.UpdatedAt); err != nil {
+		if err := rows.Scan(&u.ID, &u.Name, &u.Email, &u.Password, &u.Icon, &u.SelfIntroduction, &u.ActivationKey, &u.EmailVerified, &u.CreatedAt, &u.UpdatedAt); err != nil {
 			return nil, err
 		}
 		result = append(result, u)
@@ -143,17 +146,34 @@ func FindAllUsers(ctx context.Context, db *sql.DB) ([]model.User, error) {
 	return result, nil
 }
 
-func CreateUserPasswordReset(db *sql.DB, expiresAt time.Time) error {
-	q := "INSERT INTO `users` (`name`, `email`, `password`, `activation_key`, `password_reset_key`, `password_reset_key_expires_at`) VALUES (?, ?, ?, ?, ?, ?)"
-	_, e := db.Exec(q, dummy.User1.Name, dummy.User1.Email, dummy.User1.Password, dummy.User1.ActivationKey, dummy.User1.PasswordResetKey, expiresAt)
-	if e != nil {
-		return e
+func FindAllPasswordResets(ctx context.Context, db *sql.DB) ([]model.PasswordReset, error) {
+	q := "SELECT `id`, `user_id`, `password_reset_email_count`, `password_reset_key`, `password_reset_key_expires_at`, `created_at`, `updated_at` FROM `password_resets`"
+	rows, err := db.QueryContext(ctx, q)
+	if err != nil {
+		return nil, err
 	}
-	return nil
+	defer rows.Close()
+
+	result := []model.PasswordReset{}
+	for rows.Next() {
+		var pr model.PasswordReset
+		if err := rows.Scan(&pr.ID, &pr.UserID, &pr.PasswordResetEmailCount, &pr.PasswordResetKey, &pr.PasswordResetKeyExpiresAt, &pr.CreatedAt, &pr.UpdatedAt); err != nil {
+			return nil, err
+		}
+		result = append(result, pr)
+	}
+
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return result, nil
 }
 
 func FindAllPostings(ctx context.Context, db *sql.DB) ([]model.Posting, error) {
-	q := "SELECT `id`, `user_name`, `title`, `image_url`, `created_at`, `updated_at` FROM `postings`"
+	q := "SELECT `id`, `user_id`, `title`, `image_url`, `created_at`, `updated_at` FROM `postings`"
 	rows, err := db.QueryContext(ctx, q)
 	if err != nil {
 		return nil, err
@@ -163,7 +183,7 @@ func FindAllPostings(ctx context.Context, db *sql.DB) ([]model.Posting, error) {
 	result := []model.Posting{}
 	for rows.Next() {
 		var p model.Posting
-		if err := rows.Scan(&p.ID, &p.UserName, &p.Title, &p.ImageURL, &p.CreatedAt, &p.UpdatedAt); err != nil {
+		if err := rows.Scan(&p.ID, &p.UserID, &p.Title, &p.ImageURL, &p.CreatedAt, &p.UpdatedAt); err != nil {
 			return nil, err
 		}
 		result = append(result, p)
@@ -179,7 +199,7 @@ func FindAllPostings(ctx context.Context, db *sql.DB) ([]model.Posting, error) {
 }
 
 func FindAllLikes(ctx context.Context, db *sql.DB) ([]model.Like, error) {
-	q := "SELECT `id`, `user_name`, `posting_id`, `created_at`, `updated_at` FROM `likes`"
+	q := "SELECT `id`, `user_id`, `posting_id`, `created_at`, `updated_at` FROM `likes`"
 	rows, err := db.QueryContext(ctx, q)
 	if err != nil {
 		return nil, err
@@ -189,7 +209,7 @@ func FindAllLikes(ctx context.Context, db *sql.DB) ([]model.Like, error) {
 	result := []model.Like{}
 	for rows.Next() {
 		var l model.Like
-		if err := rows.Scan(&l.ID, &l.UserName, &l.PostingID, &l.CreatedAt, &l.UpdatedAt); err != nil {
+		if err := rows.Scan(&l.ID, &l.UserID, &l.PostingID, &l.CreatedAt, &l.UpdatedAt); err != nil {
 			return nil, err
 		}
 		result = append(result, l)
@@ -205,7 +225,7 @@ func FindAllLikes(ctx context.Context, db *sql.DB) ([]model.Like, error) {
 }
 
 func FindAllComments(ctx context.Context, db *sql.DB) ([]model.Comment, error) {
-	q := "SELECT `id`, `user_name`, `posting_id`, `comment`, `created_at`, `updated_at` FROM `comments`"
+	q := "SELECT `id`, `user_id`, `posting_id`, `comment`, `created_at`, `updated_at` FROM `comments`"
 	rows, err := db.QueryContext(ctx, q)
 	if err != nil {
 		return nil, err
@@ -215,7 +235,7 @@ func FindAllComments(ctx context.Context, db *sql.DB) ([]model.Comment, error) {
 	result := []model.Comment{}
 	for rows.Next() {
 		var c model.Comment
-		if err := rows.Scan(&c.ID, &c.UserName, &c.PostingID, &c.Comment, &c.CreatedAt, &c.UpdatedAt); err != nil {
+		if err := rows.Scan(&c.ID, &c.UserID, &c.PostingID, &c.Comment, &c.CreatedAt, &c.UpdatedAt); err != nil {
 			return nil, err
 		}
 		result = append(result, c)
@@ -231,7 +251,7 @@ func FindAllComments(ctx context.Context, db *sql.DB) ([]model.Comment, error) {
 }
 
 func FindAllFollows(ctx context.Context, db *sql.DB) ([]model.Follow, error) {
-	q := "SELECT `id`, `following_user_name`, `followed_user_name`, `created_at`, `updated_at` FROM `follows`"
+	q := "SELECT `id`, `following_user_id`, `followed_user_id`, `created_at`, `updated_at` FROM `follows`"
 	rows, err := db.QueryContext(ctx, q)
 	if err != nil {
 		return nil, err
@@ -241,7 +261,7 @@ func FindAllFollows(ctx context.Context, db *sql.DB) ([]model.Follow, error) {
 	result := []model.Follow{}
 	for rows.Next() {
 		var f model.Follow
-		if err := rows.Scan(&f.ID, &f.FollowingUserName, &f.FollowedUserName, &f.CreatedAt, &f.UpdatedAt); err != nil {
+		if err := rows.Scan(&f.ID, &f.FollowingUserID, &f.FollowedUserID, &f.CreatedAt, &f.UpdatedAt); err != nil {
 			return nil, err
 		}
 		result = append(result, f)
@@ -256,9 +276,18 @@ func FindAllFollows(ctx context.Context, db *sql.DB) ([]model.Follow, error) {
 	return result, nil
 }
 
-func UpdateResetKeyExpiresAt(db *sql.DB, passwordResetKey string, expiresAt time.Time) error {
-	q := "UPDATE `users` SET `password_reset_key` = ?, `password_reset_key_expires_at` = ?"
-	_, e := db.Exec(q, passwordResetKey, expiresAt)
+func CreatePasswordReset(db *sql.DB, expiresAt time.Time) error {
+	q := "INSERT INTO `password_resets` (`user_id`, `password_reset_email_count`, `password_reset_key`, `password_reset_key_expires_at`) VALUES (?, ?, ?, ?)"
+	_, e := db.Exec(q, dummy.User1.ID, dummy.PasswordReset1.PasswordResetEmailCount, dummy.PasswordReset1.PasswordResetKey, expiresAt)
+	if e != nil {
+		return e
+	}
+	return nil
+}
+
+func UpdatePasswordResetExpiresAt(db *sql.DB, expiresAt time.Time) error {
+	q := "UPDATE `password_resets` SET `password_reset_key_expires_at` = ?"
+	_, e := db.Exec(q, expiresAt)
 	if e != nil {
 		return e
 	}
@@ -266,7 +295,7 @@ func UpdateResetKeyExpiresAt(db *sql.DB, passwordResetKey string, expiresAt time
 }
 
 func UpdatePasswordResetEmailCount(db *sql.DB) error {
-	q := "UPDATE `users` SET `password_reset_email_count` = 10"
+	q := "UPDATE `password_resets` SET `password_reset_email_count` = 10"
 	_, e := db.Exec(q)
 	if e != nil {
 		return e
@@ -274,7 +303,7 @@ func UpdatePasswordResetEmailCount(db *sql.DB) error {
 	return nil
 }
 
-func DeleteAllData(db *sql.DB, table string) error {
+func DeleteAllTableData(db *sql.DB, table string) error {
 	q := fmt.Sprintf("DELETE FROM `%s`", table)
 	_, e := db.Exec(q)
 	if e != nil {

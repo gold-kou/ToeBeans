@@ -10,6 +10,7 @@ import (
 	"github.com/gold-kou/ToeBeans/backend/app/domain/repository"
 )
 
+var ErrFollowedUserNotExists = errors.New("the followed user doesn't exsist")
 var ErrAlreadyFollowed = errors.New("the user is already followed by you")
 
 type RegisterFollowUseCaseInterface interface {
@@ -18,6 +19,7 @@ type RegisterFollowUseCaseInterface interface {
 
 type RegisterFollow struct {
 	tx               mysql.DBTransaction
+	tokenUserID      int64
 	tokenUserName    string
 	followedUserName string
 	userRepo         *repository.UserRepository
@@ -25,9 +27,10 @@ type RegisterFollow struct {
 	notificationRepo *repository.NotificationRepository
 }
 
-func NewRegisterFollow(tx mysql.DBTransaction, tokenUserName string, followedUserName string, userRepo *repository.UserRepository, followRepo *repository.FollowRepository, notificationRepo *repository.NotificationRepository) *RegisterFollow {
+func NewRegisterFollow(tx mysql.DBTransaction, tokenUserID int64, tokenUserName string, followedUserName string, userRepo *repository.UserRepository, followRepo *repository.FollowRepository, notificationRepo *repository.NotificationRepository) *RegisterFollow {
 	return &RegisterFollow{
 		tx:               tx,
+		tokenUserID:      tokenUserID,
 		tokenUserName:    tokenUserName,
 		followedUserName: followedUserName,
 		userRepo:         userRepo,
@@ -46,10 +49,18 @@ func (follow *RegisterFollow) RegisterFollowUseCase(ctx context.Context) error {
 		return err
 	}
 
+	followedUser, err := follow.userRepo.GetUserWhereName(ctx, follow.followedUserName)
+	if err != nil {
+		if err == repository.ErrNotExistsData {
+			return ErrFollowedUserNotExists
+		}
+		return err
+	}
+
 	err = follow.tx.Do(ctx, func(ctx context.Context) error {
 		u := model.Follow{
-			FollowingUserName: follow.tokenUserName,
-			FollowedUserName:  follow.followedUserName,
+			FollowingUserID: follow.tokenUserID,
+			FollowedUserID:  followedUser.ID,
 		}
 		err := follow.followRepo.Create(ctx, &u)
 		if err != nil {

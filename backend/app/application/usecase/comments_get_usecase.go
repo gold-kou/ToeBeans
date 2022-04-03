@@ -32,21 +32,23 @@ func NewGetComments(tx mysql.DBTransaction, tokenUserName string, postingID int6
 	}
 }
 
-func (c *GetComments) GetCommentsUseCase(ctx context.Context) (comments []model.Comment, err error) {
+func (c *GetComments) GetCommentsUseCase(ctx context.Context) (comments []model.Comment, userNames []string, err error) {
 	// check userName in token exists
 	_, err = c.userRepo.GetUserWhereName(ctx, c.tokenUserName)
 	if err != nil {
 		if err == repository.ErrNotExistsData {
-			return nil, ErrTokenInvalidNotExistingUserName
+			err = ErrTokenInvalidNotExistingUserName
+			return
 		}
-		return nil, err
+		return
 	}
 
 	// check postingID exists
 	_, err = c.postingRepo.GetWhereID(ctx, c.postingID)
 	if err != nil {
 		if err == repository.ErrNotExistsData {
-			return nil, ErrNotExistsData
+			err = ErrNotExistsData
+			return
 		}
 		return
 	}
@@ -55,8 +57,18 @@ func (c *GetComments) GetCommentsUseCase(ctx context.Context) (comments []model.
 	if err != nil {
 		if err == repository.ErrNotExistsData {
 			// not error
-			return nil, nil
+			err = nil
+			return
 		}
+	}
+	for _, comment := range comments {
+		var user model.User
+		user, err = c.userRepo.GetUserWhereID(ctx, comment.UserID)
+		if err != nil {
+			// ここでのnot exists errorは500エラー
+			return
+		}
+		userNames = append(userNames, user.Name)
 	}
 	return
 }

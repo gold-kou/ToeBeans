@@ -42,7 +42,7 @@ func PostingController(w http.ResponseWriter, r *http.Request) {
 				helper.ResponseInternalServerError(w, err.Error())
 			}
 		case http.MethodGet:
-			postings, likedCounts, likes, err := getPostings(r)
+			postings, userNames, likedCounts, likes, err := getPostings(r)
 			switch err := err.(type) {
 			case nil:
 				var httpPostings []modelHTTP.ResponseGetPosting
@@ -50,7 +50,7 @@ func PostingController(w http.ResponseWriter, r *http.Request) {
 				for i, p := range postings {
 					httpPosting := modelHTTP.ResponseGetPosting{
 						PostingId:  p.ID,
-						UserName:   p.UserName,
+						UserName:   userNames[i],
 						UploadedAt: p.CreatedAt,
 						Title:      p.Title,
 						ImageUrl:   p.ImageURL,
@@ -156,7 +156,12 @@ func registerPosting(r *http.Request) error {
 	postingRepo := repository.NewPostingRepository(db)
 
 	// UseCase
-	u := usecase.NewRegisterPosting(tx, tokenUserName, reqRegisterPosting, userRepo, postingRepo)
+	tokenUserID, err := context.GetTokenUserID(r.Context())
+	if err != nil {
+		log.Println(err)
+		return helper.NewInternalServerError(err.Error())
+	}
+	u := usecase.NewRegisterPosting(tx, tokenUserID, tokenUserName, reqRegisterPosting, userRepo, postingRepo)
 	if err = u.RegisterPostingUseCase(r.Context()); err != nil {
 		log.Println(err)
 		if err == usecase.ErrDecodeImage || err == usecase.ErrNotCatImage {
@@ -167,7 +172,7 @@ func registerPosting(r *http.Request) error {
 	return err
 }
 
-func getPostings(r *http.Request) (postings []model.Posting, likedCounts []int64, likes []model.Like, err error) {
+func getPostings(r *http.Request) (postings []model.Posting, userNames []string, likedCounts []int64, likes []model.Like, err error) {
 	tokenUserName, err := context.GetTokenUserName(r.Context())
 	if err != nil {
 		log.Println(err)
@@ -205,9 +210,9 @@ func getPostings(r *http.Request) (postings []model.Posting, likedCounts []int64
 		return
 	}
 
-	// here user means selected user to see user profile
-	userName := r.URL.Query().Get("user_name")
-	if err = validation.Validate(userName, validation.Length(modelHTTP.MinVarcharLength, modelHTTP.MaxVarcharLength), is.Alphanumeric); err != nil {
+	// オプションパラメータの投稿を保持するユーザ
+	targetUserName := r.URL.Query().Get("user_name")
+	if err = validation.Validate(targetUserName, validation.Length(modelHTTP.MinVarcharLength, modelHTTP.MaxVarcharLength), is.Alphanumeric); err != nil {
 		log.Println(err)
 		err = helper.NewBadRequestError(err.Error())
 		return
@@ -229,8 +234,8 @@ func getPostings(r *http.Request) (postings []model.Posting, likedCounts []int64
 	likeRepo := repository.NewLikeRepository(db)
 
 	// UseCase
-	u := usecase.NewGetPostings(tx, tokenUserName, sinceAtFormatted, int8(limitInt), userName, userRepo, postingRepo, likeRepo)
-	if postings, likedCounts, likes, err = u.GetPostingsUseCase(r.Context()); err != nil {
+	u := usecase.NewGetPostings(tx, tokenUserName, sinceAtFormatted, int8(limitInt), targetUserName, userRepo, postingRepo, likeRepo)
+	if postings, userNames, likedCounts, likes, err = u.GetPostingsUseCase(r.Context()); err != nil {
 		log.Println(err)
 		if err == usecase.ErrDecodeImage {
 			err = helper.NewBadRequestError(err.Error())
