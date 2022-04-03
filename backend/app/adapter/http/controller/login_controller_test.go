@@ -195,8 +195,9 @@ func TestLoginController(t *testing.T) {
 				var respLogin modelHttp.Token
 				err = json.Unmarshal(respBodyByte, &respLogin)
 				assert.NoError(t, err)
-				tokenUserName, err := helper.VerifyToken(respLogin.IdToken)
+				tokenUserID, tokenUserName, err := helper.VerifyToken(respLogin.IdToken)
 				assert.NoError(t, err)
+				assert.Equal(t, dummy.User1.ID, tokenUserID)
 				assert.Equal(t, dummy.User1.Name, tokenUserName)
 			} else {
 				respBody := string(respBodyByte)

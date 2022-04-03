@@ -9,10 +9,10 @@ const (
 )
 
 type Notification struct {
-	ID          int64
-	VisitorName string
-	VisitedName string
-	Action      string
-	CreatedAt   time.Time
-	UpdatedAt   time.Time
+	ID            int64
+	VisitorUserID int64
+	VisitedUserID int64
+	Action        string
+	CreatedAt     time.Time
+	UpdatedAt     time.Time
 }

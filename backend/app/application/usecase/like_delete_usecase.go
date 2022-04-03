@@ -37,7 +37,7 @@ func NewDeleteLike(tx mysql.DBTransaction, tokenUserName string, postingID int64
 
 func (like *DeleteLike) DeleteLikeUseCase(ctx context.Context) error {
 	// check userName in token exists
-	_, err := like.userRepo.GetUserWhereName(ctx, like.tokenUserName)
+	user, err := like.userRepo.GetUserWhereName(ctx, like.tokenUserName)
 	if err != nil {
 		if err == repository.ErrNotExistsData {
 			return ErrTokenInvalidNotExistingUserName
@@ -45,7 +45,7 @@ func (like *DeleteLike) DeleteLikeUseCase(ctx context.Context) error {
 		return err
 	}
 
-	_, err = like.likeRepo.GetWhereUserNamePostingID(ctx, like.tokenUserName, like.postingID)
+	_, err = like.likeRepo.GetWhereUserIDPostingID(ctx, user.ID, like.postingID)
 	if err != nil {
 		if err == repository.ErrNotExistsData {
 			return ErrDeleteNotExistsLike
@@ -54,7 +54,7 @@ func (like *DeleteLike) DeleteLikeUseCase(ctx context.Context) error {
 	}
 
 	err = like.tx.Do(ctx, func(ctx context.Context) error {
-		if err := like.likeRepo.DeleteWhereUserNamePostingID(ctx, like.tokenUserName, like.postingID); err != nil {
+		if err := like.likeRepo.DeleteWhereUserIDPostingID(ctx, user.ID, like.postingID); err != nil {
 			return err
 		}
 		return nil

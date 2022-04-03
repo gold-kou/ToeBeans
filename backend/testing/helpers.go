@@ -173,7 +173,7 @@ func FindAllPasswordResets(ctx context.Context, db *sql.DB) ([]model.PasswordRes
 }
 
 func FindAllPostings(ctx context.Context, db *sql.DB) ([]model.Posting, error) {
-	q := "SELECT `id`, `user_name`, `title`, `image_url`, `created_at`, `updated_at` FROM `postings`"
+	q := "SELECT `id`, `user_id`, `title`, `image_url`, `created_at`, `updated_at` FROM `postings`"
 	rows, err := db.QueryContext(ctx, q)
 	if err != nil {
 		return nil, err
@@ -183,7 +183,7 @@ func FindAllPostings(ctx context.Context, db *sql.DB) ([]model.Posting, error) {
 	result := []model.Posting{}
 	for rows.Next() {
 		var p model.Posting
-		if err := rows.Scan(&p.ID, &p.UserName, &p.Title, &p.ImageURL, &p.CreatedAt, &p.UpdatedAt); err != nil {
+		if err := rows.Scan(&p.ID, &p.UserID, &p.Title, &p.ImageURL, &p.CreatedAt, &p.UpdatedAt); err != nil {
 			return nil, err
 		}
 		result = append(result, p)
@@ -199,7 +199,7 @@ func FindAllPostings(ctx context.Context, db *sql.DB) ([]model.Posting, error) {
 }
 
 func FindAllLikes(ctx context.Context, db *sql.DB) ([]model.Like, error) {
-	q := "SELECT `id`, `user_name`, `posting_id`, `created_at`, `updated_at` FROM `likes`"
+	q := "SELECT `id`, `user_id`, `posting_id`, `created_at`, `updated_at` FROM `likes`"
 	rows, err := db.QueryContext(ctx, q)
 	if err != nil {
 		return nil, err
@@ -209,7 +209,7 @@ func FindAllLikes(ctx context.Context, db *sql.DB) ([]model.Like, error) {
 	result := []model.Like{}
 	for rows.Next() {
 		var l model.Like
-		if err := rows.Scan(&l.ID, &l.UserName, &l.PostingID, &l.CreatedAt, &l.UpdatedAt); err != nil {
+		if err := rows.Scan(&l.ID, &l.UserID, &l.PostingID, &l.CreatedAt, &l.UpdatedAt); err != nil {
 			return nil, err
 		}
 		result = append(result, l)
@@ -225,7 +225,7 @@ func FindAllLikes(ctx context.Context, db *sql.DB) ([]model.Like, error) {
 }
 
 func FindAllComments(ctx context.Context, db *sql.DB) ([]model.Comment, error) {
-	q := "SELECT `id`, `user_name`, `posting_id`, `comment`, `created_at`, `updated_at` FROM `comments`"
+	q := "SELECT `id`, `user_id`, `posting_id`, `comment`, `created_at`, `updated_at` FROM `comments`"
 	rows, err := db.QueryContext(ctx, q)
 	if err != nil {
 		return nil, err
@@ -235,7 +235,7 @@ func FindAllComments(ctx context.Context, db *sql.DB) ([]model.Comment, error) {
 	result := []model.Comment{}
 	for rows.Next() {
 		var c model.Comment
-		if err := rows.Scan(&c.ID, &c.UserName, &c.PostingID, &c.Comment, &c.CreatedAt, &c.UpdatedAt); err != nil {
+		if err := rows.Scan(&c.ID, &c.UserID, &c.PostingID, &c.Comment, &c.CreatedAt, &c.UpdatedAt); err != nil {
 			return nil, err
 		}
 		result = append(result, c)
@@ -251,7 +251,7 @@ func FindAllComments(ctx context.Context, db *sql.DB) ([]model.Comment, error) {
 }
 
 func FindAllFollows(ctx context.Context, db *sql.DB) ([]model.Follow, error) {
-	q := "SELECT `id`, `following_user_name`, `followed_user_name`, `created_at`, `updated_at` FROM `follows`"
+	q := "SELECT `id`, `following_user_id`, `followed_user_id`, `created_at`, `updated_at` FROM `follows`"
 	rows, err := db.QueryContext(ctx, q)
 	if err != nil {
 		return nil, err
@@ -261,7 +261,7 @@ func FindAllFollows(ctx context.Context, db *sql.DB) ([]model.Follow, error) {
 	result := []model.Follow{}
 	for rows.Next() {
 		var f model.Follow
-		if err := rows.Scan(&f.ID, &f.FollowingUserName, &f.FollowedUserName, &f.CreatedAt, &f.UpdatedAt); err != nil {
+		if err := rows.Scan(&f.ID, &f.FollowingUserID, &f.FollowedUserID, &f.CreatedAt, &f.UpdatedAt); err != nil {
 			return nil, err
 		}
 		result = append(result, f)

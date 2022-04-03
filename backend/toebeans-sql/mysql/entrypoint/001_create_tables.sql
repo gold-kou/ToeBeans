@@ -25,57 +25,57 @@ CREATE TABLE `password_resets` (
 
 CREATE TABLE `postings` (
     `id` INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    `user_name` VARCHAR(255) NOT NULL,
+    `user_id` INT NOT NULL,
     `title` VARCHAR(255) NOT NULL,
     `image_url` VARCHAR(255) NOT NULL,
     `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     `updated_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP on UPDATE CURRENT_TIMESTAMP,
-    CONSTRAINT `postings_user_name` FOREIGN KEY (`user_name`) REFERENCES `users` (`name`),
-    INDEX idx_postings_user_name(user_name)
+    CONSTRAINT `postings_user_id` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`),
+    INDEX idx_postings_user_id(user_id)
 );
 
 CREATE TABLE `likes` (
     `id` INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    `user_name` VARCHAR(255) NOT NULL,
+    `user_id` INT NOT NULL,
     `posting_id` INT NOT NULL,
     `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     `updated_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP on UPDATE CURRENT_TIMESTAMP,
-    CONSTRAINT `likes_user_name` FOREIGN KEY (`user_name`) REFERENCES `users` (`name`),
+    CONSTRAINT `likes_user_id` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`),
     CONSTRAINT `likes_posting_id` FOREIGN KEY (`posting_id`) REFERENCES `postings` (`id`),
-    UNIQUE `uk_user_name_posting_id` (`user_name`, `posting_id`)
+    UNIQUE `uk_user_id_posting_id` (`user_id`, `posting_id`)
 );
 
 CREATE TABLE `comments` (
     `id` INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    `user_name` VARCHAR(255) NOT NULL,
+    `user_id` INT NOT NULL,
     `posting_id` INT NOT NULL,
     `comment` VARCHAR(255) NOT NULL,
     `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     `updated_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP on UPDATE CURRENT_TIMESTAMP,
-    CONSTRAINT `comments_user_name` FOREIGN KEY (`user_name`) REFERENCES `users` (`name`),
+    CONSTRAINT `comments_user_id` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`),
     CONSTRAINT `comments_posting_id` FOREIGN KEY (`posting_id`) REFERENCES `postings` (`id`),
     INDEX idx_comments_posting_id(posting_id)
 );
 
 CREATE TABLE `follows` (
     `id` INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    `following_user_name` VARCHAR(255) NOT NULL,
-    `followed_user_name` VARCHAR(255) NOT NULL,
+    `following_user_id` INT NOT NULL,
+    `followed_user_id` INT NOT NULL,
     `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     `updated_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP on UPDATE CURRENT_TIMESTAMP,
-    CONSTRAINT `follows_following_user_name` FOREIGN KEY (`following_user_name`) REFERENCES `users` (`name`),
-    CONSTRAINT `follows_followed_user_name` FOREIGN KEY (`followed_user_name`) REFERENCES `users` (`name`),
-    UNIQUE `uk_following_user_name_followed_user_name` (`following_user_name`, `followed_user_name`)
+    CONSTRAINT `follows_following_user_id` FOREIGN KEY (`following_user_id`) REFERENCES `users` (`id`),
+    CONSTRAINT `follows_followed_user_id` FOREIGN KEY (`followed_user_id`) REFERENCES `users` (`id`),
+    UNIQUE `uk_following_user_id_followed_user_id` (`following_user_id`, `followed_user_id`)
 );
 
 CREATE TABLE `notifications` (
     `id` INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    `visitor_name` VARCHAR(255) NOT NULL,
-    `visited_name` VARCHAR(255) NOT NULL,
+    `visitor_user_id` INT NOT NULL,
+    `visited_user_id` INT NOT NULL,
     `action` ENUM('like', 'comment', 'follow') NOT NULL,
     `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     `updated_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP on UPDATE CURRENT_TIMESTAMP,
-    CONSTRAINT `notifications_visitor_name` FOREIGN KEY (`visitor_name`) REFERENCES `users` (`name`),
-    CONSTRAINT `notifications_visited_name` FOREIGN KEY (`visited_name`) REFERENCES `users` (`name`),
-    INDEX idx_notifications_visited_name(visited_name)
+    CONSTRAINT `notifications_visitor_user_id` FOREIGN KEY (`visitor_user_id`) REFERENCES `users` (`id`),
+    CONSTRAINT `notifications_visited_user_id` FOREIGN KEY (`visited_user_id`) REFERENCES `users` (`id`),
+    INDEX idx_notifications_visited_user_id(visited_user_id)
 );

@@ -14,6 +14,7 @@ func AuthMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		var ctx context.Context
 		var cookie *http.Cookie
+		var tokenUserID int64
 		var tokenUserName string
 		var err error
 
@@ -33,12 +34,13 @@ func AuthMiddleware(next http.Handler) http.Handler {
 			w.WriteHeader(http.StatusUnauthorized)
 			return
 		}
-		tokenUserName, err = helper.VerifyToken(cookie.Value)
+		tokenUserID, tokenUserName, err = helper.VerifyToken(cookie.Value)
 		if err != nil {
 			_, _ = w.Write([]byte(err.Error()))
 			w.WriteHeader(http.StatusUnauthorized)
 			return
 		}
+		ctx = httpContext.SetTokenUserID(r.Context(), tokenUserID)
 		ctx = httpContext.SetTokenUserName(r.Context(), tokenUserName)
 
 	next:

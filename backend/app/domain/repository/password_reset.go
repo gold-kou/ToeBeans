@@ -12,6 +12,7 @@ import (
 type PasswordResetRepositoryInterface interface {
 	FindByUserID(ctx context.Context, userID int64) (passwordReset model.PasswordReset, err error)
 	UpdateWhereUserID(ctx context.Context, count uint16, resetKey string, expiresAt time.Time, userID int64) (err error)
+	DeleteWhereUserID(ctx context.Context, userID int64) (err error)
 }
 
 type PasswordResetRepository struct {
@@ -41,6 +42,17 @@ func (r *PasswordResetRepository) UpdateWhereUserID(ctx context.Context, count u
 		_, err = tx.ExecContext(ctx, q, count, resetKey, expiresAt, userID)
 	} else {
 		_, err = r.db.ExecContext(ctx, q, count, resetKey, expiresAt, userID)
+	}
+	return
+}
+
+func (r *PasswordResetRepository) DeleteWhereUserID(ctx context.Context, userID int64) (err error) {
+	q := "DELETE FROM `password_resets` WHERE `user_id` = ?"
+	tx := m.GetTransaction(ctx)
+	if tx != nil {
+		_, err = tx.ExecContext(ctx, q, userID)
+	} else {
+		_, err = r.db.ExecContext(ctx, q, userID)
 	}
 	return
 }

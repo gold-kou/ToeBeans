@@ -10,10 +10,12 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+// テスト順番に依存してしまうためあまり良くない
 var sharedTestToken string
 
 func TestGenerateToken(t *testing.T) {
 	type args struct {
+		userID   int64
 		userName string
 	}
 	tests := []struct {
@@ -25,7 +27,7 @@ func TestGenerateToken(t *testing.T) {
 	}{
 		{
 			name:        "success",
-			args:        args{userName: dummy.User1.Name},
+			args:        args{userID: dummy.User1.ID, userName: dummy.User1.Name},
 			environment: dummy.SecretKey,
 			want:        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9",
 			wantErr:     false,
@@ -40,7 +42,7 @@ func TestGenerateToken(t *testing.T) {
 			defer tmp()
 
 			// test target
-			got, err := helper.GenerateToken(tt.args.userName)
+			got, err := helper.GenerateToken(tt.args.userID, tt.args.userName)
 			sharedTestToken = got
 
 			if tt.wantErr {
@@ -62,7 +64,6 @@ func TestVerifyToken(t *testing.T) {
 		name        string
 		args        args
 		environment string
-		want        string
 		wantErr     bool
 		watnErrMsg  string
 	}{
@@ -70,14 +71,12 @@ func TestVerifyToken(t *testing.T) {
 			name:        "success",
 			args:        args{tokenString: sharedTestToken},
 			environment: dummy.SecretKey,
-			want:        dummy.User1.Name,
 			wantErr:     false,
 		},
 		{
 			name:        "fail(expired)",
 			args:        args{tokenString: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE1ODM3MjIzNjIsImlhdCI6IjIwMjAtMDMtMDhUMTE6NTI6NDIuMjIxMjY2NCswOTowMCIsIm5hbWUiOiJ0ZXN0In0.FYMJmXo17aUhTpdaLifMovDQ0BiKSq8LnssLwxFvshI"},
 			environment: dummy.SecretKey,
-			want:        dummy.User1.Name,
 			wantErr:     true,
 			watnErrMsg:  "token is expired",
 		},
@@ -91,7 +90,7 @@ func TestVerifyToken(t *testing.T) {
 			a := assert.New(t)
 
 			// test target
-			got, err := helper.VerifyToken(tt.args.tokenString)
+			tokenUserID, tokenUserName, err := helper.VerifyToken(tt.args.tokenString)
 
 			// assert
 			if tt.wantErr {
@@ -99,7 +98,8 @@ func TestVerifyToken(t *testing.T) {
 				a.EqualError(err, tt.watnErrMsg)
 			} else {
 				a.NoError(err)
-				a.Equal(tt.want, got)
+				a.Equal(dummy.User1.ID, tokenUserID)
+				a.Equal(dummy.User1.Name, tokenUserName)
 			}
 		})
 	}

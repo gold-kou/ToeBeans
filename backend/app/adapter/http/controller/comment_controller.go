@@ -9,17 +9,14 @@ import (
 	"strings"
 
 	validation "github.com/go-ozzo/ozzo-validation"
-
 	"github.com/gold-kou/ToeBeans/backend/app/adapter/http/context"
-
-	"github.com/gold-kou/ToeBeans/backend/app/domain/model"
-	"github.com/gorilla/mux"
-
 	"github.com/gold-kou/ToeBeans/backend/app/adapter/http/helper"
 	"github.com/gold-kou/ToeBeans/backend/app/adapter/mysql"
 	"github.com/gold-kou/ToeBeans/backend/app/application/usecase"
+	"github.com/gold-kou/ToeBeans/backend/app/domain/model"
 	modelHTTP "github.com/gold-kou/ToeBeans/backend/app/domain/model/http"
 	"github.com/gold-kou/ToeBeans/backend/app/domain/repository"
+	"github.com/gorilla/mux"
 )
 
 func CommentController(w http.ResponseWriter, r *http.Request) {
@@ -27,16 +24,16 @@ func CommentController(w http.ResponseWriter, r *http.Request) {
 	case r.URL.Path == "/comments":
 		switch r.Method {
 		case http.MethodGet:
-			comments, err := getComments(r)
+			comments, userNames, err := getComments(r)
 			switch err := err.(type) {
 			case nil:
 				var httpComments []modelHTTP.ResponseGetComment
 				var resp modelHTTP.ResponseGetComments
 				if len(comments) >= 1 {
-					for _, c := range comments {
+					for i, c := range comments {
 						httpComment := modelHTTP.ResponseGetComment{
 							CommentId:   c.ID,
-							UserName:    c.UserName,
+							UserName:    userNames[i],
 							CommentedAt: c.CreatedAt,
 							Comment:     c.Comment,
 						}
@@ -167,7 +164,12 @@ func registerComment(r *http.Request) error {
 	notificationRepo := repository.NewNotificationRepository(db)
 
 	// UseCase
-	u := usecase.NewRegisterComment(tx, tokenUserName, postingID, reqRegisterComment, userRepo, postingRepo, commentRepo, notificationRepo)
+	tokenUserID, err := context.GetTokenUserID(r.Context())
+	if err != nil {
+		log.Println(err)
+		return helper.NewInternalServerError(err.Error())
+	}
+	u := usecase.NewRegisterComment(tx, tokenUserID, tokenUserName, postingID, reqRegisterComment, userRepo, postingRepo, commentRepo, notificationRepo)
 	if err = u.RegisterCommentUseCase(r.Context()); err != nil {
 		log.Println(err)
 		if err == usecase.ErrNotExistsData {
@@ -181,24 +183,27 @@ func registerComment(r *http.Request) error {
 	return err
 }
 
-func getComments(r *http.Request) (comments []model.Comment, err error) {
+func getComments(r *http.Request) (comments []model.Comment, userNames []string, err error) {
 	// get request parameter
 	postingID := r.URL.Query().Get("posting_id")
 	if postingID == "" {
 		log.Println(err)
-		return nil, helper.NewBadRequestError("posting_id: cannot be blank.")
+		err = helper.NewBadRequestError("posting_id: cannot be blank.")
+		return
 	}
 	id, err := strconv.Atoi(postingID)
 	if err != nil {
 		log.Println(err)
-		return nil, helper.NewBadRequestError(err.Error())
+		err = helper.NewBadRequestError(err.Error())
+		return
 	}
 
 	// db connect
 	db, err := mysql.NewDB()
 	if err != nil {
 		log.Println(err)
-		return nil, helper.NewInternalServerError(err.Error())
+		err = helper.NewInternalServerError(err.Error())
+		return
 	}
 	defer db.Close()
 	tx := mysql.NewDBTransaction(db)
@@ -212,15 +217,18 @@ func getComments(r *http.Request) (comments []model.Comment, err error) {
 	tokenUserName, e := context.GetTokenUserName(r.Context())
 	if e != nil {
 		log.Println(err)
-		return nil, helper.NewInternalServerError(err.Error())
+		err = helper.NewInternalServerError(err.Error())
+		return
 	}
 	u := usecase.NewGetComments(tx, tokenUserName, int64(id), userRepo, postingRepo, commentRepo)
-	if comments, err = u.GetCommentsUseCase(r.Context()); err != nil {
+	if comments, userNames, err = u.GetCommentsUseCase(r.Context()); err != nil {
 		log.Println(err)
 		if err == usecase.ErrNotExistsData {
-			return nil, helper.NewBadRequestError(err.Error())
+			err = helper.NewBadRequestError(err.Error())
+			return
 		}
-		return nil, helper.NewInternalServerError(err.Error())
+		err = helper.NewInternalServerError(err.Error())
+		return
 	}
 	return
 }

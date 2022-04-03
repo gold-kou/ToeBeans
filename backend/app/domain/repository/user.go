@@ -12,14 +12,15 @@ import (
 
 type UserRepositoryInterface interface {
 	Create(ctx context.Context, user *model.User) (err error)
-	GetUserWhereEmail(ctx context.Context, email string) (user model.User, err error)
+	GetUserWhereID(ctx context.Context, id int64) (user model.User, err error)
 	GetUserWhereName(ctx context.Context, userName string) (user model.User, err error)
+	GetUserWhereEmail(ctx context.Context, email string) (user model.User, err error)
 	UpdatePasswordWhereName(ctx context.Context, password string, userName string) (err error)
 	UpdateIconWhereName(ctx context.Context, iconURL string, userName string) (err error)
 	UpdateSelfIntroductionWhereName(ctx context.Context, selfIntroduction string, userName string) (err error)
 	UpdateEmailVerifiedWhereNameActivationKey(ctx context.Context, emailVerified bool, userName string, activationKey string) (err error)
 	ResetPassword(ctx context.Context, password string, userName string) (err error)
-	DeleteWhereName(ctx context.Context, userName string) (err error)
+	DeleteWhereID(ctx context.Context, id int64) (err error)
 }
 
 type UserRepository struct {
@@ -47,9 +48,9 @@ func (r *UserRepository) Create(ctx context.Context, user *model.User) (err erro
 	return
 }
 
-func (r *UserRepository) GetUserWhereEmail(ctx context.Context, email string) (user model.User, err error) {
-	q := "SELECT `id`, `name`, `email`, `password`, `icon`, `self_introduction`, `activation_key`, `email_verified`, `created_at`, `updated_at` FROM `users` WHERE `email` = ?"
-	err = r.db.QueryRowContext(ctx, q, email).Scan(&user.ID, &user.Name, &user.Email, &user.Password, &user.Icon, &user.SelfIntroduction, &user.ActivationKey, &user.EmailVerified, &user.CreatedAt, &user.UpdatedAt)
+func (r *UserRepository) GetUserWhereID(ctx context.Context, id int64) (user model.User, err error) {
+	q := "SELECT `id`, `name`, `email`, `password`, `icon`, `self_introduction`, `activation_key`, `email_verified`, `created_at`, `updated_at` FROM `users` WHERE `id` = ?"
+	err = r.db.QueryRowContext(ctx, q, id).Scan(&user.ID, &user.Name, &user.Email, &user.Password, &user.Icon, &user.SelfIntroduction, &user.ActivationKey, &user.EmailVerified, &user.CreatedAt, &user.UpdatedAt)
 	if err == sql.ErrNoRows {
 		err = ErrNotExistsData
 		return
@@ -60,6 +61,16 @@ func (r *UserRepository) GetUserWhereEmail(ctx context.Context, email string) (u
 func (r *UserRepository) GetUserWhereName(ctx context.Context, userName string) (user model.User, err error) {
 	q := "SELECT `id`, `name`, `email`, `password`, `icon`, `self_introduction`, `activation_key`, `email_verified`, `created_at`, `updated_at` FROM `users` WHERE `name` = ?"
 	err = r.db.QueryRowContext(ctx, q, userName).Scan(&user.ID, &user.Name, &user.Email, &user.Password, &user.Icon, &user.SelfIntroduction, &user.ActivationKey, &user.EmailVerified, &user.CreatedAt, &user.UpdatedAt)
+	if err == sql.ErrNoRows {
+		err = ErrNotExistsData
+		return
+	}
+	return
+}
+
+func (r *UserRepository) GetUserWhereEmail(ctx context.Context, email string) (user model.User, err error) {
+	q := "SELECT `id`, `name`, `email`, `password`, `icon`, `self_introduction`, `activation_key`, `email_verified`, `created_at`, `updated_at` FROM `users` WHERE `email` = ?"
+	err = r.db.QueryRowContext(ctx, q, email).Scan(&user.ID, &user.Name, &user.Email, &user.Password, &user.Icon, &user.SelfIntroduction, &user.ActivationKey, &user.EmailVerified, &user.CreatedAt, &user.UpdatedAt)
 	if err == sql.ErrNoRows {
 		err = ErrNotExistsData
 		return
@@ -133,13 +144,13 @@ func (r *UserRepository) ResetPassword(ctx context.Context, password, userName s
 	return
 }
 
-func (r *UserRepository) DeleteWhereName(ctx context.Context, userName string) (err error) {
-	q := "DELETE FROM `users` WHERE `name` = ?"
+func (r *UserRepository) DeleteWhereID(ctx context.Context, id int64) (err error) {
+	q := "DELETE FROM `users` WHERE `id` = ?"
 	tx := m.GetTransaction(ctx)
 	if tx != nil {
-		_, err = tx.ExecContext(ctx, q, userName)
+		_, err = tx.ExecContext(ctx, q, id)
 	} else {
-		_, err = r.db.ExecContext(ctx, q, userName)
+		_, err = r.db.ExecContext(ctx, q, id)
 	}
 	return
 }

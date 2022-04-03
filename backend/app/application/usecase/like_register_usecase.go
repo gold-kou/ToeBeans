@@ -18,6 +18,7 @@ type RegisterLikeUseCaseInterface interface {
 
 type RegisterLike struct {
 	tx               mysql.DBTransaction
+	tokenUserID      int64
 	tokenUserName    string
 	postingID        int
 	userRepo         *repository.UserRepository
@@ -26,9 +27,10 @@ type RegisterLike struct {
 	notificationRepo *repository.NotificationRepository
 }
 
-func NewRegisterLike(tx mysql.DBTransaction, tokenUserName string, postingID int, userRepo *repository.UserRepository, postingRepo *repository.PostingRepository, likeRepo *repository.LikeRepository, notificationRepo *repository.NotificationRepository) *RegisterLike {
+func NewRegisterLike(tx mysql.DBTransaction, tokenUserID int64, tokenUserName string, postingID int, userRepo *repository.UserRepository, postingRepo *repository.PostingRepository, likeRepo *repository.LikeRepository, notificationRepo *repository.NotificationRepository) *RegisterLike {
 	return &RegisterLike{
 		tx:               tx,
+		tokenUserID:      tokenUserID,
 		tokenUserName:    tokenUserName,
 		postingID:        postingID,
 		userRepo:         userRepo,
@@ -53,13 +55,13 @@ func (like *RegisterLike) RegisterLikeUseCase(ctx context.Context) error {
 		return err
 	}
 
-	if like.tokenUserName == p.UserName {
+	if like.tokenUserID == p.UserID {
 		return ErrLikeYourPosting
 	}
 
 	err = like.tx.Do(ctx, func(ctx context.Context) error {
 		l := model.Like{
-			UserName:  like.tokenUserName,
+			UserID:    like.tokenUserID,
 			PostingID: int64(like.postingID),
 		}
 		if err := like.likeRepo.Create(ctx, &l); err != nil {

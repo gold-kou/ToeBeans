@@ -110,6 +110,7 @@ func TestRegisterFollow(t *testing.T) {
 			assert.NoError(t, err)
 			vars := map[string]string{"followed_user_name": tt.args.followedUserName}
 			req = mux.SetURLVars(req, vars)
+			req = req.WithContext(httpContext.SetTokenUserID(req.Context(), dummy.User1.ID))
 			req = req.WithContext(httpContext.SetTokenUserName(req.Context(), dummy.User1.Name))
 			resp := httptest.NewRecorder()
 
@@ -123,6 +124,7 @@ func TestRegisterFollow(t *testing.T) {
 				assert.NoError(t, err)
 				vars := map[string]string{"followed_user_name": tt.args.followedUserName}
 				req = mux.SetURLVars(req, vars)
+				req = req.WithContext(httpContext.SetTokenUserID(req.Context(), dummy.User1.ID))
 				req = req.WithContext(httpContext.SetTokenUserName(req.Context(), dummy.User1.Name))
 				resp := httptest.NewRecorder()
 				FollowController(resp, req)

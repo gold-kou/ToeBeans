@@ -2,6 +2,7 @@ package helper
 
 import (
 	"os"
+	"strconv"
 	"time"
 
 	jwt "github.com/dgrijalva/jwt-go"
@@ -12,6 +13,7 @@ var errUnexpectedSigningMethod = errors.New("unexpected signing method")
 var errTokenExpired = errors.New("token is expired")
 var errTokenInvalid = errors.New("token is invalid")
 var errNotFoundClaims = errors.New("not found claims in token")
+var errNotFoundSub = errors.New("not found sub in token")
 var errNotFoundName = errors.New("not found name in token")
 
 const GuestUserName = "guest"
@@ -26,13 +28,14 @@ func init() {
 	}
 }
 
-func GenerateToken(userName string) (tokenString string, err error) {
+func GenerateToken(userID int64, userName string) (tokenString string, err error) {
 	// header
 	token := jwt.New(jwt.SigningMethodHS256)
 
 	// claims
 	claims := token.Claims.(jwt.MapClaims)
 	claims["iss"] = "ToeBeans"
+	claims["sub"] = strconv.Itoa(int(userID))
 	claims["name"] = userName
 	claims["iat"] = time.Now()
 	claims["exp"] = time.Now().Add(time.Hour * TokenExpirationHour).Unix()
@@ -46,7 +49,7 @@ func GenerateToken(userName string) (tokenString string, err error) {
 	return tokenString, nil
 }
 
-func VerifyToken(tokenString string) (userName string, err error) {
+func VerifyToken(tokenString string) (userID int64, userName string, err error) {
 	// verify
 	parsedToken, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		// check signing method
@@ -61,19 +64,33 @@ func VerifyToken(tokenString string) (userName string, err error) {
 	if err != nil {
 		if ve, ok := err.(*jwt.ValidationError); ok {
 			if ve.Errors&jwt.ValidationErrorExpired != 0 {
-				return "", errTokenExpired
+				err = errTokenExpired
+				return
 			}
-			return "", errTokenInvalid
+			err = errTokenInvalid
+			return
 		}
 	}
 
 	claims, ok := parsedToken.Claims.(jwt.MapClaims)
 	if !ok {
-		return "", errNotFoundClaims
+		err = errNotFoundClaims
+		return
 	}
+	userIDStr, ok := claims["sub"].(string)
+	if !ok {
+		err = errNotFoundSub
+		return
+	}
+	userIDInt, err := strconv.Atoi(userIDStr)
+	if err != nil {
+		return
+	}
+	userID = int64(userIDInt)
 	userName, ok = claims["name"].(string)
 	if !ok {
-		return "", errNotFoundName
+		err = errNotFoundName
+		return
 	}
 
 	return

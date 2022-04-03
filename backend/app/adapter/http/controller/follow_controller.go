@@ -123,13 +123,24 @@ func registerFollow(r *http.Request) error {
 	notificationRepo := repository.NewNotificationRepository(db)
 
 	// UseCase
-	u := usecase.NewRegisterFollow(tx, tokenUserName, followedUserName, userRepo, followRepo, notificationRepo)
+	tokenUserID, err := context.GetTokenUserID(r.Context())
+	if err != nil {
+		log.Println(err)
+		return helper.NewInternalServerError(err.Error())
+	}
+	u := usecase.NewRegisterFollow(tx, tokenUserID, tokenUserName, followedUserName, userRepo, followRepo, notificationRepo)
 	if err = u.RegisterFollowUseCase(r.Context()); err != nil {
 		log.Println(err)
-		if err == usecase.ErrAlreadyFollowed {
+		switch err {
+		case usecase.ErrFollowedUserNotExists:
+			return helper.NewBadRequestError(err.Error())
+		case usecase.ErrTokenInvalidNotExistingUserName:
+			return helper.NewAuthorizationError(err.Error())
+		case usecase.ErrAlreadyFollowed:
 			return helper.NewConflictError("Whoops, you already followed the user")
+		default:
+			helper.NewInternalServerError(err.Error())
 		}
-		return helper.NewInternalServerError(err.Error())
 	}
 	return err
 }
@@ -171,7 +182,17 @@ func getFollowState(r *http.Request) (bool, error) {
 			return false, nil
 		}
 		log.Println(err)
-		return false, helper.NewInternalServerError(err.Error())
+		switch err {
+		case usecase.ErrTokenInvalidNotExistingUserName:
+			return false, helper.NewAuthorizationError(err.Error())
+		case usecase.ErrNotExitsUser:
+			return false, helper.NewBadRequestError(err.Error())
+		case usecase.ErrNotFollowed:
+			// not error
+			return false, nil
+		default:
+			return false, helper.NewInternalServerError(err.Error())
+		}
 	}
 	return true, nil
 }

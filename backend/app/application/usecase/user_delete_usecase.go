@@ -14,30 +14,32 @@ type DeleteUserUseCaseInterface interface {
 }
 
 type DeleteUser struct {
-	tx          mysql.DBTransaction
-	userName    string
-	userRepo    *repository.UserRepository
-	postingRepo *repository.PostingRepository
-	likeRepo    *repository.LikeRepository
-	commentRepo *repository.CommentRepository
-	followRepo  *repository.FollowRepository
+	tx                mysql.DBTransaction
+	userName          string
+	userRepo          *repository.UserRepository
+	passwordResetRepo *repository.PasswordResetRepository
+	postingRepo       *repository.PostingRepository
+	likeRepo          *repository.LikeRepository
+	commentRepo       *repository.CommentRepository
+	followRepo        *repository.FollowRepository
 }
 
-func NewDeleteUser(tx mysql.DBTransaction, userName string, userRepo *repository.UserRepository, postingRepo *repository.PostingRepository, likeRepo *repository.LikeRepository, commentRepo *repository.CommentRepository, followRepo *repository.FollowRepository) *DeleteUser {
+func NewDeleteUser(tx mysql.DBTransaction, userName string, userRepo *repository.UserRepository, passwordResetRepo *repository.PasswordResetRepository, postingRepo *repository.PostingRepository, likeRepo *repository.LikeRepository, commentRepo *repository.CommentRepository, followRepo *repository.FollowRepository) *DeleteUser {
 	return &DeleteUser{
-		tx:          tx,
-		userName:    userName,
-		userRepo:    userRepo,
-		postingRepo: postingRepo,
-		likeRepo:    likeRepo,
-		commentRepo: commentRepo,
-		followRepo:  followRepo,
+		tx:                tx,
+		userName:          userName,
+		userRepo:          userRepo,
+		passwordResetRepo: passwordResetRepo,
+		postingRepo:       postingRepo,
+		likeRepo:          likeRepo,
+		commentRepo:       commentRepo,
+		followRepo:        followRepo,
 	}
 }
 
 func (user *DeleteUser) DeleteUserUseCase(ctx context.Context) error {
 	// check user exists
-	_, err := user.userRepo.GetUserWhereName(ctx, user.userName)
+	u, err := user.userRepo.GetUserWhereName(ctx, user.userName)
 	if err != nil {
 		if err == repository.ErrNotExistsData {
 			return ErrNotExitsUser
@@ -48,38 +50,43 @@ func (user *DeleteUser) DeleteUserUseCase(ctx context.Context) error {
 	err = user.tx.Do(ctx, func(ctx context.Context) error {
 		// TODO notification delete
 
-		err = user.likeRepo.DeleteWhereUserName(ctx, user.userName)
+		err = user.likeRepo.DeleteWhereUserID(ctx, u.ID)
 		if err != nil {
 			return err
 		}
 
 		// 削除対象ユーザの投稿に対するいいねを削除する
-		err = user.likeRepo.DeleteWhereInPosingIDs(ctx, user.userName)
+		err = user.likeRepo.DeleteWhereInPosingIDs(ctx, u.ID)
 		if err != nil {
 			return err
 		}
 
-		err = user.commentRepo.DeleteWhereUserName(ctx, user.userName)
+		err = user.commentRepo.DeleteWhereUserID(ctx, u.ID)
 		if err != nil {
 			return err
 		}
 
-		err = user.followRepo.DeleteWhereFollowingUserName(ctx, user.userName)
+		err = user.followRepo.DeleteWhereFollowingUserID(ctx, u.ID)
 		if err != nil {
 			return err
 		}
 
-		err = user.followRepo.DeleteWhereFollowedUserName(ctx, user.userName)
+		err = user.followRepo.DeleteWhereFollowedUserID(ctx, u.ID)
 		if err != nil {
 			return err
 		}
 
-		err = user.postingRepo.DeleteWhereUserName(ctx, user.userName)
+		err = user.postingRepo.DeleteWhereUserID(ctx, u.ID)
 		if err != nil {
 			return err
 		}
 
-		err = user.userRepo.DeleteWhereName(ctx, user.userName)
+		err = user.passwordResetRepo.DeleteWhereUserID(ctx, u.ID)
+		if err != nil {
+			return err
+		}
+
+		err = user.userRepo.DeleteWhereID(ctx, u.ID)
 		if err != nil {
 			return err
 		}

@@ -15,6 +15,7 @@ type RegisterCommentUseCaseInterface interface {
 
 type RegisterComment struct {
 	tx                 mysql.DBTransaction
+	tokenUserID        int64
 	tokenUserName      string
 	postingID          int
 	reqRegisterComment *modelHTTP.Comment
@@ -24,9 +25,10 @@ type RegisterComment struct {
 	notificationRepo   *repository.NotificationRepository
 }
 
-func NewRegisterComment(tx mysql.DBTransaction, tokenUserName string, postingID int, reqRegisterComment *modelHTTP.Comment, userRepo *repository.UserRepository, postingRepo *repository.PostingRepository, commentRepo *repository.CommentRepository, notificationRepo *repository.NotificationRepository) *RegisterComment {
+func NewRegisterComment(tx mysql.DBTransaction, tokenUserID int64, tokenUserName string, postingID int, reqRegisterComment *modelHTTP.Comment, userRepo *repository.UserRepository, postingRepo *repository.PostingRepository, commentRepo *repository.CommentRepository, notificationRepo *repository.NotificationRepository) *RegisterComment {
 	return &RegisterComment{
 		tx:                 tx,
+		tokenUserID:        tokenUserID,
 		tokenUserName:      tokenUserName,
 		postingID:          postingID,
 		reqRegisterComment: reqRegisterComment,
@@ -56,7 +58,7 @@ func (comment *RegisterComment) RegisterCommentUseCase(ctx context.Context) erro
 	}
 	err = comment.tx.Do(ctx, func(ctx context.Context) error {
 		c := model.Comment{
-			UserName:  comment.tokenUserName,
+			UserID:    comment.tokenUserID,
 			PostingID: int64(comment.postingID),
 			Comment:   comment.reqRegisterComment.Comment,
 		}

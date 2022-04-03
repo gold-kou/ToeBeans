@@ -6,12 +6,12 @@ import (
 
 var Like1to2 = model.Like{
 	ID:        1,
-	UserName:  User1.Name,
+	UserID:    User1.ID,
 	PostingID: Posting2.ID, // you can't like yourself posting
 }
 
 var Like2to1 = model.Like{
 	ID:        2,
-	UserName:  User2.Name,
+	UserID:    User2.ID,
 	PostingID: Posting1.ID, // you can't like yourself posting
 }

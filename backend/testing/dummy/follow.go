@@ -5,13 +5,13 @@ import (
 )
 
 var Follow1to2 = model.Follow{
-	ID:                1,
-	FollowingUserName: User1.Name,
-	FollowedUserName:  User2.Name,
+	ID:              1,
+	FollowingUserID: User1.ID,
+	FollowedUserID:  User2.ID,
 }
 
 var Follow2to1 = model.Follow{
-	ID:                2,
-	FollowingUserName: User2.Name,
-	FollowedUserName:  User1.Name,
+	ID:              2,
+	FollowingUserID: User2.ID,
+	FollowedUserID:  User1.ID,
 }

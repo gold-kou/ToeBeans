@@ -12,14 +12,14 @@ import (
 
 type LikeRepositoryInterface interface {
 	Create(ctx context.Context, like *model.Like) (err error)
-	GetWhereUserName(ctx context.Context, userName string) (like model.Like, err error)
-	GetWhereUserNamePostingID(ctx context.Context, userName string, postingID int64) (like model.Like, err error)
-	GetLikeCountWhereUserName(ctx context.Context, userName string) (int64, err error)
-	GetLikedCountWhereUserName(ctx context.Context, userName string) (int64, err error)
+	GetWhereUserID(ctx context.Context, userID int64) (like model.Like, err error)
+	GetWhereUserIDPostingID(ctx context.Context, userID int64, postingID int64) (like model.Like, err error)
+	GetLikeCountWhereUserID(ctx context.Context, userID int64) (int64, err error)
+	GetLikedCountWhereUserID(ctx context.Context, userID int64) (int64, err error)
 	GetLikedCountWherePostingID(ctx context.Context, postingID int64) (int64, err error)
-	DeleteWhereUserNamePostingID(ctx context.Context, userName string, postingID int64) (err error)
-	DeleteWhereUserName(ctx context.Context, userName string) (err error)
-	DeleteWhereInPosingIDs(ctx context.Context, userName string) (err error)
+	DeleteWhereUserIDPostingID(ctx context.Context, userID int64, postingID int64) (err error)
+	DeleteWhereUserID(ctx context.Context, userID int64) (err error)
+	DeleteWhereInPosingIDs(ctx context.Context, userID int64) (err error)
 }
 
 type LikeRepository struct {
@@ -33,12 +33,12 @@ func NewLikeRepository(db *sql.DB) *LikeRepository {
 }
 
 func (r *LikeRepository) Create(ctx context.Context, like *model.Like) (err error) {
-	q := "INSERT INTO `likes` (`user_name`, `posting_id`) VALUES (?, ?)"
+	q := "INSERT INTO `likes` (`user_id`, `posting_id`) VALUES (?, ?)"
 	tx := m.GetTransaction(ctx)
 	if tx != nil {
-		_, err = tx.ExecContext(ctx, q, like.UserName, like.PostingID)
+		_, err = tx.ExecContext(ctx, q, like.UserID, like.PostingID)
 	} else {
-		_, err = r.db.ExecContext(ctx, q, like.UserName, like.PostingID)
+		_, err = r.db.ExecContext(ctx, q, like.UserID, like.PostingID)
 	}
 	mysqlErr, ok := err.(*mysql.MySQLError)
 	if ok && mysqlErr.Number == 1062 {
@@ -47,9 +47,9 @@ func (r *LikeRepository) Create(ctx context.Context, like *model.Like) (err erro
 	return
 }
 
-func (r *LikeRepository) GetWhereUserName(ctx context.Context, userName string) (likes []model.Like, err error) {
-	q := "SELECT `id`, `user_name`, `posting_id`, `created_at`, `updated_at` FROM `likes` WHERE `user_name` = ?"
-	rows, err := r.db.QueryContext(ctx, q, userName)
+func (r *LikeRepository) GetWhereUserID(ctx context.Context, userID int64) (likes []model.Like, err error) {
+	q := "SELECT `id`, `user_id`, `posting_id`, `created_at`, `updated_at` FROM `likes` WHERE `user_id` = ?"
+	rows, err := r.db.QueryContext(ctx, q, userID)
 	if err == sql.ErrNoRows {
 		err = ErrNotExistsData
 		return
@@ -61,7 +61,7 @@ func (r *LikeRepository) GetWhereUserName(ctx context.Context, userName string) 
 
 	var like model.Like
 	for rows.Next() {
-		if err = rows.Scan(&like.ID, &like.UserName, &like.PostingID, &like.CreatedAt, &like.UpdatedAt); err != nil {
+		if err = rows.Scan(&like.ID, &like.UserID, &like.PostingID, &like.CreatedAt, &like.UpdatedAt); err != nil {
 			return
 		}
 		likes = append(likes, like)
@@ -74,9 +74,9 @@ func (r *LikeRepository) GetWhereUserName(ctx context.Context, userName string) 
 	return
 }
 
-func (r *LikeRepository) GetWhereUserNamePostingID(ctx context.Context, userName string, postingID int64) (like model.Like, err error) {
-	q := "SELECT `id`, `user_name`, `posting_id`, `created_at`, `updated_at` FROM `likes` WHERE `user_name` = ? AND `posting_id` = ?"
-	err = r.db.QueryRowContext(ctx, q, userName, postingID).Scan(&like.ID, &like.UserName, &like.PostingID, &like.CreatedAt, &like.UpdatedAt)
+func (r *LikeRepository) GetWhereUserIDPostingID(ctx context.Context, userID, postingID int64) (like model.Like, err error) {
+	q := "SELECT `id`, `user_id`, `posting_id`, `created_at`, `updated_at` FROM `likes` WHERE `user_id` = ? AND `posting_id` = ?"
+	err = r.db.QueryRowContext(ctx, q, userID, postingID).Scan(&like.ID, &like.UserID, &like.PostingID, &like.CreatedAt, &like.UpdatedAt)
 	if err == sql.ErrNoRows {
 		err = ErrNotExistsData
 		return
@@ -84,15 +84,15 @@ func (r *LikeRepository) GetWhereUserNamePostingID(ctx context.Context, userName
 	return
 }
 
-func (r *LikeRepository) GetLikeCountWhereUserName(ctx context.Context, userName string) (count int64, err error) {
-	q := "SELECT COUNT(*) FROM `likes` WHERE `user_name` = ?"
-	err = r.db.QueryRowContext(ctx, q, userName).Scan(&count)
+func (r *LikeRepository) GetLikeCountWhereUserID(ctx context.Context, userID int64) (count int64, err error) {
+	q := "SELECT COUNT(*) FROM `likes` WHERE `user_id` = ?"
+	err = r.db.QueryRowContext(ctx, q, userID).Scan(&count)
 	return
 }
 
-func (r *LikeRepository) GetLikedCountWhereUserName(ctx context.Context, userName string) (count int64, err error) {
-	q := "SELECT COUNT(*) FROM `likes` WHERE `posting_id` IN(SELECT `id` FROM `postings` WHERE `user_name` = ?);"
-	err = r.db.QueryRowContext(ctx, q, userName).Scan(&count)
+func (r *LikeRepository) GetLikedCountWhereUserID(ctx context.Context, userID int64) (count int64, err error) {
+	q := "SELECT COUNT(*) FROM `likes` WHERE `posting_id` IN(SELECT `id` FROM `postings` WHERE `user_id` = ?);"
+	err = r.db.QueryRowContext(ctx, q, userID).Scan(&count)
 	return
 }
 
@@ -102,35 +102,35 @@ func (r *LikeRepository) GetLikedCountWherePostingID(ctx context.Context, postin
 	return
 }
 
-func (r *LikeRepository) DeleteWhereUserNamePostingID(ctx context.Context, userName string, postingID int64) (err error) {
-	q := "DELETE FROM `likes` WHERE `user_name` = ? AND `posting_id` = ?"
+func (r *LikeRepository) DeleteWhereUserIDPostingID(ctx context.Context, userID, postingID int64) (err error) {
+	q := "DELETE FROM `likes` WHERE `user_id` = ? AND `posting_id` = ?"
 	tx := m.GetTransaction(ctx)
 	if tx != nil {
-		_, err = tx.ExecContext(ctx, q, userName, postingID)
+		_, err = tx.ExecContext(ctx, q, userID, postingID)
 	} else {
-		_, err = r.db.ExecContext(ctx, q, userName, postingID)
+		_, err = r.db.ExecContext(ctx, q, userID, postingID)
 	}
 	return
 }
 
-func (r *LikeRepository) DeleteWhereUserName(ctx context.Context, userName string) (err error) {
-	q := "DELETE FROM `likes` WHERE `user_name` = ?"
+func (r *LikeRepository) DeleteWhereUserID(ctx context.Context, userID int64) (err error) {
+	q := "DELETE FROM `likes` WHERE `user_id` = ?"
 	tx := m.GetTransaction(ctx)
 	if tx != nil {
-		_, err = tx.ExecContext(ctx, q, userName)
+		_, err = tx.ExecContext(ctx, q, userID)
 	} else {
-		_, err = r.db.ExecContext(ctx, q, userName)
+		_, err = r.db.ExecContext(ctx, q, userID)
 	}
 	return
 }
 
-func (r *LikeRepository) DeleteWhereInPosingIDs(ctx context.Context, userName string) (err error) {
-	q := "DELETE FROM `likes` WHERE `posting_id` IN (SELECT `id` FROM `postings` WHERE `user_name` = ?)"
+func (r *LikeRepository) DeleteWhereInPosingIDs(ctx context.Context, userID int64) (err error) {
+	q := "DELETE FROM `likes` WHERE `posting_id` IN (SELECT `id` FROM `postings` WHERE `user_id` = ?)"
 	tx := m.GetTransaction(ctx)
 	if tx != nil {
-		_, err = tx.ExecContext(ctx, q, userName)
+		_, err = tx.ExecContext(ctx, q, userID)
 	} else {
-		_, err = r.db.ExecContext(ctx, q, userName)
+		_, err = r.db.ExecContext(ctx, q, userID)
 	}
 	return
 }

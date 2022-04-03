@@ -35,7 +35,7 @@ func NewDeleteFollow(tx mysql.DBTransaction, followUserName, followedUserName st
 
 func (follow *DeleteFollow) DeleteFollowUseCase(ctx context.Context) error {
 	// check userName in token exists
-	_, err := follow.userRepo.GetUserWhereName(ctx, follow.followUserName)
+	followingUser, err := follow.userRepo.GetUserWhereName(ctx, follow.followUserName)
 	if err != nil {
 		if err == repository.ErrNotExistsData {
 			return ErrTokenInvalidNotExistingUserName
@@ -44,7 +44,7 @@ func (follow *DeleteFollow) DeleteFollowUseCase(ctx context.Context) error {
 	}
 
 	// 存在しないユーザのフォロー削除はConflictエラー
-	_, err = follow.userRepo.GetUserWhereName(ctx, follow.followedUserName)
+	followedUser, err := follow.userRepo.GetUserWhereName(ctx, follow.followedUserName)
 	if err != nil {
 		if err == repository.ErrNotExistsData {
 			return ErrNotExitsUser
@@ -53,7 +53,7 @@ func (follow *DeleteFollow) DeleteFollowUseCase(ctx context.Context) error {
 	}
 
 	// 存在しないフォローの削除はConflictエラー
-	_, err = follow.followRepo.FindByBothUserNames(ctx, follow.followUserName, follow.followedUserName)
+	_, err = follow.followRepo.FindByBothUserIDs(ctx, followingUser.ID, followedUser.ID)
 	if err != nil {
 		if err == repository.ErrNotExistsData {
 			return ErrDeleteNotExistsFollow
@@ -62,7 +62,7 @@ func (follow *DeleteFollow) DeleteFollowUseCase(ctx context.Context) error {
 	}
 
 	err = follow.tx.Do(ctx, func(ctx context.Context) error {
-		err := follow.followRepo.DeleteWhereFollowingFollowedUserName(ctx, follow.followUserName, follow.followedUserName)
+		err := follow.followRepo.DeleteWhereBothUserIDs(ctx, followingUser.ID, followedUser.ID)
 		if err != nil {
 			return err
 		}
