@@ -54,8 +54,10 @@ const MyPage = () => {
           }
         } else if (error.request) {
           console.log(error.request);
+          setErrMessage("failed");
         } else {
           console.log(error);
+          setErrMessage("failed");
         }
       });
   }, [userName, history]);
@@ -83,8 +85,10 @@ const MyPage = () => {
           }
         } else if (error.request) {
           console.log(error.request);
+          setErrMessage("failed");
         } else {
           console.log(error);
+          setErrMessage("failed");
         }
       });
   };
@@ -105,8 +109,10 @@ const MyPage = () => {
           }
         } else if (error.request) {
           console.log(error.request);
+          setErrMessage("failed");
         } else {
           console.log(error);
+          setErrMessage("failed");
         }
       });
   }

@@ -96,6 +96,12 @@ func SetupDBTest() *sql.DB {
 }
 
 func TeardownDBTest(db *sql.DB) {
+	if err := DeleteAllTableData(db, "user_reports"); err != nil {
+		panic(err)
+	}
+	if err := DeleteAllTableData(db, "posting_reports"); err != nil {
+		panic(err)
+	}
 	if err := DeleteAllTableData(db, "notifications"); err != nil {
 		panic(err)
 	}
@@ -265,6 +271,58 @@ func FindAllFollows(ctx context.Context, db *sql.DB) ([]model.Follow, error) {
 			return nil, err
 		}
 		result = append(result, f)
+	}
+
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return result, nil
+}
+
+func FindAllUserReports(ctx context.Context, db *sql.DB) ([]model.UserReport, error) {
+	q := "SELECT `id`, `user_name`, `detail`, `created_at`, `updated_at` FROM `user_reports`"
+	rows, err := db.QueryContext(ctx, q)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	result := []model.UserReport{}
+	for rows.Next() {
+		var u model.UserReport
+		if err := rows.Scan(&u.ID, &u.UserName, &u.Detail, &u.CreatedAt, &u.UpdatedAt); err != nil {
+			return nil, err
+		}
+		result = append(result, u)
+	}
+
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return result, nil
+}
+
+func FindAllPostingReports(ctx context.Context, db *sql.DB) ([]model.PostingReport, error) {
+	q := "SELECT `id`, `posting_id`, `detail`, `created_at`, `updated_at` FROM `posting_reports`"
+	rows, err := db.QueryContext(ctx, q)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	result := []model.PostingReport{}
+	for rows.Next() {
+		var u model.PostingReport
+		if err := rows.Scan(&u.ID, &u.PostingID, &u.Detail, &u.CreatedAt, &u.UpdatedAt); err != nil {
+			return nil, err
+		}
+		result = append(result, u)
 	}
 
 	if err := rows.Close(); err != nil {

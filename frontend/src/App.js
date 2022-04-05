@@ -10,11 +10,14 @@ import MyPage from "./MyPage";
 import Login from "./Login";
 import Logout from "./Logout";
 import Main from "./Main";
+import UserReport from "./UserReport";
+import PostingReport from "./PostingReport";
 import Settings from "./Settings";
 import ChangePassword from "./ChangePassword";
 import UserDelete from "./UserDelete";
 
 axios.defaults.baseURL = process.env.REACT_APP_BACK_BASE_URL;
+// 異なるオリジンへのリクエストでもCookieを許可する
 axios.defaults.withCredentials = true;
 
 function App() {
@@ -42,6 +45,12 @@ function App() {
               <UserPage userName={props.match.params.userName} />
             )}
           ></Route>
+          <Route exact path="/reports/users/:userName" component={UserReport} />
+          <Route
+            exact
+            path="/reports/postings/:postingID"
+            component={PostingReport}
+          />
           <Route exact path="/settings" component={Settings} />
           <Route exact path="/change_password" component={ChangePassword} />
           <Route exact path="/delete_user" component={UserDelete} />

@@ -75,6 +75,8 @@ func Serve() {
 	r.HandleFunc("/comments", controller.CommentController)
 	r.HandleFunc("/comments/{comment_id}", controller.CommentController)
 	r.HandleFunc("/follows/{followed_user_name}", controller.FollowController)
+	r.HandleFunc("/reports/users/{user_name}", controller.ReportController)
+	r.HandleFunc("/reports/postings/{posting_id}", controller.ReportController)
 
 	// graceful shutdown
 	server := &http.Server{Addr: fmt.Sprintf(":%v", 80), Handler: r}

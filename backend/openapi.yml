@@ -619,6 +619,67 @@ paths:
           $ref: '#/components/responses/notAllowedMethod'
         "500":
           $ref: '#/components/responses/internalServerError'
+  /reports/users/{user_name}:
+    post:
+      description: submit user report
+      operationId: submitUserReport
+      tags:
+        - report
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: user_name
+          schema:
+            type: string
+          in: path
+          required: true
+          example: 1
+      requestBody:
+        $ref: '#/components/requestBodies/submitUserReport'
+      responses:
+        "200":
+          $ref: '#/components/responses/simpleSuccess'
+        "400":
+          $ref: '#/components/responses/badRequest'
+        "401":
+          $ref: '#/components/responses/unauthorized'
+        "403":
+          $ref: '#/components/responses/forbidden'
+        "405":
+          $ref: '#/components/responses/notAllowedMethod'
+        "500":
+          $ref: '#/components/responses/internalServerError'
+  /reports/postings/{posting_id}:
+    post:
+      description: submit posting report
+      operationId: submitPostingReport
+      tags:
+        - report
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: posting_id
+          schema:
+            type: integer
+            format: int64
+          in: path
+          required: true
+          example: 1
+      requestBody:
+        $ref: '#/components/requestBodies/submitPostingReport'
+      responses:
+        "200":
+          $ref: '#/components/responses/simpleSuccess'
+        "400":
+          $ref: '#/components/responses/badRequest'
+        "401":
+          $ref: '#/components/responses/unauthorized'
+        "403":
+          $ref: '#/components/responses/forbidden'
+        "405":
+          $ref: '#/components/responses/notAllowedMethod'
+        "500":
+          $ref: '#/components/responses/internalServerError'
   /health/liveness:
     get:
       description: health check liveness
@@ -691,6 +752,18 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/requestRegisterComment'
+    submitUserReport:
+      description: submit user report
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/requestSubmitUserReport'
+    submitPostingReport:
+      description: submit posting report
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/requestSubmitPostingReport'
   responses:
     getCSRFToken:
       description: get csrf token
@@ -900,6 +973,24 @@ components:
           example: 'this is a sample comment.'
       required:
         - comment
+    requestSubmitUserReport:
+      type: object
+      properties:
+        detail:
+          type: string
+          description: report detail
+          example: an inappropriate user
+      required:
+        - detail
+    requestSubmitPostingReport:
+      type: object
+      properties:
+        detail:
+          type: string
+          description: report detail
+          example: an inappropriate posting
+      required:
+        - detail    
     responseGetCSRFToken:
       description: get csrf token
       type: object
@@ -1264,5 +1355,7 @@ tags:
     description: follow
   - name: notification
     description: notification
+  - name: report
+    description: report
   - name: system
     description: system operation

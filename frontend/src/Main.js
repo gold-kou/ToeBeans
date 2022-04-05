@@ -4,6 +4,8 @@ import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
 import Feed from "./Feed";
 import UserPage from "./UserPage";
 import MyPage from "./MyPage";
+import UserReport from "./UserReport";
+import PostingReport from "./PostingReport";
 import Settings from "./Settings";
 import ChangePassword from "./ChangePassword";
 import UserDelete from "./UserDelete";
@@ -23,6 +25,12 @@ function Main() {
               <UserPage userName={props.match.params.userName} />
             )}
           ></Route>
+          <Route exact path="/reports/users/:userName" component={UserReport} />
+          <Route
+            exact
+            path="/reports/postings/:postingID"
+            component={PostingReport}
+          />
           <Route exact path="/settings" component={Settings}></Route>
           <Route
             exact

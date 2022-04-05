@@ -37,8 +37,10 @@ const UserRegistration = (props) => {
           setErrMessage(error.response.data.message);
         } else if (error.request) {
           console.log(error.request);
+          setErrMessage("failed");
         } else {
           console.log(error);
+          setErrMessage("failed");
         }
       });
   }

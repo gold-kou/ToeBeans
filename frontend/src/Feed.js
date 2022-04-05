@@ -34,9 +34,11 @@ function Feed() {
             setErrMessage(error.response.data.message);
           }
         } else if (error.request) {
-          setErrMessage(error.request.data);
+          console.log(error.request);
+          setErrMessage("failed");
         } else {
           console.log(error);
+          setErrMessage("failed");
         }
       });
   }, [history]);
@@ -64,7 +66,7 @@ function Feed() {
             setErrMessage(error.response.data.message);
           }
         } else if (error.request) {
-          setErrMessage(error.request.data);
+          console.log(error.request);
         } else {
           console.log(error);
         }

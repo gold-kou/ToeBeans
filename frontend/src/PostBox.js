@@ -8,14 +8,14 @@ import { isCorrectSize, getBase64 } from "./libs/fileLibs";
 
 import "./PostBox.css";
 
-function PostBox() {
+function PostBox(onFileSelect) {
   const [title, setTitle] = useState("");
   const [image, setImage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
   const [errMessage, setErrMessage] = useState("");
   const history = useHistory();
 
-  function onClickSendPost(e) {
+  const onClickSendPost = async (e) => {
     e.preventDefault();
 
     if (isCorrectSize(image) === false) {
@@ -31,7 +31,7 @@ function PostBox() {
         axios
           .post("/postings", reqBody)
           .then(function () {
-            setSuccessMessage("success post");
+            setSuccessMessage("success");
           })
           .catch((error) => {
             if (error.response) {
@@ -43,9 +43,11 @@ function PostBox() {
                 setErrMessage(error.response.data.message);
               }
             } else if (error.request) {
-              setErrMessage(error.request.data.message);
+              console.log(error.request);
+              setErrMessage("failed");
             } else {
               console.log(error);
+              setErrMessage("failed");
             }
           })
           .finally(function () {
@@ -54,7 +56,7 @@ function PostBox() {
           });
       });
     }
-  }
+  };
 
   function isValid() {
     if (title !== "" && image !== "") {
@@ -87,7 +89,7 @@ function PostBox() {
           />
         </Form.Group>
         <Button
-          onClick={() => onClickSendPost()}
+          onClick={(e) => onClickSendPost(e)}
           type="submit"
           variant="contained"
           color="primary"

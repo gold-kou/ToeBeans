@@ -56,8 +56,10 @@ function ChangePassword() {
           }
         } else if (error.request) {
           console.log(error.request);
+          setErrMessage("failed");
         } else {
           console.log(error);
+          setErrMessage("failed");
         }
       });
   }

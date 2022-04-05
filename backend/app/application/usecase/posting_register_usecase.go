@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/base64"
 	"errors"
-	"flag"
 	"os"
 	"strings"
 
@@ -93,7 +92,7 @@ func (posting *RegisterPosting) RegisterPostingUseCase(ctx context.Context) erro
 	}()
 
 	// check cat or not
-	if flag.Lookup("test.v") == nil {
+	if app.IsProduction() {
 		labels, err := gcp.DetectLabels(filePath)
 		if err != nil {
 			return err

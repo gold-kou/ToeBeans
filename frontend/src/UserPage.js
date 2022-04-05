@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Button } from "@material-ui/core";
 import { Container, Row, Col, Alert, Form } from "react-bootstrap";
 import axios from "axios";
-import { useHistory } from "react-router-dom";
+import { Link, useHistory } from "react-router-dom";
 import InfiniteScroll from "react-infinite-scroller";
 
 import Sidebar from "./Sidebar";
@@ -52,8 +52,10 @@ const UserPage = (props) => {
           }
         } else if (error.request) {
           console.log(error.request);
+          setErrMessage("failed");
         } else {
           console.log(error);
+          setErrMessage("failed");
         }
       });
 
@@ -72,9 +74,11 @@ const UserPage = (props) => {
               setErrMessage(error.response.data.message);
             }
           } else if (error.request) {
-            setErrMessage(error.request.data.message);
+            console.log(error.request);
+            setErrMessage("failed");
           } else {
             console.log(error);
+            setErrMessage("failed");
           }
         });
     }
@@ -96,8 +100,10 @@ const UserPage = (props) => {
           }
         } else if (error.request) {
           console.log(error.request);
+          setErrMessage("failed");
         } else {
           console.log(error);
+          setErrMessage("failed");
         }
       });
   };
@@ -118,8 +124,10 @@ const UserPage = (props) => {
           }
         } else if (error.request) {
           console.log(error.request);
+          setErrMessage("failed");
         } else {
           console.log(error);
+          setErrMessage("failed");
         }
       });
   };
@@ -147,8 +155,10 @@ const UserPage = (props) => {
           }
         } else if (error.request) {
           console.log(error.request);
+          setErrMessage("failed");
         } else {
           console.log(error);
+          setErrMessage("failed");
         }
       });
   };
@@ -169,8 +179,10 @@ const UserPage = (props) => {
           }
         } else if (error.request) {
           console.log(error.request);
+          setErrMessage("failed");
         } else {
           console.log(error);
+          setErrMessage("failed");
         }
       });
   }
@@ -292,6 +304,15 @@ const UserPage = (props) => {
                     </Button>
                   )}
                 </Form>
+                {userName !== loginUserName && (
+                  <Link
+                    style={{ color: "gray" }}
+                    className="float-right"
+                    to={`/reports/users/${userName}`}
+                  >
+                    Report
+                  </Link>
+                )}
               </Container>
               <br></br>
               <br></br>
