@@ -57,13 +57,13 @@ func (req *RequestRegisterPosting) ValidateParam() error {
 	return validation.ValidateStruct(req, fieldRules...)
 }
 
-func (e *Email) ValidateParam() error {
+func (e *RequestSendPasswordResetEmail) ValidateParam() error {
 	var fieldRules []*validation.FieldRules
 	fieldRules = append(fieldRules, validation.Field(&e.Email, validation.Required, is.Email, validation.Length(MinVarcharLength, MaxVarcharLength)))
 	return validation.ValidateStruct(e, fieldRules...)
 }
 
-func (c *Comment) ValidateParam() error {
+func (c *RequestRegisterComment) ValidateParam() error {
 	var fieldRules []*validation.FieldRules
 	fieldRules = append(fieldRules, validation.Field(&c.Comment, validation.Required, validation.Length(MinVarcharLength, MaxVarcharLength)))
 	return validation.ValidateStruct(c, fieldRules...)

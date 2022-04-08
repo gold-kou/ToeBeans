@@ -18,9 +18,6 @@ frontend/build
 # Output of the go coverage tool, specifically when used with LiteIDE
 *.out
 coverage.html
-# OpenAPI-generate
-backend/openapi/openapi-generated/api
-backend/openapi/openapi-generated/go
 # Go
 backend/go-modules/
 backend/Gododir/godobin*

@@ -24,12 +24,12 @@ type PasswordResetEmailUseCaseInterface interface {
 
 type PasswordResetEmail struct {
 	tx                    mysql.DBTransaction
-	reqPasswordResetEmail *modelHTTP.Email
+	reqPasswordResetEmail *modelHTTP.RequestSendPasswordResetEmail
 	userRepo              *repository.UserRepository
 	passwordResetRepo     *repository.PasswordResetRepository
 }
 
-func NewPasswordResetEmail(tx mysql.DBTransaction, reqPasswordResetEmail *modelHTTP.Email, userRepo *repository.UserRepository, passwordResetRepo *repository.PasswordResetRepository) *PasswordResetEmail {
+func NewPasswordResetEmail(tx mysql.DBTransaction, reqPasswordResetEmail *modelHTTP.RequestSendPasswordResetEmail, userRepo *repository.UserRepository, passwordResetRepo *repository.PasswordResetRepository) *PasswordResetEmail {
 	return &PasswordResetEmail{
 		tx:                    tx,
 		reqPasswordResetEmail: reqPasswordResetEmail,

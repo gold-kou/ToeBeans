@@ -144,7 +144,7 @@ func changePassword(r *http.Request) (err error) {
 
 func passwordResetEmail(r *http.Request) error {
 	// get request parameter
-	var reqPasswordResetEmail *modelHTTP.Email
+	var reqPasswordResetEmail *modelHTTP.RequestSendPasswordResetEmail
 	b, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		log.Println(err)

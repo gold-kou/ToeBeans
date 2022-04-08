@@ -18,14 +18,14 @@ type RegisterComment struct {
 	tokenUserID        int64
 	tokenUserName      string
 	postingID          int
-	reqRegisterComment *modelHTTP.Comment
+	reqRegisterComment *modelHTTP.RequestRegisterComment
 	userRepo           *repository.UserRepository
 	postingRepo        *repository.PostingRepository
 	commentRepo        *repository.CommentRepository
 	notificationRepo   *repository.NotificationRepository
 }
 
-func NewRegisterComment(tx mysql.DBTransaction, tokenUserID int64, tokenUserName string, postingID int, reqRegisterComment *modelHTTP.Comment, userRepo *repository.UserRepository, postingRepo *repository.PostingRepository, commentRepo *repository.CommentRepository, notificationRepo *repository.NotificationRepository) *RegisterComment {
+func NewRegisterComment(tx mysql.DBTransaction, tokenUserID int64, tokenUserName string, postingID int, reqRegisterComment *modelHTTP.RequestRegisterComment, userRepo *repository.UserRepository, postingRepo *repository.PostingRepository, commentRepo *repository.CommentRepository, notificationRepo *repository.NotificationRepository) *RegisterComment {
 	return &RegisterComment{
 		tx:                 tx,
 		tokenUserID:        tokenUserID,

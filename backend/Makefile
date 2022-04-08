@@ -7,10 +7,6 @@ setup:
 install:
 	@go install github.com/gold-kou/ToeBeans/backend/app/...
 
-.PHONY: openapi
-openapi:
-	@./hack/openapi/openapi-generate.sh
-
 .PHONY: test
 test:
 	@docker-compose -f docker-compose.test.yml build app

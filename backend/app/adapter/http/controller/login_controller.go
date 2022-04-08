@@ -14,7 +14,7 @@ import (
 
 	"github.com/gold-kou/ToeBeans/backend/app/adapter/http/helper"
 
-	model "github.com/gold-kou/ToeBeans/backend/app/domain/model/http"
+	modelHTTP "github.com/gold-kou/ToeBeans/backend/app/domain/model/http"
 )
 
 func LoginController(w http.ResponseWriter, r *http.Request) {
@@ -36,7 +36,7 @@ func LoginController(w http.ResponseWriter, r *http.Request) {
 			w.Header().Set(helper.HeaderKeyContentType, helper.HeaderValueApplicationJSON)
 			w.WriteHeader(http.StatusOK)
 
-			resp := model.Token{
+			resp := modelHTTP.ResponseIDToken{
 				IdToken: idToken,
 			}
 			if err := json.NewEncoder(w).Encode(resp); err != nil {
@@ -61,7 +61,7 @@ func LoginController(w http.ResponseWriter, r *http.Request) {
 
 func login(r *http.Request) (idToken string, err error) {
 	// get request parameter
-	var reqLogin *model.RequestLogin
+	var reqLogin *modelHTTP.RequestLogin
 	b, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		log.Println(err)
