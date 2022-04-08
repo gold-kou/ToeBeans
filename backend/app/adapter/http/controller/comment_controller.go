@@ -125,7 +125,7 @@ func registerComment(r *http.Request) error {
 		log.Println(err)
 		return helper.NewBadRequestError(err.Error())
 	}
-	var reqRegisterComment *modelHTTP.Comment
+	var reqRegisterComment *modelHTTP.RequestRegisterComment
 	b, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		log.Println(err)

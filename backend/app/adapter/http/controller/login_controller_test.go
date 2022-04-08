@@ -192,7 +192,7 @@ func TestLoginController(t *testing.T) {
 			respBodyByte, err := ioutil.ReadAll(resp.Body)
 			assert.NoError(t, err)
 			if tt.wantStatus == http.StatusOK {
-				var respLogin modelHttp.Token
+				var respLogin modelHttp.ResponseIDToken
 				err = json.Unmarshal(respBodyByte, &respLogin)
 				assert.NoError(t, err)
 				tokenUserID, tokenUserName, err := helper.VerifyToken(respLogin.IdToken)
