@@ -69,6 +69,18 @@ func (c *RequestRegisterComment) ValidateParam() error {
 	return validation.ValidateStruct(c, fieldRules...)
 }
 
+func (r *RequestSubmitUserReport) ValidateParam() error {
+	var fieldRules []*validation.FieldRules
+	fieldRules = append(fieldRules, validation.Field(&r.Detail, validation.Required))
+	return validation.ValidateStruct(r, fieldRules...)
+}
+
+func (r *RequestSubmitPostingReport) ValidateParam() error {
+	var fieldRules []*validation.FieldRules
+	fieldRules = append(fieldRules, validation.Field(&r.Detail, validation.Required))
+	return validation.ValidateStruct(r, fieldRules...)
+}
+
 // custom password validation
 //
 // upp: at least one upper case letter.

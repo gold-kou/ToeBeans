@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"log"
 	"net/http"
 	"strings"
 
@@ -41,7 +42,11 @@ func AuthMiddleware(next http.Handler) http.Handler {
 			return
 		}
 		ctx = httpContext.SetTokenUserID(r.Context(), tokenUserID)
-		ctx = httpContext.SetTokenUserName(r.Context(), tokenUserName)
+		tokenUserID, err = httpContext.GetTokenUserID(ctx)
+		if err != nil {
+			log.Println(err)
+		}
+		ctx = httpContext.SetTokenUserName(ctx, tokenUserName)
 
 	next:
 		if ctx == nil {

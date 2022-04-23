@@ -28,8 +28,10 @@ const Login = (props) => {
           }
         } else if (error.request) {
           console.log(error.request);
+          setErrMessage("failed");
         } else {
           console.log(error);
+          setErrMessage("failed");
         }
       });
   }
@@ -111,9 +113,7 @@ const Login = (props) => {
           Guest Login
         </Button>
       </div>
-      <div className="text-muted center">
-        You can also login as a guest user.
-      </div>
+      <div className="text-muted center">Login as a guest user.</div>
 
       <br />
       <br />

@@ -106,8 +106,7 @@ This is written in Japanese.
 # Launch in local
 
 ## Backend
-
-投稿機能を使用する場合は、 `docker-compose.yml` の `GOOGLE_API_KEY` を設定する。値は SSM のパラメータストアに設定されている。
+投稿画像が猫画像かどうかのチェックは本番環境のみでの使用を想定している。ローカルでも確認したい場合は、 `docker-compose.yml` の `APP_ENV` を `prd` にし、 `GOOGLE_API_KEY` の値を設定する。値は SSM のパラメータストアに設定されている。
 
 ```
 $ cd backend

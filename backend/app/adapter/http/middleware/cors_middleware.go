@@ -9,6 +9,7 @@ import (
 func CORSMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Access-Control-Allow-Headers", "X-Requested-With, Content-Type, Authorization, X-CSRF-Token")
+		// 異なるオリジンへのリクエストでもCookieを許可する
 		w.Header().Set("Access-Control-Allow-Credentials", "true")
 		if app.IsProduction() {
 			w.Header().Set("Access-Control-Allow-Origin", "https://toebeans.tk")

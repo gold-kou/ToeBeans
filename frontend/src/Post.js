@@ -33,7 +33,7 @@ const Post = forwardRef(
       await axios
         .delete(`/postings/${postingID}`)
         .then(() => {
-          setSuccessMessage("success delete post");
+          setSuccessMessage("success");
         })
         .catch((error) => {
           if (error.response) {
@@ -45,9 +45,11 @@ const Post = forwardRef(
               setErrMessage(error.response.data.message);
             }
           } else if (error.request) {
-            setErrMessage(error.request.data.message);
+            console.log(error.request);
+            setErrMessage("failed");
           } else {
             console.log(error);
+            setErrMessage("failed");
           }
         });
     };
@@ -71,9 +73,11 @@ const Post = forwardRef(
                 setErrMessage(error.response.data.message);
               }
             } else if (error.request) {
-              setErrMessage(error.request.data.message);
+              console.log(error.request);
+              setErrMessage("failed");
             } else {
               console.log(error);
+              setErrMessage("failed");
             }
           });
       } else {
@@ -94,9 +98,11 @@ const Post = forwardRef(
                 setErrMessage(error.response.data.message);
               }
             } else if (error.request) {
-              setErrMessage(error.request.data.message);
+              console.log(error.request);
+              setErrMessage("failed");
             } else {
               console.log(error);
+              setErrMessage("failed");
             }
           });
       }
@@ -141,6 +147,15 @@ const Post = forwardRef(
               )}
               {count}
             </IconButton>
+            {userName !== loginUserName && (
+              <Link
+                style={{ color: "gray" }}
+                className="float-right post__report"
+                to={`/reports/postings/${postingID}`}
+              >
+                Report
+              </Link>
+            )}
           </div>
         </div>
       </div>

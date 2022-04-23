@@ -79,3 +79,23 @@ CREATE TABLE `notifications` (
     CONSTRAINT `notifications_visited_user_id` FOREIGN KEY (`visited_user_id`) REFERENCES `users` (`id`),
     INDEX idx_notifications_visited_user_id(visited_user_id)
 );
+
+CREATE TABLE `user_reports` (
+    `id` INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    `user_name` VARCHAR(255) NOT NULL,
+    `detail` VARCHAR(3000) NOT NULL DEFAULT 'UNKNOWN',
+    `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP on UPDATE CURRENT_TIMESTAMP,
+    CONSTRAINT `user_reports_user_name` FOREIGN KEY (`user_name`) REFERENCES `users` (`name`),
+    INDEX idx_user_reports_created_at(created_at)
+);
+
+CREATE TABLE `posting_reports` (
+    `id` INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    `posting_id` INT NOT NULL,
+    `detail` VARCHAR(3000) NOT NULL DEFAULT 'UNKNOWN',
+    `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP on UPDATE CURRENT_TIMESTAMP,
+    CONSTRAINT `posting_reports_posting_id` FOREIGN KEY (`posting_id`) REFERENCES `postings` (`id`),
+    INDEX idx_posting_reports_created_at(created_at)
+);
