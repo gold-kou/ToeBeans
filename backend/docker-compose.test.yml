@@ -20,7 +20,7 @@ services:
       - AWS_SECRET_KEY=test_secret_key # must not be real key
       - S3_BUCKET_POSTINGS=/toebeans-postings
       - S3_BUCKET_ICONS=/toebeans-icons
-      - SYSTEM_EMAIL=no-reply@toebeans.tk
+      - SYSTEM_EMAIL=no-reply@toebeans.ml
       - TZ=Asia/Tokyo
     volumes:
       - ./:/go/src/github.com/gold-kou/ToeBeans/backend:cached

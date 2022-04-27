@@ -12,7 +12,7 @@ func CORSMiddleware(next http.Handler) http.Handler {
 		// 異なるオリジンへのリクエストでもCookieを許可する
 		w.Header().Set("Access-Control-Allow-Credentials", "true")
 		if app.IsProduction() {
-			w.Header().Set("Access-Control-Allow-Origin", "https://toebeans.tk")
+			w.Header().Set("Access-Control-Allow-Origin", "https://toebeans.ml")
 		} else {
 			w.Header().Set("Access-Control-Allow-Origin", "http://localhost:3000")
 		}

@@ -52,7 +52,7 @@ resource "aws_cloudfront_distribution" "toebeans_frontend" {
   }
 
   # バージニアのACMを指定できないため以下のコメントアウトを外すとエラーになる。
-  # aliases = ["toebeans.tk"]
+  # aliases = ["toebeans.ml"]
 }
 
 resource "aws_cloudfront_origin_access_identity" "toebeans_frontend" {}
