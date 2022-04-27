@@ -1,40 +1,59 @@
 # 構成図
-
 comming soon...
 
 # 構築手順
-
 ## ドメイン登録
+### freenomでドメイン取得
+適当に画面入力してドメインを取得する。
 
-ref.
-https://note.com/dafujii/n/n12bb564081f1
-https://note.com/dafujii/n/n0365dc0a89af
+無料枠最大の12ヶ月で取得する。更新も無料。ただし更新を忘れるとそのドメインは有料になってしまうのでカレンダーに登録するなどしよう。更新メールも最近は送られなくなった？
 
-### freenom でドメイン取得
+`Forward this domain or Use DNS` の選択は特にせずにContinueしてしまってよい。
 
-適当に画面入力してドメインを取得。
-無料枠最大の 12 ヶ月で取得。更新も無料。
-
-### Route53 でホストゾーンの作成
-
+### Route53でホストゾーンの作成
 `ホストゾーンの作成` に進み、freenom で取得したドメイン名を入力する。
 
 ![](docs/images/Route_53_ドメイン作成.png)
 
 ### freenom でレコード設定
+`Services > My Domains > Manage Domain > Manage Tools > Use custom nameservers (enter below)` と進む。
 
-`Services > My Domains > Manage Domain > Manage Freenom DNS > Edit Nameservers > Use custom nameservers (enter below)` と進む。
+Route53で払い出された該当ドメインNSレコードの値4つを入力する。
+-> `Change Nameservers` を押す。登録後、自動で大文字になる。
 
-Route53 で払い出された NS レコードの値 4 つを入力する。登録後、自動で大文字になる。
-
-`Change Nameservers` を押す。
+### ref
+- https://note.com/dafujii/n/n406f385651e2
+- https://note.com/dafujii/n/n12bb564081f1
 
 ## メールサーバ構築
+### 新コンソール手順
+#### ドメイン検証からテストメール送信まで
+https://www.blog.danishi.net/2022/02/13/post-5807/
 
-### ドメイン検証とレコード設定
+- Verified identitiesへ進む。
+- ドメイン検証
+  - Create identityをクリック。Domainを選択。Assign a default configuration setを選択。Create identityをクリック。
+    - CNAMEのRoute53登録は自動でされる。
+- メール検証
+  - Create identityをクリック。Email addressを選択。メールアドレスを入力。Create identityをクリック。
+- テストメール送信
+  - 対象ドメインを選択。Send test emailをクリック。From-addressは@前を適当に入力。ScenarioでCustomを選択し、送信先メールアドレスとして↑で検証したメールアドレスを入力。SubjectとBodyを適当に入力してSend test emailをクリック。
 
+#### Sandboxから抜ける
+https://docs.aws.amazon.com/ja_jp/ses/latest/dg/request-production-access.html
+
+※Classic Console時に既に設定していたため、実際には↑の手順は試していない。
+
+### Classic Console手順（廃止）
+※Classic Consoleが廃止されたため以下手順は使えない。
+
+#### ref
+- https://note.com/dafujii/n/n0365dc0a89af
+- https://docs.aws.amazon.com/ses/latest/DeveloperGuide/request-production-access.html
+
+#### ドメイン検証とレコード設定
 SES コンソールの `Domains` の `verify a New Domain` を押す。
-freenom で取得したドメイン `toebeans.tk` を入力して、 `Generate DKIM Settings` にチェックして、 `Verify This Domain` を押す。
+freenom で取得したドメイン `toebeans.ml` を入力して、 `Generate DKIM Settings` にチェックして、 `Verify This Domain` を押す。
 
 ![](docs/images/verify_new_domain.png)
 
@@ -44,13 +63,8 @@ freenom で取得したドメイン `toebeans.tk` を入力して、 `Generate D
 
 ![](docs/images/SES_レコード設定.png)
 
-### ドメイン有効確認
-
+#### ドメイン有効確認
 有効になっていることを確認する。72 時間以内に有効となるらしいが、たいていは数分以内で完了する。ただし、DKIM だけ一時間ほどかかるかも。
-
-![](docs/images/status_verified.png)
-
-### メール送信テスト
 
 `Email Addresses > Verify a New Email Address` で適当なメールアドレスを入力し、検証する。
 
@@ -60,8 +74,7 @@ freenom で取得したドメイン `toebeans.tk` を入力して、 `Generate D
 
 ![](docs/images/send_test_email.png)
 
-### sandbox から抜ける
-
+#### sandbox から抜ける
 SES は作成時点では sandbox のまま。
 このままでは検証されたメールに対してのみにしか送信できないため、sandbox から抜けるための申請が必要。
 
@@ -71,20 +84,14 @@ SES は作成時点では sandbox のまま。
 
 ![](docs/images/SES_sandboxから抜ける申請.png)
 
-ref. https://docs.aws.amazon.com/ses/latest/DeveloperGuide/request-production-access.html
-
 ## Terraform
-
 ### 前提
-
-Terraform インストール済み。
+Terraformインストール済み。
 
 ### IAM ユーザ作成
-
-AWS コンソールにて Terraform 実行用のユーザをコンソールで作成する。
+AWS コンソールにてTerraform実行用のユーザをコンソールで作成する。
 
 ### クレデンシャル設定
-
 ```
 $ vi ~/.aws/credentials
 [terraform]
@@ -93,30 +100,21 @@ aws_access_key_id=XXXXX
 aws_secret_access_key=XXXXX
 ```
 
-### tfstate 管理用バケットの作成
+### tfstate管理用バケットの作成
+AWS コンソールにてS3バケットを作成する。「パブリックアクセスをすべてブロック」・「バージョニングを有効」・「暗号化を有効」で作成する。バケット名は、 `main.tf` の bucket と一致させる。
 
-AWS コンソールにて S3 バケットを作成する。「パブリックアクセスをすべてブロック」・「バージョニングを有効」・「暗号化を有効」で作成する。
+### GitHubとAWSの連携設定
+`AWS Connector for GitHub` を設定する。（手順詳細忘れた）。
 
-バケット名は、 `main.tf` の bucket と一致させる。
-
-### GitHub と AWS の連携設定
-
-`AWS Connector for GitHub` を設定する。
-
-（手順詳細忘れた）。
-
-### SSH キーペアの作成
-
+### SSHキーペアの作成
 `ssh-keygen -t rsa -f toebeans -N ''` とかだった気がする。
 
 ### GitHub トークンの生成
-
 GitHub コンソールの `Settings > Developer Settings > Personal access tokens` と進む。
 新規の場合は、 `Generate new token` を押す。 `Select scopes` では `repo` と `admin:repo_hook` を全てチェック。
 再発行の場合は、 `Regenarate token` を押す。
 
 ### SSM パラメータストアの設定
-
 `cotainer_definitions.json` の `secrets` の内容を設定する。
 
 `github_token` に関しては apply 前に設定が必須。
@@ -125,11 +123,9 @@ GitHub コンソールの `Settings > Developer Settings > Personal access token
 `db_host` の値は RDS エンドポイントの値を設定する。
 
 ### S3 バケット名の決定
-
-Go アプリケーションが使用する S3 バケット名を決定し、 `s3.tf` を編集する。バケット名は世界中で一意である必要がある。諸事情により、複数の AWS アカウントで開発しているため、バケット名が重複してしまう場合はバケット名を既存のものから変更すること。その際は、 `backend/Dockerfile` の ENV の設定もあわせて実施すること。
+Goアプリケーションが使用するS3バケット名を決定し、 `s3.tf` を編集する。バケット名は世界中で一意である必要がある。諸事情により、複数のAWSアカウントで開発しているため、バケット名が重複してしまう場合はバケット名を既存のものから変更すること。その際は、 `backend/Dockerfile` のENVの設定もあわせて実施すること。
 
 ### apply
-
 ```
 $ cd environments/prd
 $ AWS_PROFILE=terraform GITHUB_TOKEN=xxx terraform apply -auto-approve
@@ -143,7 +139,6 @@ Error: error creating ELBv2 Listener (arn:aws:elasticloadbalancing:ap-northeast-
 ```
 
 ## CodeStar 接続
-
 初回 apply 時は CodePipeline の実行に失敗してしまうため、以下の手順で再開する。
 
 接続の項目から対象のコネクションを選択する。
@@ -157,9 +152,8 @@ GitHub アプリで自分のアカウントを選択し、 `接続` を押す。
 
 対象のパイプラインを選択し、 `変更をリリースする` を押す。
 
-## DB の変更
-
-admin ユーザのパスワード変更、テーブルマイグレーション、アプリケーショ用ユーザの作成、を実施します。
+## DBの変更
+adminユーザのパスワード変更、テーブルマイグレーション、アプリケーション用ユーザの作成を実施します。
 
 1. EC2 コンソールを利用し、踏み台サーバにログインする。
 2. `mysql -u admin -p -h <RDSエンドポイント>` を実行する。RDS エンドポイントはコンソールの `接続とセキュリティ` から確認可能。初期パスワードは variables.tf を参照する。
@@ -172,10 +166,9 @@ admin ユーザのパスワード変更、テーブルマイグレーション�
 9. exit する。
 
 ## CloudFront 修正
+`cycle error` により ACM を Terraform のコード上で指定できない都合上、コンソールで設定の追加をする必要がある。設定後数分で403Errorでなくなる。
 
-`cycle error` により ACM を Terraform のコード上で指定できない都合上、コンソールで設定の追加をする必要がある。設定後数分で 403 Error でなくなる。
-
-- 代替ドメイン名を追加して toebeans.tk を入力する
+- 代替ドメイン名を追加して toebeans.ml を入力する
 - カスタム SSL 証明書でバージニアのものを選択する
 
 ![](docs/images/CloudFront_add.png)
@@ -183,13 +176,10 @@ admin ユーザのパスワード変更、テーブルマイグレーション�
 ※Terraform のコード上で `cloudfront_default_certificate = true` としているめ、apply されるたびに本設定をやり直す必要がある。
 
 ## S3 へフロントのソースコードをアップロード
+- `frontend/` に移動。
+- `npm run build` を実行する。
+- `build` ディレクトリ配下のファイルとディレクトリをS3へアップロードする。
+  - build ディレクトリ自体はアップロードしないように注意する。
 
-`frontend/` に移動。
-
-`npm run build` を実行する。
-
-`build` ディレクトリ配下のファイルとディレクトリを S3 へアップロードする。build ディレクトリ自体はアップロードしないように注意する。
-
-# イメージ更新（バックエンド）
-
-`gold-kou/toebeans` の master ブランチにマージされると、CodePipeline の Source と Build により ECR へ最新のバックエンドの Docker イメージが push され、Deploy によりデプロイされる。マージしてからデプロイされるまでには約 20 分かかる。
+# イメージ更新（バックエンド）について
+`gold-kou/toebeans` のmasterブランチにマージされると、CodePipelineのSourceとBuildによりECRへ最新のバックエンドのDockerイメージがpushされ、Deployによりデプロイされる。マージしてからデプロイされるまでには約20分かかる。

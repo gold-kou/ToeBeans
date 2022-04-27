@@ -1,5 +1,5 @@
 data "aws_route53_zone" "toebeans" {
-  name = "toebeans.tk"
+  name = "toebeans.ml"
 }
 
 resource "aws_route53_record" "toebeans_frontend" {

@@ -125,7 +125,7 @@ func UserController(w http.ResponseWriter, r *http.Request) {
 			case nil:
 				var link string
 				if app.IsProduction() {
-					link = "https://toebeans.tk/login"
+					link = "https://toebeans.ml/login"
 				} else {
 					link = "http://localhost:3000/login"
 				}

@@ -47,6 +47,6 @@ COPY config/logger.yml.tpl config/logger.yml.tpl
 WORKDIR /
 COPY --from=builder /go/src/github.com/gold-kou/ToeBeans/backend/backend /backend
 # 基本的に値を変えない環境変数のみをここに設定
-ENV AWS_REGION=ap-​northeast-1 DB_NAME=toebeansdb DB_PORT=3306 DB_USER=toebeans S3_BUCKET_POSTINGS=toebeans-postings-tcpip S3_BUCKET_ICONS=toebeans-icons-tcpip SYSTEM_EMAIL=no-reply@toebeans.tk TZ=Asia/Tokyo
+ENV AWS_REGION=ap-​northeast-1 DB_NAME=toebeansdb DB_PORT=3306 DB_USER=toebeans S3_BUCKET_POSTINGS=toebeans-postings-tcpip S3_BUCKET_ICONS=toebeans-icons-tcpip SYSTEM_EMAIL=no-reply@toebeans.ml TZ=Asia/Tokyo
 EXPOSE 80
 CMD ["/backend"]
