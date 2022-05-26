@@ -1,59 +1,169 @@
-# CORS
+# Architecture
+ヘキサゴナルアーキテクチャを採用しています。
 
-同一オリジンあるいは特別に許可しているオリジン（ローカル開発用）以外のオリジンからはリクエストを許可していません。
+ヘキサゴナルアーキテクチャは、ドメイン領域を中心に見据えてそのほかを外側に押しやることで、コンポーネント間を疎結合にし、以下のメリットをもたらします。
 
-# CSRF トークン
+- 変更に強くなる
+  - 例えば、DBがMySQLからPostgreSQLへ変わったとしても、Adapterの実装とAdapterの呼び出し部分を書き換えるだけで済みます。つまり、Application側はアダプタを付け加えるだけで済みます。
+- テストを書きやすい
+  - Adapterをモックに置き換えることで外部と接続する機能のテストも容易に行えます。
 
-「RFC で定められている安全」なメソッド（本サービスでは GET）以外のリクエストは全て `X-CSRF-Token` ヘッダに CSRF トークンを格納する必要があります。
+# Security
+## Authorization
+IDトークンによる認証方式としています。IDトークンは、本人であることを証明するトークンです。JWTの仕様に従っています。認証を必要とするAPIでは、Cookieに正しいIDトークンが格納されていない場合は401エラーを返します。
 
-CSRF トークンは `/csrf-token GET` で取得可能です。
+OpenIDConnectのIDトークンとは異なるものです。
 
-有効期限は 24 時間です。
+### IDトークンの中身
+#### Header
+署名検証を行うための以下のメタ情報をBase64エンコードしたものです。
 
-[gorilla/csrf](https://github.com/gorilla/csrf) を使用しています。
+- typ
+  - JWT
+- alg
+  - 署名アルゴリズム
+    - HS256
 
-# ID Token
-
-ID Token は、本人であることを証明するトークンです。OpenIDConnect の ID Token とは異なるものです。
-
-XSS 対策として、ID Token は Cookie に保存されます。
-
-トークンの生成と検証には、 [jwt-go](https://github.com/dgrijalva/jwt-go) を使用しています。
-
-## トークンの中身
-
-### header
-
-HS256
-
-### claim
+#### Payload(Claims)
+IDトークンの中身となる以下の情報をBase64エンコードしたものです。
 
 - iss
-  - 発行者。文字列"ToeBeans"で固定。
+  - 発行者名。文字列"ToeBeans"。
+- sub
+  - ユーザID
 - name
-  - ユーザ名。
+  - ユーザ名
 - iat
-  - 発行時刻。
+  - 発行時刻
 - exp
-  - 有効期限。
+  - 有効期限
 
-## トークンの生成
+#### Signature
+`Header.Payload` をalgの署名アルゴリズムで署名し、Base64エンコードしたものです。
 
-秘密鍵を使って、上記内容からトークンを生成する。
+### IDトークンの生成と検証
+[jwt-go](https://github.com/dgrijalva/jwt-go)を使用しています。
 
-## トークンの検証
+#### 生成
+1. `jwt.New` でHeaderを含めた初期化を行います。typがJWTであることは自明なので署名アルゴリズム（HS256）だけを指定します。
+2. Claimsを設定します。
+3. 署名に必要な鍵をjwt-goの関数に渡してトークンを生成します。
 
-1. Cookie の `id_token` プロパティに格納された値を取り出し、秘密鍵で検証できるかを確認する。
-2. 有効期限を確認する。
+```go
+func GenerateToken(userID int64, userName string) (tokenString string, err error) {
+	// header
+	token := jwt.New(jwt.SigningMethodHS256)
+
+	// claims
+	claims := token.Claims.(jwt.MapClaims)
+	claims["iss"] = "ToeBeans"
+	claims["sub"] = strconv.Itoa(int(userID))
+	claims["name"] = userName
+	claims["iat"] = time.Now()
+	claims["exp"] = time.Now().Add(time.Hour * TokenExpirationHour).Unix()
+
+	// generate token by secret key
+	tokenString, err = token.SignedString([]byte(jwtSecretKey))
+	if err != nil {
+		return "", err
+	}
+
+	return tokenString, nil
+}
+```
+
+#### 検証
+1. 署名アルゴリズムが一致しているかの確認します。
+2. 秘密鍵で復号できるかを確認します。
+3. 有効期限を確認します。
+
+```go
+func VerifyToken(tokenString string) (userID int64, userName string, err error) {
+	parsedToken, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+		// check signing method
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			err = errUnexpectedSigningMethod
+			return nil, err
+		}
+		return []byte(jwtSecretKey), nil
+	})
+
+	if err != nil {
+		if ve, ok := err.(*jwt.ValidationError); ok {
+			if ve.Errors&jwt.ValidationErrorExpired != 0 {
+				err = errTokenExpired
+				return
+			}
+			err = errTokenInvalid
+			return
+		}
+	}
+  // ...
+}
+```
+
+## XSS対策
+IDトークンはLocalStorageでなく、Cookie(httpOnly)に格納し、JavaScriptから参照・更新ができないようにしています。Cookie(httpOnly)への格納は完全にXSSを対策できるものではありませんが、簡単に実装できるため、緩和策として講じています。
+
+## CSRF対策
+### 背景
+IDトークンをCookieに格納しているため、CSRF攻撃によりユーザに身に覚えないのリクエストが実行されてしまう可能性があります。
+
+### CSRFトークン
+CSRFトークンによるCSRF対策をしています。RFCで定められている「安全」なメソッド（本サービスではGET）以外のリクエストは全て `X-CSRF-Token` ヘッダにCSRFトークンが格納されている必要があります。
+
+CSRFトークンは `/csrf-token GET` で取得可能ですが、CORSで許可されているオリジン（SPAのフロントエンド）からしか取得できません。
+
+有効期限は24時間です。
+
+### CSRFトークンの生成と検証
+[gorilla/csrf](https://github.com/gorilla/csrf) を使用しています。
+
+#### 生成
+Token関数でCSRFトークンを生成しています。ライブラリ内で乱数を使って生成されています。これをAPIレスポンスで返します。
+
+```go
+token := csrf.Token(r)
+```
+
+#### 検証
+Protect関数でCSRFトークンを検証しています。検証は非安全なHTTPメソッドの場合のみ、ミドルウェアで実施します。鍵は環境変数で与えたものを使用しています。
+
+```go
+csrfMiddleware := csrf.Protect([]byte(csrfAuthKey))
+```
+
+## CORS
+JavaScriptのSame Origin Policyにより、異なるオリジンからのリクエストは許可されていません。しかしながら、SPA＋APIサーバの構成のため、フロントエンドとバックエンドがそれぞれ異なるドメイン上に存在します。そこで、CORSにより `toebeans.ml` と `localhost:3000` からのリクエストは `Access-Control-Allow-Origin` を設定し、許可するようにしています。加えて、IDトークンをCookieに格納しているため、異なるオリジンへのCookieを許可するために `Access-Control-Allow-Credentials: true` にしています。
+
+## メール本人確認によるダブルオプトイン
+アカウント作成時に登録されたメールアドレス宛に、アカウントを有効化するためのアクティベーションキーが付与されたURLリンクを記載したメールを送信しています。そのリンクが踏まれることで、アカウント作成が完了します。ダブルオプトインにより、他人のメールアドレスが使用されたり、存在しないメールアドレスが使用されることを防いでいます。
+
+## パスワードのハッシュ化
+パスワードはハッシュ化したうえでRDBに保存しています。
+
+ハッシュ化には[crypt/bcrypt](https://pkg.go.dev/golang.org/x/crypto/bcrypt)パッケージのGenerateFromPassword関数を使用しています。
+
+```go
+hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.reqRegisterUser.Password), bcrypt.DefaultCost)
+```
+
+パスワード照合時には、DBに保存されたハッシュ化済みパスワードとログイン時に入力されたパスワードを照合します。同パッケージのCompareHashAndPassword関数を使用しています。
+
+```go
+if err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(l.reqLogin.Password)); err != nil {
+	return "", ErrNotCorrectPassword
+}
+```
 
 # Development tips
-
-## Login as a userA
-
-email/password: userA@example.com/Password1234
+## UT
+```
+$ make test
+```
 
 ## Launch servers in local
-
+### (docker-composeを使う場合)コンテナとアプリケーション起動
 ```
 $ ./serverrun.sh
 # go run main.go
@@ -68,9 +178,18 @@ On app
 # kill -9 <process>
 ```
 
-## table migration
+### (ECRのイメージを使う場合)コンテナとアプリケーション起動
+```
+$ $(aws ecr get-login --profile tcpip-terraform --region ap-northeast-1 --no-include-email)
+WARNING! Using --password via the CLI is insecure. Use --password-stdin.
+Login Succeeded
+$ docker pull XXX.dkr.ecr.ap-northeast-1.amazonaws.com/toebeans:latest
+$ docker image ls |grep toebeans
+$ docker run -it b83a48f97efb /bin/bash
+```
 
-`docker-compose.yml` および `docker-compose.test.yml` の volumes で `./toebeans-sql/mysql/entrypoint:/docker-entrypoint-initdb.d` としているため、コンテナ起動時に自動でマイグレーションが実行される。ただし、volume は削除する必要がある。
+### Table migration
+`docker-compose.yml` および `docker-compose.test.yml` の volumes で `./toebeans-sql/mysql/entrypoint:/docker-entrypoint-initdb.d` としているため、コンテナ起動時に自動でマイグレーションが実行される。ただし、前回のが残っている場合は、volumeは削除する必要がある。
 
 ```
 $ docker volume ls |grep backend_db
@@ -84,22 +203,12 @@ $ docker volume rm backend_db-test
 backend_db-test
 ```
 
-## UT
+### Login as a userA
+`userA` is automatically created by `toebeans-sql/mysql/entrypoint/002_insert_dummy_data.sql`.
 
-```
-$ make test
-```
-
-## Generate OpenAPI models
-
-```
-$ make openapi
-```
+email/password: userA@example.com/Password1234
 
 ## Access log
-
-example
-
 ```json
 {
   "severity": "INFO",
@@ -121,8 +230,3 @@ example
   }
 }
 ```
-
-## Be careful
-
-It is impossible to request APIs in local by curl or tools because of `Forbidden - CSRF token invalid` .
-Use frontend.

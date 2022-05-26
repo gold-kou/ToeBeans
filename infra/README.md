@@ -1,6 +1,3 @@
-# 構成図
-comming soon...
-
 # 構築手順
 ## ドメイン登録
 ### freenomでドメイン取得
@@ -138,8 +135,8 @@ $ AWS_PROFILE=terraform GITHUB_TOKEN=xxx terraform apply -auto-approve
 Error: error creating ELBv2 Listener (arn:aws:elasticloadbalancing:ap-northeast-1:022111582403:loadbalancer/app/toebeans/460be5df191fb445): UnsupportedCertificate: The certificate 'arn:aws:acm:ap-northeast-1:022111582403:certificate/77af2cb4-5d0e-4359-812e-02119b9f32f7' must have a fully-qualified domain name, a supported signature, and a supported key size.
 ```
 
-## CodeStar 接続
-初回 apply 時は CodePipeline の実行に失敗してしまうため、以下の手順で再開する。
+## CodeStar接続
+初回apply時はCodePipelineの実行に失敗してしまうため、以下の手順で再開する。
 
 接続の項目から対象のコネクションを選択する。
 ![](docs/images/AWS_Developer_Tools_1.png)
@@ -147,7 +144,7 @@ Error: error creating ELBv2 Listener (arn:aws:elasticloadbalancing:ap-northeast-
 `保留中の接続を更新` を押す。
 ![](docs/images/AWS_Developer_Tools_2.png)
 
-GitHub アプリで自分のアカウントを選択し、 `接続` を押す。
+GitHubアプリで自分のアカウントを選択し、 `接続` を押す。
 ![](docs/images/AWS_Developer_Tools_3.png)
 
 対象のパイプラインを選択し、 `変更をリリースする` を押す。
@@ -156,30 +153,68 @@ GitHub アプリで自分のアカウントを選択し、 `接続` を押す。
 adminユーザのパスワード変更、テーブルマイグレーション、アプリケーション用ユーザの作成を実施します。
 
 1. EC2 コンソールを利用し、踏み台サーバにログインする。
-2. `mysql -u admin -p -h <RDSエンドポイント>` を実行する。RDS エンドポイントはコンソールの `接続とセキュリティ` から確認可能。初期パスワードは variables.tf を参照する。
-3. `SET PASSWORD = PASSWORD('XXXXX');` を実行して admin ユーザのパスワードを変更する。パスワード値は任意の値。
+2. `mysql -u admin -p -h <RDSエンドポイント>` を実行する。RDSエンドポイントはコンソールの `接続とセキュリティ` から確認可能。初期パスワードはvariables.tfを参照する。
+3. `SET PASSWORD = PASSWORD('XXXXX');` を実行してadminユーザのパスワードを変更する。パスワード値は任意の値。
 4. `CREATE DATABASE toebeansdb DEFAULT CHARACTER SET utf8;` を実行する。
 5. `USE toebeansdb;` を実行する。
 6. `backend/toebeans-sql/mysql/entrypoint/001_create_tables.sql` の内容を実行する。
 7. `backend/toebeans-sql/mysql/create_user.sql` の内容を実行する。パスワード値は任意の値。
 8. `backend/toebeans-sql/mysql/entrypoint/002_insert_dummy_data.sql` の内容を実行する。ゲストユーザのみでよい。
-9. exit する。
+9. exitする。
 
-## CloudFront 修正
-`cycle error` により ACM を Terraform のコード上で指定できない都合上、コンソールで設定の追加をする必要がある。設定後数分で403Errorでなくなる。
+## CloudFront修正
+`cycle error` によりACMをTerraformのコード上で指定できない都合上、コンソールで設定の追加をする必要がある。設定後数分で403Errorでなくなる。
 
-- 代替ドメイン名を追加して toebeans.ml を入力する
-- カスタム SSL 証明書でバージニアのものを選択する
+- 代替ドメイン名を追加してtoebeans.mlを入力する
+- カスタムSSL証明書でバージニアのものを選択する
 
 ![](docs/images/CloudFront_add.png)
 
-※Terraform のコード上で `cloudfront_default_certificate = true` としているめ、apply されるたびに本設定をやり直す必要がある。
+※Terraform のコード上で `cloudfront_default_certificate = true` としているめ、applyされるたびに本設定をやり直す必要がある。
 
-## S3 へフロントのソースコードをアップロード
+# Deploy
+## Frontend
 - `frontend/` に移動。
 - `npm run build` を実行する。
 - `build` ディレクトリ配下のファイルとディレクトリをS3へアップロードする。
   - build ディレクトリ自体はアップロードしないように注意する。
 
-# イメージ更新（バックエンド）について
-`gold-kou/toebeans` のmasterブランチにマージされると、CodePipelineのSourceとBuildによりECRへ最新のバックエンドのDockerイメージがpushされ、Deployによりデプロイされる。マージしてからデプロイされるまでには約20分かかる。
+## Backend
+`gold-kou/toebeans` のmasterブランチにマージされると、CodePipelineのSourceとBuildによりECRへ最新のバックエンドのDockerイメージがpushされ、Deployにより自動でデプロイされる。マージしてからデプロイされるまでには約20分かかる。
+
+# Pricing memo
+## GCP
+- Cloud Vision APIのLABEL_DETECTION
+  - 1000リクエスト/月まで無料
+  - 500万リクエスト/月まで1.5$
+  - https://cloud.google.com/vision/pricing
+
+## AWS
+リクエスト量にもよるが、起動コストだけでおそらく2万円程度。
+
+個人開発にしては料金コストが重いなと感じたことをメモします。
+
+- AWS Config
+  - ECS上で起動失敗するアプリケーションをずっとオートヒーリングし続けてしまうことで料金がかかった経験がある。
+    - Essential container in task exited でタスクが起動せず、desired_count=2にしていたため。
+- RDS
+  - 起動料金が高い。
+  - 開発中はこまめに落とすのも手。
+    - 起動に20分くらいかかるので効率悪いかも。
+    - 7日間停止していると自動で8日目に起動するので要注意。
+- NAT Gateway
+  - 起動料金が高い。
+  - プライベートインスタンスがインターネットに接続するためにサービス運用中は必要だが、開発中はこまめに落とす。
+- VPC Endpoint
+  - 起動料金が高い。
+    - NAT Gatewayの費用削減になるかもと思い、使ってみたがあまりうまくいかなかったのでやめた。
+- ELB
+  - 起動料金が高い。
+  - こまめに落とす。
+
+開発中は節約のために以下を実施している。
+
+- RDSインスタンスの停止
+  - 毎週忘れないようにする
+- ECSのdesired_countを0にしてapply
+- NAT Gateway関連のネットワークリソースをコメントアウトしてapply
