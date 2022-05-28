@@ -66,13 +66,15 @@ const MyPage = () => {
     await axios
       .get(`/postings?since_at=${sinceAt}&limit=10&user_name=${userName}`)
       .then((response) => {
+        setPosts([...posts, ...response.data.postings]);
         if (response.data.postings.length < 10) {
           setHasMore(false);
+        } else {
+          setSinceAt(
+            response.data.postings[response.data.postings.length - 1]
+              .uploaded_at
+          );
         }
-        setPosts([...posts, ...response.data.postings]);
-        setSinceAt(
-          response.data.postings[response.data.postings.length - 1].uploaded_at
-        );
       })
       .catch((error) => {
         if (error.response) {
