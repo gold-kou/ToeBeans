@@ -202,7 +202,7 @@ func registerUser(r *http.Request) error {
 	if err = u.RegisterUserUseCase(r.Context()); err != nil {
 		log.Println(err)
 		if err == usecase.ErrDuplicateData {
-			return helper.NewBadRequestError(err.Error() + ", the user name or email have been already used.")
+			return helper.NewBadRequestError(err.Error() + ", the user name or email has been already used.")
 		}
 		return helper.NewInternalServerError(err.Error())
 	}
