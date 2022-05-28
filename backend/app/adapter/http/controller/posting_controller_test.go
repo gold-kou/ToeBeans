@@ -213,6 +213,11 @@ var successRespGetPostings = `
   ]
 }
 `
+var successRespGetPostingsEmpty = `
+{
+  "postings": []
+}
+`
 var errRespGetPostingsWithoutSinceAt = `
 {
   "status": 400,
@@ -260,6 +265,13 @@ func TestGetPostings(t *testing.T) {
 			wantStatus: http.StatusOK,
 		},
 		{
+			name:       "success empty",
+			args:       args{sinceAt: "2100-01-01T00:00:00+09:00", limit: "50"},
+			method:     http.MethodGet,
+			want:       successRespGetPostingsEmpty,
+			wantStatus: http.StatusOK,
+		},
+		{
 			name:       "error empty since_at",
 			args:       args{limit: "50"},
 			method:     http.MethodGet,
@@ -298,13 +310,15 @@ func TestGetPostings(t *testing.T) {
 
 			// insert dummy data
 			userRepo := repository.NewUserRepository(db)
-			postingRepo := repository.NewPostingRepository(db)
 			err := userRepo.Create(context.Background(), &dummy.User1)
 			assert.NoError(t, err)
-			err = postingRepo.Create(context.Background(), &dummy.Posting1)
-			assert.NoError(t, err)
-			err = testingHelper.UpdateNow(db, "postings")
-			assert.NoError(t, err)
+			if tt.want != successRespGetPostingsEmpty {
+				postingRepo := repository.NewPostingRepository(db)
+				err = postingRepo.Create(context.Background(), &dummy.Posting1)
+				assert.NoError(t, err)
+				err = testingHelper.UpdateNow(db, "postings")
+				assert.NoError(t, err)
+			}
 
 			// http request
 			var req *http.Request

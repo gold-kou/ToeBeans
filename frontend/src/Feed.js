@@ -47,14 +47,16 @@ function Feed() {
     await axios
       .get(`/postings?since_at=${sinceAt}&limit=10`)
       .then((response) => {
+        setPosts([...posts, ...response.data.postings]);
         if (response.data.postings.length < 10) {
           setHasMore(false);
+        } else {
+          // 取得データのうち一番古い uploaded_at を次のリクエスト用に保持しておく
+          setSinceAt(
+            response.data.postings[response.data.postings.length - 1]
+              .uploaded_at
+          );
         }
-        setPosts([...posts, ...response.data.postings]);
-        // 取得データのうち一番古い uploaded_at を次のリクエスト用に保持しておく
-        setSinceAt(
-          response.data.postings[response.data.postings.length - 1].uploaded_at
-        );
       })
       .catch((error) => {
         if (error.response) {

@@ -45,7 +45,7 @@ func PostingController(w http.ResponseWriter, r *http.Request) {
 			postings, userNames, likedCounts, likes, err := getPostings(r)
 			switch err := err.(type) {
 			case nil:
-				var httpPostings []modelHTTP.ResponseGetPosting
+				var httpPostings = []modelHTTP.ResponseGetPosting{}
 				var resp modelHTTP.ResponseGetPostings
 				for i, p := range postings {
 					httpPosting := modelHTTP.ResponseGetPosting{
