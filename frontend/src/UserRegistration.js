@@ -25,9 +25,7 @@ const UserRegistration = (props) => {
   async function registerUserServer() {
     registerUser(state.userName, state.email, state.password)
       .then(() => {
-        setSuccessMessage(
-          "Registration successful. Redirecting to login page.."
-        );
+        setSuccessMessage("Success! Redirecting to login page..");
         setTimeout(() => {
           redirectToLogin();
         }, 2000);
@@ -51,10 +49,14 @@ const UserRegistration = (props) => {
 
   const onClickHandleSubmitClick = (e) => {
     e.preventDefault();
-    if (state.password === state.confirmPassword) {
-      registerUserServer();
+    if (state.userName !== "" && state.email != "" && state.password !== "") {
+      if (state.password === state.confirmPassword) {
+        registerUserServer();
+      } else {
+        setErrMessage("Passwords do not match.");
+      }
     } else {
-      setErrMessage("Passwords do not match");
+      setErrMessage("Please input name, email, password.");
     }
   };
   return (
@@ -122,7 +124,7 @@ const UserRegistration = (props) => {
         <button
           type="submit"
           className="btn btn-primary"
-          onClick={() => onClickHandleSubmitClick()}
+          onClick={(e) => onClickHandleSubmitClick(e)}
         >
           Register
         </button>
