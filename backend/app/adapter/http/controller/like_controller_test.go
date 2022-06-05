@@ -148,7 +148,7 @@ func TestRegisterLike(t *testing.T) {
 			}
 
 			// assert db
-			if tt.wantStatus == 200 {
+			if tt.wantStatus == http.StatusOK {
 				likes, err := testingHelper.FindAllLikes(context.Background(), db)
 				assert.NoError(t, err)
 				dummy.Like1to2.CreatedAt = lib.NowFunc()
@@ -272,7 +272,7 @@ func TestDeleteLike(t *testing.T) {
 			assert.JSONEq(t, tt.want, respBody)
 
 			// assert db
-			if tt.wantStatus == 200 {
+			if tt.wantStatus == http.StatusOK {
 				likes, err := testingHelper.FindAllLikes(context.Background(), db)
 				assert.NoError(t, err)
 				assert.Equal(t, 0, len(likes))

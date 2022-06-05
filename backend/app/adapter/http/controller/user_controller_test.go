@@ -213,7 +213,7 @@ func TestRegisterUser(t *testing.T) {
 			assert.NoError(t, err)
 
 			// assert db
-			if tt.wantStatus == 200 {
+			if tt.wantStatus == http.StatusOK {
 				users, err := testingHelper.FindAllUsers(context.Background(), db)
 				assert.NoError(t, err)
 				assert.Equal(t, 1, len(users))
@@ -484,7 +484,7 @@ func TestUpdateUser(t *testing.T) {
 			UserController(resp, req)
 			assert.NoError(t, err)
 
-			if tt.wantStatus == 200 {
+			if tt.wantStatus == http.StatusOK {
 				users, err := testingHelper.FindAllUsers(context.Background(), db)
 				assert.NoError(t, err)
 				assert.Equal(t, "http://localhost:9000/toebeans-icons/testUser1", users[0].Icon)
@@ -591,7 +591,7 @@ func TestDeleteUser(t *testing.T) {
 			assert.NoError(t, err)
 
 			// assert db
-			if tt.wantStatus == 200 {
+			if tt.wantStatus == http.StatusOK {
 				users, err := testingHelper.FindAllUsers(context.Background(), db)
 				assert.NoError(t, err)
 				assert.Equal(t, 1, len(users)) // user2がいるため
@@ -606,22 +606,6 @@ func TestDeleteUser(t *testing.T) {
 		})
 	}
 }
-
-var successRespUserActivationHTML = `<!DOCTYPE html>
-<html lang='en'>
-<head>
-    <meta charset='UTF-8'>
-    <meta name='viewport' content='width=device-width, initial-scale=1.0'>
-    <title>User Activation</title>
-</head>
-<body>
-    <h1>Welcome to ToeBeans!</h1>
-    User activation is success!
-	<br>
-	<br>
-	<a href="http://localhost:3000/login">Login Page</a>
-</body>
-</html>`
 
 var errRespUserActivationWithoutUserName = `
 {
@@ -676,7 +660,7 @@ func TestUserActivation(t *testing.T) {
 			name:       "success",
 			args:       args{userName: dummy.User1.Name, activationKey: dummy.User1.ActivationKey},
 			method:     http.MethodGet,
-			want:       successRespUserActivationHTML,
+			want:       testingHelper.RespSimpleSuccess,
 			wantStatus: http.StatusOK,
 		},
 		{
@@ -761,7 +745,7 @@ func TestUserActivation(t *testing.T) {
 			assert.NoError(t, err)
 
 			// assert db
-			if tt.wantStatus == 200 {
+			if tt.wantStatus == http.StatusOK {
 				users, err := testingHelper.FindAllUsers(context.Background(), db)
 				assert.NoError(t, err)
 				assert.Equal(t, true, users[0].EmailVerified)
@@ -772,11 +756,7 @@ func TestUserActivation(t *testing.T) {
 			respBodyByte, err := ioutil.ReadAll(resp.Body)
 			assert.NoError(t, err)
 			respBody := string(respBodyByte)
-			if tt.wantStatus == 200 {
-				assert.Equal(t, tt.want, respBody)
-			} else {
-				assert.JSONEq(t, tt.want, respBody)
-			}
+			assert.JSONEq(t, tt.want, respBody)
 		})
 	}
 }

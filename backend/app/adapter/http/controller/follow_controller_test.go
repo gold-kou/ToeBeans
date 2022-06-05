@@ -140,7 +140,7 @@ func TestRegisterFollow(t *testing.T) {
 			}
 
 			// assert db
-			//if tt.wantStatus == 200 {
+			//if tt.wantStatus == http.StatusOK {
 			//	follows, err := testingHelper.FindAllFollows(context.Background(), db)
 			//	assert.NoError(t, err)
 			//	dummy.Follow1to2.CreatedAt = lib.NowFunc()
@@ -360,7 +360,7 @@ func TestDeleteFollow(t *testing.T) {
 			assert.NoError(t, err)
 
 			// assert db
-			if tt.wantStatus == 200 {
+			if tt.wantStatus == http.StatusOK {
 				follows, err := testingHelper.FindAllFollows(context.Background(), db)
 				assert.NoError(t, err)
 				assert.Equal(t, 0, len(follows))

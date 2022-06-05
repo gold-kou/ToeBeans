@@ -127,7 +127,7 @@ func TestRegisterComment(t *testing.T) {
 			CommentController(resp, req)
 
 			// assert db
-			if tt.wantStatus == 200 {
+			if tt.wantStatus == http.StatusOK {
 				comments, err := testingHelper.FindAllComments(context.Background(), db)
 				assert.NoError(t, err)
 				dummy.Comment1.CreatedAt = lib.NowFunc()
@@ -337,7 +337,7 @@ func TestDeleteComment(t *testing.T) {
 			assert.NoError(t, err)
 
 			// db check
-			if tt.wantStatus == 200 {
+			if tt.wantStatus == http.StatusOK {
 				comments, err := testingHelper.FindAllComments(context.Background(), db)
 				assert.NoError(t, err)
 				if len(comments) != 0 {

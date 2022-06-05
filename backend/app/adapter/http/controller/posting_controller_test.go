@@ -178,7 +178,7 @@ func TestRegisterPosting(t *testing.T) {
 			assert.NoError(t, err)
 
 			// assert db
-			if tt.wantStatus == 200 {
+			if tt.wantStatus == http.StatusOK {
 				postings, err := testingHelper.FindAllPostings(context.Background(), db)
 				assert.NoError(t, err)
 				dummy.Posting1.CreatedAt = lib.NowFunc()
@@ -438,7 +438,7 @@ func TestDeletePosting(t *testing.T) {
 			assert.NoError(t, err)
 
 			// assert db
-			if tt.wantStatus == 200 {
+			if tt.wantStatus == http.StatusOK {
 				postings, err := testingHelper.FindAllPostings(context.Background(), db)
 				assert.NoError(t, err)
 				assert.Equal(t, 0, len(postings))
