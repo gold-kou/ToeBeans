@@ -2,7 +2,6 @@ package middleware
 
 import (
 	"net/http"
-	"strings"
 
 	"github.com/gold-kou/ToeBeans/backend/app"
 )
@@ -18,9 +17,10 @@ func CORSMiddleware(next http.Handler) http.Handler {
 			w.Header().Set("Access-Control-Allow-Origin", "http://localhost:3000")
 		}
 		// アカウントのアクティベーションはユーザのメーラからリクエストされるので全許可にする
-		if strings.HasPrefix(r.URL.Path, "/user-activation/") && r.Method == http.MethodGet {
-			w.Header().Set("Access-Control-Allow-Origin", "*")
-		}
+		// TODO いらないかも
+		// if strings.HasPrefix(r.URL.Path, "/user-activation/") && r.Method == http.MethodGet {
+		// 	w.Header().Set("Access-Control-Allow-Origin", "*")
+		// }
 		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
 		if r.Method == "OPTIONS" {
 			w.WriteHeader(http.StatusOK)
