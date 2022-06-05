@@ -2,8 +2,8 @@ package testing
 
 var RespSimpleSuccess = `
 {
-  "message":"success", 
-  "status":200
+  "status":200,
+  "message":"success"
 }
 `
 

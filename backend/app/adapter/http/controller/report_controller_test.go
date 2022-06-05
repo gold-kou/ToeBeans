@@ -118,7 +118,7 @@ func TestSubmitUserReport(t *testing.T) {
 			assert.NoError(t, err)
 
 			// assert db
-			if tt.wantStatus == 200 {
+			if tt.wantStatus == http.StatusOK {
 				userReports, err := testingHelper.FindAllUserReports(context.Background(), db)
 				assert.NoError(t, err)
 				assert.Equal(t, 1, len(userReports))
@@ -240,7 +240,7 @@ func TestSubmitPostingReport(t *testing.T) {
 			assert.NoError(t, err)
 
 			// assert db
-			if tt.wantStatus == 200 {
+			if tt.wantStatus == http.StatusOK {
 				postingReports, err := testingHelper.FindAllPostingReports(context.Background(), db)
 				assert.NoError(t, err)
 				assert.Equal(t, 1, len(postingReports))
