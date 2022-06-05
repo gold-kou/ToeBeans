@@ -3,13 +3,11 @@ package controller
 import (
 	"encoding/json"
 	"fmt"
-	"html/template"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"strings"
 
-	"github.com/gold-kou/ToeBeans/backend/app"
 	"github.com/gold-kou/ToeBeans/backend/app/adapter/http/context"
 
 	validation "github.com/go-ozzo/ozzo-validation"
@@ -123,23 +121,7 @@ func UserController(w http.ResponseWriter, r *http.Request) {
 			err := activateUser(r)
 			switch err := err.(type) {
 			case nil:
-				var link string
-				if app.IsProduction() {
-					link = "https://toebeans.ml/login"
-				} else {
-					link = "http://localhost:3000/login"
-				}
-				params := map[string]string{
-					"loginLink": link,
-				}
-				w.Header().Set(helper.HeaderKeyContentType, helper.HeaderValueHTML)
-				t, err := template.ParseFiles("../view/template/user-activation.html")
-				if err != nil {
-					log.Println(err.Error())
-				}
-				if err := t.Execute(w, params); err != nil {
-					log.Println(err.Error())
-				}
+				helper.ResponseSimpleSuccess(w)
 			case *helper.BadRequestError:
 				helper.ResponseBadRequest(w, err.Error())
 			case *helper.AuthorizationError:

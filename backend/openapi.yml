@@ -178,7 +178,7 @@ paths:
           example: '5e8ff9bf55ba3508199d22e984129be6'
       responses:
         "200":
-          $ref: '#/components/responses/successUserActivationHTML'
+          $ref: '#/components/responses/simpleSuccess'
         "400":
           $ref: '#/components/responses/badRequest'
         "405":
@@ -860,15 +860,6 @@ components:
         'application/json':
           schema:
             $ref: '#/components/schemas/responseInternalServerError'
-    successUserActivationHTML:
-      description: success html
-      content:
-        text/html:
-          schema:
-            type: string
-          examples:
-            html:
-              value: <head><title>Welcome to ToeBeans!</title></head><body>User activation is successful!</body>
   schemas:
     requestLogin:
       type: object
