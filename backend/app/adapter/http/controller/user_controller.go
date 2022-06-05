@@ -133,7 +133,7 @@ func UserController(w http.ResponseWriter, r *http.Request) {
 					"loginLink": link,
 				}
 				w.Header().Set(helper.HeaderKeyContentType, helper.HeaderValueHTML)
-				t, err := template.ParseFiles("../template/user-activation.html")
+				t, err := template.ParseFiles("../view/template/user-activation.html")
 				if err != nil {
 					log.Println(err.Error())
 				}

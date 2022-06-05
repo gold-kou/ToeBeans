@@ -44,6 +44,7 @@ RUN apt update && apt upgrade -y --no-install-recommends liblz4-1 \
 COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 WORKDIR /go/src/github.com/gold-kou/ToeBeans/backend
 COPY config/logger.yml.tpl config/logger.yml.tpl
+COPY app/adapter/http/view/template/user-activation.html app/adapter/http/view/template/user-activation.html
 WORKDIR /
 COPY --from=builder /go/src/github.com/gold-kou/ToeBeans/backend/backend /backend
 # 基本的に値を変えない環境変数のみをここに設定
